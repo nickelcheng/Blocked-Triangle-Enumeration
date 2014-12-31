@@ -1,7 +1,9 @@
 #include<cstdio>
 #include<set>
 #include<vector>
+#include<queue>
 #include<algorithm>
+#include<functional>
 
 #define UNDEF -1
 
@@ -33,13 +35,27 @@ typedef struct Edge{
     }
 } Edge;
 
+typedef struct DegInfo{
+    int deg, nodeID;
+    DegInfo(int d, int id){
+        deg = d, nodeID = id;
+    }
+    bool operator > (const DegInfo &a) const{
+        if(deg != a.deg) return deg > a.deg;
+        return nodeID > a.nodeID;
+    }
+} DegInfo;
+
 vector< Node > node;
 vector< Edge > edge;
+priority_queue< DegInfo, vector< DegInfo >, greater< DegInfo > > degInfoPQ;
 int degeneracy;
 
 void input(const char *srcFile);
+void initDegInfo(void);
 int findDegMinNode(void);
 void removeNode(int v);
+void renewDegInfoPQ(int v);
 void sortNewEdge(void);
 void output(const char *tarFile, const char *nodeMapFile);
 
@@ -55,10 +71,13 @@ int main(int argc, char *argv[]){
     sprintf(nodeMapFile, "%s", argv[3]);
 
     input(srcFile);
+    printf("input done\n");
 
     int vertices = (int)node.size();
     int next = 1;
     degeneracy = 0;
+    initDegInfo();
+    printf("init done\n");
     while(vertices--){
         int degMinNode = findDegMinNode();
         node[degMinNode].newOrder = next++;
@@ -95,8 +114,16 @@ void input(const char *srcFile){
     }
 }
 
+void initDegInfo(void){
+    while(!degInfoPQ.empty()) degInfoPQ.pop();
+    for(int i = 0; i < (int)node.size(); i++){
+        int deg = (int)node[i].nei.size();
+        degInfoPQ.push(DegInfo(deg, i));
+    }
+}
+
 int findDegMinNode(void){
-    int mmin = (int)node.size() + 1;
+/*    int mmin = (int)node.size() + 1;
     int ch = -1;
     for(int i = 0; i < (int)node.size(); i++){
         if(node[i].newOrder != UNDEF) continue;
@@ -106,14 +133,25 @@ int findDegMinNode(void){
             ch = i;
         }
     }
-    return ch;
+    return ch;*/
+    while(!degInfoPQ.empty() && node[degInfoPQ.top().nodeID].newOrder != UNDEF)
+        degInfoPQ.pop();
+    int mmin = degInfoPQ.top().nodeID;
+    degInfoPQ.pop();
+    return mmin;
 }
 
 void removeNode(int v){
     set< int >::iterator it;
     for(it = node[v].nei.begin(); it != node[v].nei.end(); ++it){
         node[*it].removeNei(v);
+        renewDegInfoPQ(*it);
     }
+}
+
+void renewDegInfoPQ(int v){
+    int deg = (int)node[v].nei.size();
+    degInfoPQ.push(DegInfo(deg, v));
 }
 
 void sortNewEdge(void){
