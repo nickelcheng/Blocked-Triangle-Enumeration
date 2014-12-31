@@ -1,6 +1,7 @@
 #include<cstdio>
 #include<cstdlib>
 #include<cstring>
+#include<string>
 #include<map>
 #include<vector>
 #include<algorithm>
@@ -10,10 +11,10 @@
 
 using namespace std;
 
-map< int, int > nodemap;
+map< string, int > nodemap;
 vector< pair< int, int > > edge;
 
-int relabel(int v);
+int relabel(const char *v);
 bool parsing(const char *srcFile, const char *tarFile, const int format);
 void parser(const char *srcFile, const int format);
 void ignoreComment(FILE *fp);
@@ -68,9 +69,10 @@ void parser(const char *srcFile, const int format){
 
     ignoreComment(fp);
 
-    int u, v, a, b;
-    while(fscanf(fp, "%d%d", &u, &v) != EOF){
-        if(format == 2) fscanf(fp, "%*d");
+    char u[100], v[100];
+    int a, b;
+    while(fscanf(fp, "%s%s", u, v) != EOF){
+        if(format == 2) fscanf(fp, "%*s");
 
         if(u == v) continue;
         a = relabel(u);
@@ -100,10 +102,10 @@ void ignoreComment(FILE *fp){
     }
 }
 
-int relabel(int v){
-    pair< map< int,int >::iterator, bool > result;
+int relabel(const char *v){
+    pair< map< string,int >::iterator, bool > result;
     int nextID = (int)nodemap.size()+1;
-    result = nodemap.insert(mp(v, nextID));
+    result = nodemap.insert(mp(string(v), nextID));
     return result.first->second;
 }
 
@@ -117,9 +119,9 @@ void output(const char *nodeMapFile, const char *tarFile){
     fclose(fp);
 
     fp = fopen(nodeMapFile, "w");
-    map< int, int >::iterator it;
+    map< string, int >::iterator it;
     for(it = nodemap.begin(); it != nodemap.end(); ++it){
-        fprintf(fp, "%d -> %d\n", it->first, it->second);
+        fprintf(fp, "%s -> %d\n", it->first.c_str(), it->second);
     }
     fclose(fp);
 }
