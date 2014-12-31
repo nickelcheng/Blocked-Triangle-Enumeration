@@ -14,7 +14,13 @@ for f in $files
 do
     filename=${f##*/}
     filename=${filename%.*}
-    #echo "./$EXEC $ORI_FOLDER/format1/$f $RLB_FOLDER/$filename.rlb $MAP_FOLDER/$filename.ori2rlb 1"
+
+    if [ -f $RLB_FOLDER/$filename.rlb ]; then
+        echo "$filename.rlb already exists."
+        continue
+    fi
+
+    echo "Reordering $f"
     ./$EXEC $ORI_FOLDER/format1/$f $RLB_FOLDER/$filename.rlb $MAP_FOLDER/$filename.ori2rlb 1
 done
 
@@ -24,7 +30,13 @@ for f in $files
 do
     filename=${f##*/}
     filename=${filename%.*}
-    #echo "./$EXEC $ORI_FOLDER/format2/$f $RLB_FOLDER/$filename.rlb $MAP_FOLDER/$filename.ori2rlb 2"
+
+    if [ -f $RLB_FOLDER/$filename.rlb ]; then
+        echo "$filename.rlb already exists."
+        continue
+    fi
+
+    echo "Reordering $f"
     ./$EXEC $ORI_FOLDER/format2/$f $RLB_FOLDER/$filename.rlb $MAP_FOLDER/$filename.ori2rlb 2
 done
 
