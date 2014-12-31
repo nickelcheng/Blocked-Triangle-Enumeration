@@ -11,7 +11,7 @@ using namespace std;
 
 typedef struct Node{
     set< int > nei;
-    int newOrder;
+    int newOrder, dValue;
     Node(void){
         nei.clear();
         newOrder = UNDEF;
@@ -57,41 +57,34 @@ int findDegMinNode(void);
 void removeNode(int v);
 void renewDegInfoPQ(int v);
 void sortNewEdge(void);
-void output(const char *tarFile, const char *nodeMapFile);
+void output(const char *tarFile, const char *nodeMapFile, const char *dValueFile);
 
 int main(int argc, char *argv[]){
-    if(argc != 4){
-        fprintf(stderr, "usage: degeneracy <src_file> <tar_file> <node_map_file>\n");
+    if(argc != 5){
+        fprintf(stderr, "usage: degeneracy <src_file> <tar_file> <node_map_file> <dValueFile>\n");
         return 0;
     }
 
-    char srcFile[100], tarFile[100], nodeMapFile[100];
+    char srcFile[100], tarFile[100], nodeMapFile[100], dValueFile[100];
     sprintf(srcFile, "%s", argv[1]);
     sprintf(tarFile, "%s", argv[2]);
     sprintf(nodeMapFile, "%s", argv[3]);
+    sprintf(dValueFile, "%s", argv[4]);
 
     input(srcFile);
-    printf("input done\n");
 
     int vertices = (int)node.size();
     int next = 1;
     degeneracy = 0;
     initDegInfo();
-    printf("init done\n");
     while(vertices--){
         int degMinNode = findDegMinNode();
         node[degMinNode].newOrder = next++;
-
-        if(degeneracy < node[degMinNode].nei.size()){
-            degeneracy = (int)node[degMinNode].nei.size();
-        }
-
         removeNode(degMinNode);
     }
-    printf("degeneracy = %d\n", degeneracy);
 
     sortNewEdge();
-    output(tarFile, nodeMapFile);
+    output(tarFile, nodeMapFile, dValueFile);
 
     return 0;
 }
@@ -123,22 +116,13 @@ void initDegInfo(void){
 }
 
 int findDegMinNode(void){
-/*    int mmin = (int)node.size() + 1;
-    int ch = -1;
-    for(int i = 0; i < (int)node.size(); i++){
-        if(node[i].newOrder != UNDEF) continue;
-        int deg = (int)node[i].nei.size();
-        if(deg < mmin){
-            mmin = deg;
-            ch = i;
-        }
-    }
-    return ch;*/
     while(!degInfoPQ.empty() && node[degInfoPQ.top().nodeID].newOrder != UNDEF)
         degInfoPQ.pop();
-    int mmin = degInfoPQ.top().nodeID;
+    int tar = degInfoPQ.top().nodeID;
+    int deg = degInfoPQ.top().deg;
+    node[tar].dValue = deg;
     degInfoPQ.pop();
-    return mmin;
+    return tar;
 }
 
 void removeNode(int v){
@@ -167,7 +151,7 @@ void sortNewEdge(void){
     sort(edge.begin(), edge.end());
 }
 
-void output(const char *tarFile, const char *nodeMapFile){
+void output(const char *tarFile, const char *nodeMapFile, const char *dValueFile){
     freopen(tarFile, "w", stdout);
 
     printf("%d %d\n", (int)node.size(), (int)edge.size());
@@ -179,6 +163,11 @@ void output(const char *tarFile, const char *nodeMapFile){
     freopen(nodeMapFile, "w", stdout);
     for(int i = 0; i < (int)node.size(); i++){
         printf("%d -> %d\n", i, node[i].newOrder);
+    }
+
+    freopen(dValueFile, "w", stdout);
+    for(int i = 0; i < (int)node.size(); i++){
+        printf("%d\n", node[i].dValue);
     }
 }
 
