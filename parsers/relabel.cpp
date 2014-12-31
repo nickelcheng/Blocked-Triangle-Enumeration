@@ -15,7 +15,8 @@ vector< pair< int, int > > edge;
 
 int relabel(int v);
 bool parsing(const char *srcFile, const char *tarFile, const int format);
-void parser1(const char *srcFile);
+void parser(const char *srcFile, const int format);
+void ignoreComment(FILE *fp);
 void output(const char *nodeMapFile, const char *tarFile);
 
 int main(int argc, char *argv[]){
@@ -44,8 +45,8 @@ int main(int argc, char *argv[]){
 }
 
 bool parsing(const char *srcFile, const char *tarFile, const int format){
-    if(format == 1)
-        parser1(srcFile);
+    if(format == 1 || format == 2)
+        parser(srcFile, format);
     else{
         fprintf(stderr, "parser format error\n");
         return false;
@@ -55,38 +56,47 @@ bool parsing(const char *srcFile, const char *tarFile, const int format){
 
 /* 
  * parser1 format
- * several line of comments (start with '#')
+ * several lines of comments (start with '#')
  * u <blank(s)> v <\n>
+ *
+ * parser2 format
+ * several lines of comments (start with '#')
+ * u <blank(s)> v <blank(s)> direction <\n>
  */ 
-void parser1(const char *srcFile){
-    freopen(srcFile, "r", stdin);
+void parser(const char *srcFile, const int format){
+    FILE *fp = fopen(srcFile, "r");
 
-    /* ignore comment lines */
-    char line[100010];
-    int comment = 0;
+    ignoreComment(fp);
 
-    /* find number of comment lines */
-    while(1){
-        fgets(line, 100000, stdin);
-        if(line[0] == '#') comment++;
-        else break;
-    }
-
-    /* ignore them */
-    rewind(stdin);
-    for(int i = 0; i < comment; i++){
-        fgets(line, 100000, stdin);
-    }
-
-
-    /* start parsing */
     int u, v, a, b;
-    while(scanf("%d%d", &u, &v) != EOF){
+    while(fscanf(fp, "%d%d", &u, &v) != EOF){
+        if(format == 2) fscanf(fp, "%*d");
+
         if(u == v) continue;
         a = relabel(u);
         b = relabel(v);
         if(a > b) swap(a, b)
         edge.push_back(mp(a, b));
+    }
+
+    fclose(fp);
+}
+
+void ignoreComment(FILE *fp){
+    char line[100010];
+    int comment = 0;
+    
+    /* find number of comment lines */
+    while(1){
+        fgets(line, 100000, fp);
+        if(line[0] == '#') comment++;
+        else break;
+    }
+
+    /* ignore them */
+    rewind(fp);
+    for(int i = 0; i < comment; i++){
+        fgets(line, 100000, fp);
     }
 }
 
@@ -98,16 +108,18 @@ int relabel(int v){
 }
 
 void output(const char *nodeMapFile, const char *tarFile){
-    freopen(tarFile, "w", stdout);
-    printf("%d %d\n", (int)nodemap.size(), (int)edge.size());
+    FILE *fp = fopen(tarFile, "w");
+    fprintf(fp, "%d %d\n", (int)nodemap.size(), (int)edge.size());
 
     for(int i = 0; i < (int)edge.size(); i++){
-        printf("%d %d\n", edge[i].first, edge[i].second);
+        fprintf(fp, "%d %d\n", edge[i].first, edge[i].second);
     }
+    fclose(fp);
 
-    freopen(nodeMapFile, "w", stdout);
+    fp = fopen(nodeMapFile, "w");
     map< int, int >::iterator it;
     for(it = nodemap.begin(); it != nodemap.end(); ++it){
-        printf("%d -> %d\n", it->first, it->second);
+        fprintf(fp, "%d -> %d\n", it->first, it->second);
     }
+    fclose(fp);
 }
