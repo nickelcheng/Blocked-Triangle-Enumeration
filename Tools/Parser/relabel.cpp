@@ -74,7 +74,7 @@ void parser(const char *srcFile, const int format){
     while(fscanf(fp, "%s%s", u, v) != EOF){
         if(format == 2) fscanf(fp, "%*s");
 
-        if(u == v) continue;
+        if(strcmp(u, v) == 0) continue;
         a = relabel(u);
         b = relabel(v);
         if(a > b) swap(a, b)
