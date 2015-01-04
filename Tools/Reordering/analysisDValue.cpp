@@ -13,7 +13,6 @@ int main(int argc, char *argv[]){
     char srcFile[100], resultFile[100];
     sprintf(srcFile, "%s", argv[1]);
     sprintf(resultFile, "%s", argv[2]);
-    groupSize.resize(100, 0);
 
     FILE *fp = fopen(srcFile, "r");
     int dvalue;
