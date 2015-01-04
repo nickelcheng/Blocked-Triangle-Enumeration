@@ -29,7 +29,7 @@ int main(int argc, char *argv[]){
     fprintf(fp, "degeneracy value: %d\n", maxD);
     fprintf(fp, "dvalue\tcount\n");
     for(int i = 1; i <= maxD; i++){
-        fprintf(fp, "%5d\t%5d\n", groupSize[i]);
+        fprintf(fp, "%5d\t%5d\n", i, groupSize[i]);
     }
     fclose(fp);
 
