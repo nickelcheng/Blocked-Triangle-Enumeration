@@ -20,8 +20,8 @@ void reorder(int nodeRange, int edgeRange, vector< Node > &node, vector< Edge > 
         node[minDegNode].nextOrder = i;
         removeNode(minDegNode, node, pq);
     }
-    updateNodeOrder(nodeRange, node);
     updateEdgeEnd(edgeRange, node, edge);
+    updateNodeOrder(nodeRange, node);
 }
 
 void initDegInfoPQ(int nodeRange, vector< Node > &node, DegInfoPQ &pq){
@@ -36,11 +36,7 @@ int findMinDegNode(DegInfoPQ &pq, vector< Node > &node){
     while(!pq.empty() && node[pq.top().nodeID].nextOrder != UNDEF)
         pq.pop();
 
-    try{
-        if(pq.empty()) throw("Error: pq emtpy\n");
-    } catch (const char *msg){
-        fprintf(stderr, "%s", msg);
-    }
+    if(pq.empty()) throw("Error: pq emtpy\n");
 
     int tar = pq.top().nodeID;
     pq.pop();
@@ -66,9 +62,14 @@ void updateDegInfoPQ(int v, vector< Node > &node, DegInfoPQ &pq){
 int removeOutRangeEdge(int nodeRange, int edgeRange, vector< Edge > &edge){
     for(int i = 0; i < edgeRange; i++){
         if(edge[i].outOfRange(nodeRange)){
-            edge[edgeRange].u = edge[i].u;
-            edge[edgeRange].v = edge[i].v;
             edgeRange--;
+            int tmp = edge[edgeRange].u;
+            edge[edgeRange].u = edge[i].u;
+            edge[i].u = tmp;
+            tmp = edge[edgeRange].v;
+            edge[edgeRange].v = edge[i].v;
+            edge[i].v = tmp;
+            i--;
         }
     }
     return edgeRange;

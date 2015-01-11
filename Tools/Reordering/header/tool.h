@@ -11,8 +11,9 @@ void initSetting(
 );
 void checkArgs(int argc);
 
-void sortNewEdge(vector< Node > &node, vector< Edge > &edge);
+void initNodeOriOrder(int nodeNum, vector< Node > &node);
+void sortNewEdge(vector< Edge > &edge);
 void updateNodeOrder(int nodeRange, vector< Node > &node);
-void updateEdgeEnd(int range, vector< Node > &node, vector< Edge > &edge);
+void updateEdgeEnd(int edgeRange, vector< Node > &node, vector< Edge > &edge);
 
 #endif

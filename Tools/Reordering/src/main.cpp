@@ -11,19 +11,30 @@ int main(int argc, char *argv[]){
     vector< Edge > edge;
     int nodeRange, edgeRange;
 
-    initSetting(argc, argv, srcFile, tarFile, nodeMapFile, blockSize);
+    try{
+        initSetting(argc, argv, srcFile, tarFile, nodeMapFile, blockSize);
+    } catch(const char *msg){
+        fprintf(stderr, "%s", msg);
+        return 0;
+    }
+
     nodeRange = input(srcFile, edge);
-    node.resize(nodeRange);
     edgeRange = (int)edge.size();
+    initNodeOriOrder(nodeRange, node);
 
     while(nodeRange > 0){
         initNodeNei(nodeRange, edgeRange, node, edge);
-        reorder(nodeRange, edgeRange, node, edge);
-        edgeRange = removeOutRangeEdge(nodeRange, edgeRange, edge);
+        try{
+            reorder(nodeRange, edgeRange, node, edge);
+        } catch(const char *msg){
+            fprintf(stderr, "%s", msg);
+            return 0;
+        }
         nodeRange -= blockSize;
+        edgeRange = removeOutRangeEdge(nodeRange, edgeRange, edge);
     }
 
-    sortNewEdge(node, edge);
+    sortNewEdge(edge);
     output(tarFile, nodeMapFile, node, edge);
 
     return 0;

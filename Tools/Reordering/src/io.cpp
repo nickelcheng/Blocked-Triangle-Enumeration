@@ -31,7 +31,7 @@ void outputTar(const char *file, int nodeNum, vector< Edge > &edge){
 
     fprintf(fp, "%d %d\n", nodeNum, edgeNum);
     for(int i = 0; i < edgeNum; i++){
-        printf("%d %d\n", edge[i].u, edge[i].v);
+        fprintf(fp, "%d %d\n", edge[i].u, edge[i].v);
     }
 
     fclose(fp);
@@ -42,9 +42,9 @@ void outputNodeMap(const char *file, vector< Node > &node){
     int nodeNum = (int)node.size();
 
     for(int i = 0; i < nodeNum; i++){
-        fprintf(fp, "%d ", node[i].currOrder);
+        fprintf(fp, "%d <- %d\n", i, node[i].oriOrder);
     }
 
-    fprintf(fp, "\n");
+    fclose(fp);
 }
 

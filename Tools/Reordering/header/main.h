@@ -11,11 +11,11 @@ using namespace std;
 #define MAX_LEN 100
 
 typedef struct Node{
-    int currOrder, nextOrder;
+    int oriOrder, nextOrder;
     int laterNeiNum;
     set< int > nei;
     Node(int order = UNDEF){
-        currOrder = order;
+        oriOrder = order;
         nextOrder = UNDEF;
         nei.clear();
     }
@@ -24,10 +24,6 @@ typedef struct Node{
     }
     void removeNei(int v){
         nei.erase(v);
-    }
-    void updateOrder(void){
-        currOrder = nextOrder;
-        nextOrder = UNDEF;
     }
 } Node;
 
