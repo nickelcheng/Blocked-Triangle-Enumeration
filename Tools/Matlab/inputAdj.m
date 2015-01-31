@@ -1,30 +1,10 @@
-function [adj, nodeNum, edgeNum] = inputAdj(adjFile)
+function adj = inputAdj2(adjFile,N)
 
-% open file
-[fid,msg] = fopen(adjFile,'r');
-if fid == -1
-    disp(msg);
-    return;
-end
-
-% read N and M
-A = fscanf(fid,'%d',2);
-nodeNum = A(1);
-edgeNum = A(2);
-
-% read all edges
-A = fscanf(fid,'%d%d',[2,inf]);
-A = A';
-
-% store edges into adj
-adj=sparse([]);
-for i = 1:edgeNum,
-    if A(i,1) ~= A(i,2) % not self cycle
-        adj(A(i,1),A(i,2)) = 1;
-        adj(A(i,2),A(i,1)) = 1;
-    end
-end
-
-fclose(fid);
-
-clear adjFile fid msg A i;
+idx = load(adjFile, '-ascii');
+i = idx(:,1);
+j = idx(:,2);
+a = [i;j];
+b = [j;i];
+len =length(idx) * 2;
+val(1:len) = 1;
+adj = sparse(a,b,val,N,N);
