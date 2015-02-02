@@ -1,8 +1,8 @@
 #!/bin/bash
 
-ORI_FOLDER=../TestData/SNAP
-RLB_FOLDER=../TestData/Relabel
-MAP_FOLDER=../TestData/Mapping
+ORI_FOLDER=../../TestData/SNAP
+RLB_FOLDER=../../TestData/Relabel
+MAP_FOLDER=../../TestData/Mapping
 
 EXEC=relabel
 
