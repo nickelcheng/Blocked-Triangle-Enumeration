@@ -16,9 +16,6 @@ struct Node{
     void addNei(int v){
         largerDegNei.push_back(v);
     }
-    int degree(void) const{
-        return (int)largerDegNei.size();
-    }
 };
 
 struct Edge{
