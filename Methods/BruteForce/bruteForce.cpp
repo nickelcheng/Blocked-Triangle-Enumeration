@@ -1,17 +1,18 @@
 #include<cstdio>
+#include<cstdlib>
 
 bool edge[10000][10000];
 
 int main(int argc, char *argv[]){
-    if(argc != 2){
-        fprintf(stderr, "usage: bruteForce <input_path>\n");
+    if(argc != 4){
+        fprintf(stderr, "usage: bruteForce <input_path> < node_num> <edge_num>\n");
         return 0;
     }
 
-    int nodeNum, edgeNum;
+    int nodeNum = atoi(argv[2]);
+    int edgeNum = atoi(argv[3]);
 
     FILE *fp = fopen(argv[1], "r");
-    fscanf(fp, "%d%d", &nodeNum, &edgeNum);
     if(nodeNum > 10000){
         fprintf(stderr, "too many nodes\n");
         return 0;

@@ -1,4 +1,5 @@
 #include<cstdio>
+#include<cstdlib>
 #include<vector>
 #include<algorithm>
 
@@ -68,19 +69,20 @@ void updateGraph(vector< Edge > &edge, vector< Node > &node);
 int intersectList(vector< int > &l1, vector< int > &l2, int a, int b);
 
 int main(int argc, char *argv[]){
-    if(argc != 2){
-        fprintf(stderr, "usage: listIntersect <input_path>\n");
+    if(argc != 4){
+        fprintf(stderr, "usage: listIntersect <input_path> <node_num> <edge_num>\n");
         return 0;
     }
 
-    vector< Node > node;
-    vector< Edge > edge;
+    int nodeNum = atoi(argv[2]);
+    int edgeNum = atoi(argv[3]);
+    vector< Node > node(nodeNum);
+    vector< Edge > edge(edgeNum);
 
     input(argv[1], node, edge);
     reorderByDegeneracy(node, edge);
     updateGraph(edge, node);
     
-    int nodeNum = (int)node.size();
     int triNum = 0;
 //    triList.clear();
     for(int i = 0; i < nodeNum; i++){
@@ -107,12 +109,10 @@ int main(int argc, char *argv[]){
 }
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
-    int nodeNum, edgeNum;
+    int nodeNum = (int)node.size();
+    int edgeNum = (int)edge.size();
     FILE *fp = fopen(inFile, "r");
 
-    fscanf(fp, "%d%d", &nodeNum, &edgeNum);
-    node.resize(nodeNum);
-    edge.resize(edgeNum);
     for(int i = 0; i < edgeNum; i++){
         int u, v;
         fscanf(fp, "%d%d", &u, &v);
