@@ -1,14 +1,19 @@
 #include<cstdio>
 #include<vector>
+#include<algorithm>
+
+#define swap(a,b) {int tmp = a; a = b, b = tmp;}
 
 using namespace std;
 
 typedef struct Node Node;
 typedef struct Edge Edge;
+typedef struct Triangle Triangle;
 
 struct Node{
     vector< int > largerDegNei;
     int realDeg;
+    int newOrder;
     Node(void){
         realDeg = 0;
         largerDegNei.clear();
@@ -16,17 +21,39 @@ struct Node{
     void addNei(int v){
         largerDegNei.push_back(v);
     }
+    int degree(void) const{
+        return (int)largerDegNei.size();
+    }
 };
 
 struct Edge{
     int u, v;
 };
 
+struct Triangle{
+    int a, b, c;
+    Triangle(int _a, int _b, int _c){
+        a = _a, b = _b, c = _c;
+    }
+    bool operator < (const Triangle &t) const{
+        if(a != t.a) return a < t.a;
+        if(b != t.b) return b < t.b;
+        return c < t.c;
+    }
+    void sortNode(void){
+        if(a > b) swap(a,b);
+        if(a > c) swap(a,c);
+        if(b > c) swap(b,c);
+    }
+};
+
+vector< Triangle > triList;
+vector< int > oriOrder;
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge);
 void reorderByDegree(vector< Node > &node, vector< Edge > &edge);
 void initDegList(vector< Node > &node, vector< Edge > &edge);
-int intersectList(vector< int > &l1, vector< int > &l2);
+int intersectList(vector< int > &l1, vector< int > &l2, int a, int b);
 
 int main(int argc, char *argv[]){
     if(argc != 2){
@@ -47,10 +74,22 @@ int main(int argc, char *argv[]){
         int deg = node[i].degree();
         for(int j = 0; j < deg; j++){
             int tar = node[i].largerDegNei[j];
-            triNum += intersectList(node[i].largerDegNei, node[tar].largerDegNei);
+            triNum += intersectList(node[i].largerDegNei, node[tar].largerDegNei, i, tar);
         }
     }
     fprintf(stderr, "total triangle: %d\n", triNum);
+
+    for(int i = 0; i < triNum; i++){
+        triList[i].a = oriOrder[triList[i].a];
+        triList[i].b = oriOrder[triList[i].b];
+        triList[i].c = oriOrder[triList[i].c];
+        triList[i].sortNode();
+    }
+    sort(triList.begin(), triList.end());
+    for(int i = 0; i < triNum; i++){
+        printf("%d %d %d\n", triList[i].a, triList[i].b, triList[i].c);
+    }
+
 
     return 0;
 }
@@ -75,19 +114,20 @@ void reorderByDegree(vector< Node > &node, vector< Edge > &edge){
     int nodeNum = (int)node.size();
     int edgeNum = (int)edge.size();
     vector< vector< int > > degList(nodeNum);
-    int newOrd[nodeNum];
+    oriOrder.resize(nodeNum);
 
     for(int i = 0; i < nodeNum; i++){
         degList[node[i].realDeg].push_back(i);
     }
     for(int i = 0, deg = 0; deg < nodeNum; deg++){
         for(int j = 0; j < (int)degList[deg].size(); j++){
-            newOrd[degList[deg][j]] = i++;
+            oriOrder[i] = degList[deg][j];
+            node[degList[deg][j]].newOrder = i++;
         }
     }
     for(int i = 0; i < edgeNum; i++){
-        edge[i].u = newOrd[edge[i].u];
-        edge[i].v = newOrd[edge[i].v];
+        edge[i].u = node[edge[i].u].newOrder;
+        edge[i].v = node[edge[i].v].newOrder;
     }
 }
 
@@ -98,9 +138,13 @@ void initDegList(vector< Node > &node, vector< Edge > &edge){
         if(u < v) node[u].addNei(v);
         else node[v].addNei(u);
     }
+    int nodeNum = (int)node.size();
+    for(int i = 0; i < nodeNum; i++){
+        sort(node[i].largerDegNei.begin(), node[i].largerDegNei.end());
+    }
 }
 
-int intersectList(vector< int > &l1, vector< int > &l2){
+int intersectList(vector< int > &l1, vector< int > &l2, int a, int b){
     int sz1 = (int)l1.size();
     int sz2 = (int)l2.size();
     int triNum = 0;
@@ -108,6 +152,7 @@ int intersectList(vector< int > &l1, vector< int > &l2){
         if(l1[i] < l2[j]) i++;
         else if(l1[i] > l2[j]) j++;
         else{
+            triList.push_back(Triangle(a,b,l1[i]));
             triNum++;
             i++, j++;
         }
