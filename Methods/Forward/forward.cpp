@@ -29,6 +29,9 @@ struct Node{
 
 struct Edge{
     int u, v;
+    Edge(int _u, int _v){
+        u = _u, v = _v;
+    }
 };
 
 struct Triangle{
@@ -57,15 +60,14 @@ void initDegList(vector< Node > &node, vector< Edge > &edge);
 int intersectList(vector< int > &l1, vector< int > &l2, int a, int b);
 
 int main(int argc, char *argv[]){
-    if(argc != 4){
-        fprintf(stderr, "usage: forward <input_path> <node_num> <edge_num>\n");
+    if(argc != 3){
+        fprintf(stderr, "usage: forward <input_path> <node_num>\n");
         return 0;
     }
 
     int nodeNum = atoi(argv[2]);
-    int edgeNum = atoi(argv[3]);
     vector< Node > node(nodeNum);
-    vector< Edge > edge(edgeNum);
+    vector< Edge > edge;
 
     input(argv[1], node, edge);
     reorderByDegree(node, edge);
@@ -97,14 +99,13 @@ int main(int argc, char *argv[]){
 }
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
-    int nodeNum = (int)node.size();
-    int edgeNum = (int)edge.size();
     FILE *fp = fopen(inFile, "r");
 
-    for(int i = 0; i < edgeNum; i++){
-        fscanf(fp, "%d%d", &edge[i].u, &edge[i].v);
-        node[edge[i].u].realDeg++;
-        node[edge[i].v].realDeg++;
+    int u, v;
+    while(fscanf(fp, "%d%d", &u, &v) != EOF){
+        node[u].realDeg++;
+        node[v].realDeg++;
+        edge.push_back(Edge(u,v));
     }
 
     fclose(fp);

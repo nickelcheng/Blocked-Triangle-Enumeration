@@ -4,13 +4,12 @@
 bool edge[10000][10000];
 
 int main(int argc, char *argv[]){
-    if(argc != 4){
-        fprintf(stderr, "usage: bruteForce <input_path> < node_num> <edge_num>\n");
+    if(argc != 3){
+        fprintf(stderr, "usage: bruteForce <input_path> < node_num>\n");
         return 0;
     }
 
     int nodeNum = atoi(argv[2]);
-    int edgeNum = atoi(argv[3]);
 
     FILE *fp = fopen(argv[1], "r");
     if(nodeNum > 10000){
@@ -18,9 +17,8 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    for(int i = 0; i < edgeNum; i++){
-        int u, v;
-        fscanf(fp, "%d%d", &u, &v);
+    int u, v;
+    while(fscanf(fp, "%d%d", &u, &v) != EOF){
         edge[u][v] = edge[v][u] = true;
     }
     fclose(fp);
