@@ -138,9 +138,7 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     timerInit()
     timerStart()
 
-    int nodeNum = (int)node.size();
     FILE *fp = fopen(inFile, "r");
-
     int u, v;
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
         node[u].addNei(v);
@@ -148,12 +146,7 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
         edge.push_back(Edge(u,v));
     }
 
-    for(int i = 0; i < nodeNum; i++){
-        node[i].leftDeg = node[i].degree();
-    }
-
     fclose(fp);
-
     timerEnd("input")
 }
 
@@ -178,6 +171,11 @@ void reordering(vector< Node > &node, vector< DegList > &degList){
     int nodeNum = (int)node.size();
     int currPos = 0;
 //    oriOrder.resize(nodeNum);
+
+    for(int i = 0; i < nodeNum; i++){
+        node[i].leftDeg = node[i].degree();
+    }
+
     for(int i = 0; i < nodeNum; i++){
         int v = findMinDegNode(currPos, degList);
         removeNode(v, node, degList);

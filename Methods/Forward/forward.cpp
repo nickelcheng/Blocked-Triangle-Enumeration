@@ -127,7 +127,6 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     timerStart()
 
     FILE *fp = fopen(inFile, "r");
-
     int u, v;
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
         node[u].realDeg++;
