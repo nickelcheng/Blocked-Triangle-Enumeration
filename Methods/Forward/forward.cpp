@@ -2,8 +2,24 @@
 #include<cstdlib>
 #include<vector>
 #include<algorithm>
+#include<sys/time.h>
 
 #define swap(a,b) {int tmp = a; a = b, b = tmp;}
+
+#define cntTime(st,ed)\
+((double)ed.tv_sec*1000000+ed.tv_usec-(st.tv_sec*1000000+st.tv_usec))/1000
+
+#define timerInit()\
+struct timeval st, ed;
+
+#define timerStart()\
+gettimeofday(&st, NULL);
+
+#define timerEnd(tar)\
+gettimeofday(&ed, NULL);\
+fprintf(stderr, " %.3lf", cntTime(st,ed));
+//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st,ed));
+
 
 using namespace std;
 
@@ -56,7 +72,7 @@ vector< int > oriOrder;*/
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge);
 void reorderByDegree(vector< Node > &node, vector< Edge > &edge);
-void initDegList(vector< Node > &node, vector< Edge > &edge);
+void updateGraph(vector< Node > &node, vector< Edge > &edge);
 int intersectList(vector< int > &l1, vector< int > &l2, int a, int b);
 
 int main(int argc, char *argv[]){
@@ -65,14 +81,20 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
+    timerInit()
+    timerStart()
+
     int nodeNum = atoi(argv[2]);
     vector< Node > node(nodeNum);
     vector< Edge > edge;
 
     input(argv[1], node, edge);
     reorderByDegree(node, edge);
-    initDegList(node, edge);
+    updateGraph(node, edge);
 
+    timerEnd("preprocessing")
+    timerStart()
+    
     int triNum = 0;
     for(int i = 0; i < nodeNum; i++){
         int deg = node[i].degree();
@@ -81,7 +103,9 @@ int main(int argc, char *argv[]){
             triNum += intersectList(node[i].largerDegNei, node[tar].largerDegNei, i, tar);
         }
     }
-    fprintf(stderr, "total triangle: %d\n", triNum);
+    printf("total triangle: %d\n", triNum);
+
+    timerEnd("intersection")
 
 /*    for(int i = 0; i < triNum; i++){
         triList[i].a = oriOrder[triList[i].a];
@@ -99,6 +123,9 @@ int main(int argc, char *argv[]){
 }
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
+    timerInit()
+    timerStart()
+
     FILE *fp = fopen(inFile, "r");
 
     int u, v;
@@ -109,11 +136,11 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     }
 
     fclose(fp);
+    timerEnd("input")
 }
 
 void reorderByDegree(vector< Node > &node, vector< Edge > &edge){
     int nodeNum = (int)node.size();
-    int edgeNum = (int)edge.size();
     vector< vector< int > > degList(nodeNum);
 //    oriOrder.resize(nodeNum);
 
@@ -126,20 +153,23 @@ void reorderByDegree(vector< Node > &node, vector< Edge > &edge){
             node[degList[deg][j]].newOrder = i++;
         }
     }
+}
+
+void updateGraph(vector< Node > &node, vector< Edge > &edge){
+    int edgeNum = (int)edge.size();
+    int nodeNum = (int)node.size();
+
     for(int i = 0; i < edgeNum; i++){
         edge[i].u = node[edge[i].u].newOrder;
         edge[i].v = node[edge[i].v].newOrder;
     }
-}
 
-void initDegList(vector< Node > &node, vector< Edge > &edge){
-    int edgeNum = (int)edge.size();
     for(int i = 0; i < edgeNum; i++){
         int u = edge[i].u, v = edge[i].v;
         if(u < v) node[u].addNei(v);
         else node[v].addNei(u);
     }
-    int nodeNum = (int)node.size();
+
     for(int i = 0; i < nodeNum; i++){
         sort(node[i].largerDegNei.begin(), node[i].largerDegNei.end());
     }
@@ -149,13 +179,18 @@ int intersectList(vector< int > &l1, vector< int > &l2, int a, int b){
     int sz1 = (int)l1.size();
     int sz2 = (int)l2.size();
     int triNum = 0;
-    for(int i = 0, j = 0; i < sz1 && j < sz2;){
-        if(l1[i] < l2[j]) i++;
-        else if(l1[i] > l2[j]) j++;
+    int i, j;
+    for(i = sz1-1, j = sz2-1; i >= 0 && j >= 0;){
+        if(l1[i] > l2[j]){
+            i--;
+        }
+        else if(l1[i] < l2[j]){
+            j--;
+        }
         else{
 //            triList.push_back(Triangle(a,b,l1[i]));
             triNum++;
-            i++, j++;
+            i--, j--;
         }
     }
     return triNum;

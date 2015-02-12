@@ -2,8 +2,24 @@
 #include<cstdlib>
 #include<vector>
 #include<algorithm>
+#include<sys/time.h>
 
 #define swap(a,b) {int tmp=a;a=b,b=tmp;}
+
+#define cntTime(st,ed)\
+((double)ed.tv_sec*1000000+ed.tv_usec-(st.tv_sec*1000000+st.tv_usec))/1000
+
+#define timerInit()\
+struct timeval st, ed;
+
+#define timerStart()\
+gettimeofday(&st, NULL);
+
+#define timerEnd(tar)\
+gettimeofday(&ed, NULL);\
+fprintf(stderr, " %.3lf", cntTime(st,ed));
+//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st,ed));
+
 
 using namespace std;
 
@@ -77,6 +93,9 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
+    timerInit()
+    timerStart()
+
     int nodeNum = atoi(argv[2]);
     vector< Node > node(nodeNum);
     vector< Edge > edge;
@@ -84,6 +103,9 @@ int main(int argc, char *argv[]){
     input(argv[1], node, edge);
     reorderByDegeneracy(node, edge);
     updateGraph(edge, node);
+
+    timerEnd("preprocessing")
+    timerStart()
     
     int triNum = 0;
 //    triList.clear();
@@ -94,7 +116,9 @@ int main(int argc, char *argv[]){
             triNum += intersectList(node[i].nei, node[tar].nei, i, tar);
         }
     }
-    fprintf(stderr, "total triangle: %d\n", triNum);
+    printf("total triangle: %d\n", triNum);
+
+    timerEnd("intersection")
 
 /*    for(int i = 0; i < triNum; i++){
         triList[i].a = oriOrder[triList[i].a];
@@ -111,6 +135,9 @@ int main(int argc, char *argv[]){
 }
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
+    timerInit()
+    timerStart()
+
     int nodeNum = (int)node.size();
     FILE *fp = fopen(inFile, "r");
 
@@ -126,6 +153,8 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     }
 
     fclose(fp);
+
+    timerEnd("input")
 }
 
 void reorderByDegeneracy(vector< Node > &node, vector< Edge > &edge){
@@ -216,13 +245,18 @@ int intersectList(vector< int > &l1, vector< int > &l2, int a, int b){
     int sz1 = (int)l1.size();
     int sz2 = (int)l2.size();
     int triNum = 0;
-    for(int i = 0, j = 0; i < sz1 && j < sz2;){
-        if(l1[i] < l2[j]) i++;
-        else if(l1[i] > l2[j]) j++;
+    int i, j;
+    for(i = sz1-1, j = sz2-1; i >= 0 && j >= 0;){
+        if(l1[i] > l2[j]){
+            i--;
+        }
+        else if(l1[i] < l2[j]){
+            j--;
+        }
         else{
 //            triList.push_back(Triangle(a,b,l1[i]));
             triNum++;
-            i++, j++;
+            i--, j--;
         }
     }
     return triNum;
