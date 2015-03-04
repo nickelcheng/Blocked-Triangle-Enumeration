@@ -3,7 +3,7 @@ CFLAG = -Wall -O2
 GCC = nvcc
 GFLAG = -arch=sm_20 --ptxas-options="-dlcm=cg"
 
-all: forward edgeIterator bruteForce g_forward g_edgeIterator
+all: forward edgeIterator bitwise g_forward g_edgeIterator g_bitwise
 
 forward: Forward/forward.cpp
 	$(CC) Forward/forward.cpp $(CFLAG) -o forward
@@ -17,8 +17,11 @@ edgeIterator: EdgeIterator/edgeIterator.cpp
 g_edgeIterator: EdgeIterator/edgeIterator.cu
 	$(GCC) EdgeIterator/edgeIterator.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_edgeIterator
 
-bruteForce: BruteForce/bruteForce.cpp
-	$(CC) BruteForce/bruteForce.cpp $(CFLAG) -o bruteForce
+bitwise: Bitwise/bitwise.cpp
+	$(CC) Bitwise/bitwise.cpp $(CFLAG) -o bitwise
+
+g_bitwise: Bitwise/bitwise.cu
+	$(GCC) Bitwise/bitwise.cpp $(GFLAG) -Xcompiler $(CFLAG) -o g_bitwise
 
 clean:
-	rm -rf forward edgeIterator bruteForce g_forward g_edgeIterator
+	rm -rf forward edgeIterator bitwise g_forward g_edgeIterator g_bruteForce g_bitwise
