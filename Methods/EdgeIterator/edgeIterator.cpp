@@ -9,16 +9,16 @@
 #define cntTime(st,ed)\
 ((double)ed.tv_sec*1000000+ed.tv_usec-(st.tv_sec*1000000+st.tv_usec))/1000
 
-#define timerInit()\
-struct timeval st, ed;
+#define timerInit(n)\
+struct timeval st[n], ed[n];
 
-#define timerStart()\
-gettimeofday(&st, NULL);
+#define timerStart(n)\
+gettimeofday(&st[n], NULL);
 
-#define timerEnd(tar)\
-gettimeofday(&ed, NULL);\
-fprintf(stderr, " %.3lf", cntTime(st,ed));
-//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st,ed));
+#define timerEnd(tar, n)\
+gettimeofday(&ed[n], NULL);\
+fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
+//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st[n],ed[n]));
 
 
 using namespace std;
@@ -93,20 +93,24 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    timerInit()
-    timerStart()
+    timerInit(2)
+
+    timerStart(0)
 
     int nodeNum = atoi(argv[2]);
     vector< Node > node(nodeNum);
     vector< Edge > edge;
 
+    timerStart(1)
     input(argv[1], node, edge);
+    timerEnd("input", 1)
+
+    timerStart(1)
     reorderByDegeneracy(node, edge);
     updateGraph(edge, node);
+    timerEnd("reordering", 1)
 
-    timerEnd("preprocessing")
-    timerStart()
-    
+    timerStart(1)
     int triNum = 0;
 //    triList.clear();
     for(int i = 0; i < nodeNum; i++){
@@ -117,8 +121,7 @@ int main(int argc, char *argv[]){
         }
     }
     printf("total triangle: %d\n", triNum);
-
-    timerEnd("intersection")
+    timerEnd("intersection", 1)
 
 /*    for(int i = 0; i < triNum; i++){
         triList[i].a = oriOrder[triList[i].a];
@@ -131,13 +134,12 @@ int main(int argc, char *argv[]){
         printf("%d %d %d\n", triList[i].a, triList[i].b, triList[i].c);
     }*/
 
+    timerEnd("total", 0)
+
     return 0;
 }
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
-    timerInit()
-    timerStart()
-
     FILE *fp = fopen(inFile, "r");
     int u, v;
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
@@ -147,7 +149,6 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     }
 
     fclose(fp);
-    timerEnd("input")
 }
 
 void reorderByDegeneracy(vector< Node > &node, vector< Edge > &edge){

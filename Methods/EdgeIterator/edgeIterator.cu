@@ -9,16 +9,16 @@
 #define cntTime(st,ed)\
 ((double)ed.tv_sec*1000000+ed.tv_usec-(st.tv_sec*1000000+st.tv_usec))/1000
 
-#define timerInit()\
-struct timeval st, ed;
+#define timerInit(n)\
+struct timeval st[n], ed[n];
 
-#define timerStart()\
-gettimeofday(&st, NULL);
+#define timerStart(n)\
+gettimeofday(&st[n], NULL);
 
-#define timerEnd(tar)\
-gettimeofday(&ed, NULL);\
-fprintf(stderr, " %.3lf", cntTime(st,ed));
-//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st,ed));
+#define timerEnd(tar, n)\
+gettimeofday(&ed[n], NULL);\
+fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
+//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st[n],ed[n]));
 
 
 using namespace std;
@@ -94,20 +94,22 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    timerInit()
-    timerStart()
+    timerInit(2)
+    timerStart(0)
 
     int nodeNum = atoi(argv[2]);
     vector< Node > node(nodeNum);
     vector< Edge > edge;
 
+    timerStart(1)
     input(argv[1], node, edge);
+    timerEnd("input", 1)
+
+    timerStart(1)
     reorderByDegeneracy(node, edge);
     updateGraph(edge, node);
+    timerEnd("reordering", 1)
 
-    timerEnd("preprocessing")
-    timerStart()
-    
     int edgeNum = (int)edge.size();
     int triNum = 0, *h_offset, *h_edgeU, *h_edgeV;
     int *d_triNum, *d_offset, *d_edgeU, *d_edgeV;
@@ -127,9 +129,7 @@ int main(int argc, char *argv[]){
         }
     }
 
-    timerEnd("cpu copy")
-    timerStart()
-
+    timerStart(1)
     cudaMalloc((void**)&d_triNum, sizeof(int));
     cudaMalloc((void**)&d_offset, sizeof(int)*(nodeNum+1));
     cudaMalloc((void**)&d_edgeU, sizeof(int)*edgeNum);
@@ -139,16 +139,16 @@ int main(int argc, char *argv[]){
     cudaMemcpy(d_offset, h_offset, sizeof(int)*(nodeNum+1), cudaMemcpyHostToDevice);
     cudaMemcpy(d_edgeU, h_edgeU, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
     cudaMemcpy(d_edgeV, h_edgeV, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
+    timerEnd("cuda copy", 1)
 
-    timerEnd("cuda copy")
-    timerStart()
-
+    timerStart(1)
     int nB = (int)ceil((edgeNum/1024.0)+0.001);
     countTriNum<<< nB, 1024 >>>(d_offset, d_edgeU, d_edgeV, d_triNum, edgeNum);
     cudaDeviceSynchronize();
-    timerEnd("intersection")
+    timerEnd("intersection", 1)
 
     cudaMemcpy(&triNum, d_triNum, sizeof(int), cudaMemcpyDeviceToHost);
+    printf("total triangle: %d\n", triNum);
 
     cudaFree(d_triNum);
     cudaFree(d_offset);
@@ -159,15 +159,12 @@ int main(int argc, char *argv[]){
     free(h_edgeU);
     free(h_edgeV);
 
-    printf("total triangle: %d\n", triNum);
+    timerEnd("total", 0)
 
     return 0;
 }
 
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
-    timerInit()
-    timerStart()
-
     FILE *fp = fopen(inFile, "r");
     int u, v;
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
@@ -177,7 +174,6 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     }
 
     fclose(fp);
-    timerEnd("input")
 }
 
 void reorderByDegeneracy(vector< Node > &node, vector< Edge > &edge){
