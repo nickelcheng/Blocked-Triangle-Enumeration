@@ -26,7 +26,7 @@ if [ $2 != "dense" -a $2 != "sparse" ]; then
     exit
 fi
 
-if [ $dstart -lt 1 -o $dend -gt 10 -o $nstart -lt 1 -o $nend -gt 10 ]; then
+if [ $dstart -lt 1 -o $dend -gt 9 -o $nstart -lt 1 -o $nend -gt 10 ]; then
     echo "value error"
     exit
 fi
@@ -48,12 +48,12 @@ do
 
         echo -n d=$myd%,N=$myn>> $algo.result
 
-        for((t=0;t<5;t++))
-        do
+#        for((t=0;t<5;t++))
+#        do
             echo "./$algo ../Experiments/d$myd/N$myn $myn > /dev/null 2>> $algo.result"
             ./$algo ../Experiments/d$myd/N$myn $myn > /dev/null 2>> $algo.result
             echo "" >> $algo.result
-        done
+#        done
     done
 done
 
