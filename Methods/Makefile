@@ -21,7 +21,7 @@ bitwise: Bitwise/bitwise.cpp
 	$(CC) Bitwise/bitwise.cpp $(CFLAG) -o bitwise
 
 g_bitwise: Bitwise/bitwise.cu
-	$(GCC) Bitwise/bitwise.cpp $(GFLAG) -Xcompiler $(CFLAG) -o g_bitwise
+	$(GCC) Bitwise/bitwise.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_bitwise
 
 clean:
 	rm -rf forward edgeIterator bitwise g_forward g_edgeIterator g_bruteForce g_bitwise

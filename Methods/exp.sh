@@ -17,7 +17,7 @@ fi
 
 algo=$1
 dstart=$3
-dend=$3
+dend=$4
 nstart=$5
 nend=$6
 
@@ -26,8 +26,23 @@ if [ $2 != "dense" -a $2 != "sparse" ]; then
     exit
 fi
 
-if [ $dstart -lt 1 -o $dend -gt 9 -o $nstart -lt 1 -o $nend -gt 10 ]; then
-    echo "value error"
+if [ $dstart -lt 1 -o $dstart -gt 9 ]; then
+    echo "dstart error"
+    exit
+fi
+
+if [ $dend -lt 1 -o $dend -gt 9 ]; then
+    echo "dend error"
+    exit
+fi
+
+if [ $nstart -lt 1 -o $nstart -gt 10 ]; then
+    echo "nstart error"
+    exit
+fi
+
+if [ $nend -lt 1 -o $nend -gt 10 ]; then
+    echo "nend error"
     exit
 fi
 
