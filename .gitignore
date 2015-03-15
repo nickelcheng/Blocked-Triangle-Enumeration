@@ -2,4 +2,8 @@ degeneracy
 analysisDValue
 relabel
 randomGraph
-
+*.result
+Dataset
+*forward
+*edgeIterator
+*bitwise
