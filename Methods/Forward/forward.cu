@@ -153,18 +153,22 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     FILE *fp = fopen(inFile, "r");
     int u, v;
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
-        node[u].realDeg++;
-        node[v].realDeg++;
         edge.push_back(Edge(u,v));
     }
-
     fclose(fp);
 }
 
 void reorderByDegree(vector< Node > &node, vector< Edge > &edge){
     int nodeNum = (int)node.size();
+    int edgeNum = (int)edge.size();
     vector< vector< int > > degList(nodeNum);
 
+    // count degree for each node
+    for(int i = 0; i < edgeNum; i++){
+        node[edge[i].u].realDeg++;
+        node[edge[i].v].realDge++;
+    }
+    // reorder by counting sort
     for(int i = 0; i < nodeNum; i++){
         degList[node[i].realDeg].push_back(i);
     }

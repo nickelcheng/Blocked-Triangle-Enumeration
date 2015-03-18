@@ -168,18 +168,22 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
     FILE *fp = fopen(inFile, "r");
     int u, v;
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
-        node[u].addNei(v);
-        node[v].addNei(u);
         edge.push_back(Edge(u,v));
     }
-
     fclose(fp);
 }
 
 void reorderByDegeneracy(vector< Node > &node, vector< Edge > &edge){
     int nodeNum = (int)node.size();
+    int edgeNum = (int)edge.size():
     vector< DegList > degList;
 
+    // count degree for each node
+    for(int i = 0; i < edgeNum; i++){
+        node[edge[i].u].addNei(edge[i].v);
+        node[edge[i].v].addNei(edge[i].u);
+    }
+    // reordering
     degList.resize(nodeNum);
     buildDegList(node, degList);
     reordering(node, degList);
