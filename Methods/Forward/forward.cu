@@ -166,7 +166,7 @@ void reorderByDegree(vector< Node > &node, vector< Edge > &edge){
     // count degree for each node
     for(int i = 0; i < edgeNum; i++){
         node[edge[i].u].realDeg++;
-        node[edge[i].v].realDge++;
+        node[edge[i].v].realDeg++;
     }
     // reorder by counting sort
     for(int i = 0; i < nodeNum; i++){

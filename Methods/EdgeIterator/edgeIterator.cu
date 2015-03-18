@@ -175,7 +175,7 @@ void input(const char *inFile, vector< Node > &node, vector< Edge > &edge){
 
 void reorderByDegeneracy(vector< Node > &node, vector< Edge > &edge){
     int nodeNum = (int)node.size();
-    int edgeNum = (int)edge.size():
+    int edgeNum = (int)edge.size();
     vector< DegList > degList;
 
     // count degree for each node
