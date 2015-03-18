@@ -17,8 +17,8 @@ gettimeofday(&st[n], NULL);
 
 #define timerEnd(tar, n)\
 gettimeofday(&ed[n], NULL);\
-fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
-//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st[n],ed[n]));
+fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st[n],ed[n]));
+//fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
 
 
 using namespace std;
@@ -70,12 +70,14 @@ struct Triangle{
 void input(const char *inFile, vector< Node > &node, vector< Edge > &edge);
 void reorderByDegree(vector< Node > &node, vector< Edge > &edge);
 void updateGraph(vector< Node > &node, vector< Edge > &edge);
-__global__ void countTriNum(int *offset, int *edgeU, int *edgeV, int *triNum, int edgeNum);
+__global__ void countTriNum(int *offset, int *edgeV, int *triNum);
 __device__ int intersectList(int sz1, int sz2, int *l1, int *l2);
 
+extern __shared__ int shared[]; // adj[maxDeg], threadTriNum[threadNum]
+
 int main(int argc, char *argv[]){
-    if(argc != 3){
-        fprintf(stderr, "usage: forward <input_path> <node_num>\n");
+    if(argc != 4){
+        fprintf(stderr, "usage: forward <input_path> <node_num> <thread_per_block>\n");
         return 0;
     }
 
@@ -95,12 +97,17 @@ int main(int argc, char *argv[]){
     updateGraph(node, edge);
     timerEnd("reordering", 1)
 
+    int maxDeg = 0;
+    for(int i = 0; i < nodeNum; i++){
+        if(node[i].degree() > maxDeg)
+            maxDeg = node[i].degree();
+    }
+
     int edgeNum = (int)edge.size();
-    int triNum = 0, *h_offset, *h_edgeU, *h_edgeV;
-    int *d_triNum, *d_offset, *d_edgeU, *d_edgeV;
+    int triNum = 0, *h_offset, *h_edgeV;
+    int *d_triNum, *d_offset, *d_edgeV;
     
     h_offset = (int*)malloc(sizeof(int)*(nodeNum+1));
-    h_edgeU = (int*)malloc(sizeof(int)*edgeNum);
     h_edgeV = (int*)malloc(sizeof(int)*edgeNum);
 
     h_offset[0] = 0;
@@ -109,7 +116,6 @@ int main(int argc, char *argv[]){
         h_offset[i+1] = h_offset[i] + deg;
         for(int j = 0; j < deg; j++){
             int idx = h_offset[i] + j;
-            h_edgeU[idx] = i;
             h_edgeV[idx] = node[i].largerDegNei[j];
         }
     }
@@ -117,18 +123,19 @@ int main(int argc, char *argv[]){
     timerStart(1)
     cudaMalloc((void**)&d_triNum, sizeof(int));
     cudaMalloc((void**)&d_offset, sizeof(int)*(nodeNum+1));
-    cudaMalloc((void**)&d_edgeU, sizeof(int)*edgeNum);
     cudaMalloc((void**)&d_edgeV, sizeof(int)*edgeNum);
 
     cudaMemcpy(d_triNum, &triNum, sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_offset, h_offset, sizeof(int)*(nodeNum+1), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_edgeU, h_edgeU, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
     cudaMemcpy(d_edgeV, h_edgeV, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
     timerEnd("cuda copy", 1)
 
     timerStart(1)
-    int nB = (int)ceil((edgeNum/1024.0)+0.001);
-    countTriNum<<< nB, 1024 >>>(d_offset, d_edgeU, d_edgeV, d_triNum, edgeNum);
+    int threadNum = atoi(argv[3]);
+    int smSize = (threadNum+maxDeg) * sizeof(int);
+/*    printf("%d blocks, %d threads per block\n", nodeNum, threadNum);
+    printf("smSize = %d bytes\n", smSize);*/
+    countTriNum<<< nodeNum, threadNum, smSize >>>(d_offset, d_edgeV, d_triNum);
     cudaDeviceSynchronize();
     timerEnd("intersection", 1)
 
@@ -137,11 +144,9 @@ int main(int argc, char *argv[]){
 
     cudaFree(d_triNum);
     cudaFree(d_offset);
-    cudaFree(d_edgeU);
     cudaFree(d_edgeV);
 
     free(h_offset);
-    free(h_edgeU);
     free(h_edgeV);
 
     timerEnd("total", 0)
@@ -199,9 +204,44 @@ void updateGraph(vector< Node > &node, vector< Edge > &edge){
     }
 }
 
-__global__ void countTriNum(int *offset, int *edgeU, int *edgeV, int *triNum, int edgeNum){
-    int idx = blockIdx.x*blockDim.x + threadIdx.x;
-    if(idx < edgeNum){
+__global__ void countTriNum(int *offset, int *edgeV, int *triNum){
+    int myOffset = offset[blockIdx.x];
+    int nextOffset = offset[blockIdx.x+1];
+    int deg = nextOffset - myOffset;
+//    int jobPerThread = deg/blockDim.x + 1;
+    int jobPerThread = (int)ceil((double)deg/blockDim.x-0.001);
+
+    // move node u's adj list to shared memory
+    for(int i = 0; i < jobPerThread; i++){
+        int idx = threadIdx.x*jobPerThread + i;
+        if(idx < deg){
+            shared[idx] = edgeV[myOffset+idx]; // adj[idx]
+        }
+    }
+    __syncthreads();
+
+    // counting triangle number
+    shared[deg+threadIdx.x] = 0;
+    for(int i = 0; i < jobPerThread; i++){
+        int idx = threadIdx.x*jobPerThread + i;
+        if(idx < deg){
+            int v = shared[idx]; // adj[idx]
+            int vNeiLen = offset[v+1] - offset[v];
+            shared[deg+threadIdx.x] += intersectList(deg, vNeiLen, shared, &edgeV[offset[v]]); // threadTriNum[threadIdx.x]
+        }
+    }
+    __syncthreads();
+
+    // sum triangle number
+    if(threadIdx.x == 0){
+        int tmp = 0;
+        for(int i = 0; i < blockDim.x; i++){
+            tmp += shared[deg+i]; // threadTriNum[i]
+        }
+        atomicAdd(triNum, tmp);
+    }
+/*    int idx = blockIdx.x*blockDim.x + threadIdx.x;
+      if(idx < edgeNum){
         int u = edgeU[idx];
         int v = edgeV[idx];
         int szu = offset[u+1] - offset[u];
@@ -209,7 +249,7 @@ __global__ void countTriNum(int *offset, int *edgeU, int *edgeV, int *triNum, in
         int tmp;
         tmp = intersectList(szu, szv, &edgeV[offset[u]], &edgeV[offset[v]]);
         atomicAdd(triNum, tmp);
-    }
+    }*/
 }
 
 __device__ int intersectList(int sz1, int sz2, int *l1, int *l2){
