@@ -2,6 +2,7 @@
 #include<cstdlib>
 #include<cstring>
 #include<cmath>
+#include<sys/time.h>
 
 #define BIT_PER_ENTRY (sizeof(UI)*8)
 
@@ -19,7 +20,7 @@ gettimeofday(&st[n], NULL);
 
 #define timerEnd(tar, n)\
 gettimeofday(&ed[n], NULL);\
-fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
+//fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
 //fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st[n],ed[n]));
 
 typedef unsigned int UI;
@@ -38,17 +39,18 @@ int main(int argc, char *argv[]){
     int nodeNum = atoi(argv[2]);
     int nodePerTile = atoi(argv[3]);
     if(nodePerTile % BIT_PER_ENTRY != 0){
-        fprintf(stderr, "node per tile must be multiple of %d\n", BIT_PER_ENTRY);
+        fprintf(stderr, "node per tile must be multiple of %lu\n", BIT_PER_ENTRY);
         return 0;
     }
 
-    int entryNum = nodeNum / BIT_PER_ENTRY + 1;
-    UI *edge = (UI*)malloc(entryNum*nodeNum*BIT_PER_ENTRY);
+    int entryNum = (int)ceil((double)nodeNum/BIT_PER_ENTRY-0.001);
+    UI *edge = (UI*)malloc(entryNum*nodeNum*sizeof(UI));
+
 
     timerStart(1)
     FILE *fp = fopen(argv[1], "r");
     int u, v;
-    memset(edge, 0, entryNum*nodeNum*BIT_PER_ENTRY);
+    memset(edge, 0, entryNum*nodeNum*sizeof(UI));
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
         setEdge(u, v);
         setEdge(v, u);
@@ -75,7 +77,7 @@ int main(int argc, char *argv[]){
         }
     }
     triNum /= 3;
-    TimerEnd("find triangle", 1)
+    timerEnd("find triangle", 1)
     printf("total triangle: %lld\n", triNum);
 
     free(edge);
