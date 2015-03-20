@@ -1,7 +1,7 @@
 CC = g++
 CFLAG = -Wall -O2
 GCC = nvcc
-GFLAG = -arch=sm_20 --ptxas-options="-dlcm=cg"
+GFLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
 
 all: forward edgeIterator bitwise g_forward g_edgeIterator g_bitwise
 
