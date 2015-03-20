@@ -27,8 +27,8 @@ typedef unsigned int UI;
 long long countOneBits(UI tar);
 
 int main(int argc, char *argv[]){
-    if(argc != 4){
-        fprintf(stderr, "usage: tiledBit <input_path> <node_num> <node_per_tile>\n");
+    if(argc != 5){
+        fprintf(stderr, "usage: tiledBit <input_path> <node_num> <node_per_tile> <thread_per_block\n");
         return 0;
     }
 
@@ -56,10 +56,27 @@ int main(int argc, char *argv[]){
     fclose(fp);
     timerEnd("input", 1)
 
+    long long h_triNum = 0, *d_triNum;
+    UI *d_edge;
+
     timerStart(1)
-    long long triNum = 0;
+    cudaMalloc((void**)&d_edge, entryNum*nodeNum*BIT_PER_ENTRY);
+    cudaMalloc((void**)&d_triNum, sizeof(long long));
+    cudaMemcyp(d_dege, edge, entryNum*nodeNum*BIT_PER_ENTRY, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_triNum, &h_triNum, sizeof(long long), cudaMemcpyHostToDevice);
+    timerEnd("cuda copy", 1)
+
+    timerStart(1)
+    int thraedNum = atoi(4);
     int entryPerTile = nodePerTile / BIT_PER_ENTRY;
-    int round = (int)ceil((double)nodeNum/nodePerTile-0.001);
+    int tileNum = entryNum / entryPerTile + 1;
+    int smSize = entryPerTile * nodeNum * sizeof(UI);
+    countTriNum<<< tileNum, threadNum, smSize >>>();
+    cudaDeviceSynchronize();
+    timerEnd("find triangle", 1)
+
+    cudaMemcyp(&h_triNum, d_triNum, sizeof(long long), cudaMemcpyDeviceToHost);
+/*    int round = (int)ceil((double)nodeNum/nodePerTile-0.001);
     for(int t = 0; t < round; t++){
         int st = t * entryPerTile;
         int ed = st + entryPerTile;
@@ -75,8 +92,11 @@ int main(int argc, char *argv[]){
         }
     }
     triNum /= 3;
-    TimerEnd("find triangle", 1)
-    printf("total triangle: %lld\n", triNum);
+    TimerEnd("find triangle", 1)*/
+    printf("total triangle: %lld\n", h_triNum/3);
+
+    cudaFree(d_triNum);
+    cudaFree(d_edge);
 
     free(edge);
 
@@ -85,7 +105,26 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-long long countOneBits(UI tar){
+__global__ void countTriNum(UI *edge, long long *triNum, int nodeNum, int nodePerTile){
+    int round = (int)ceil((double)nodeNum/nodePerTile-0.001);
+    int entryPerTile = nodePerTile / BIT_PER_ENTRY + 1;
+    for(int t = 0; t < round; t++){
+        int st = t * entryPerTile;
+        int ed = st + entryPerTile;
+        for(int i = 0; i < nodePerThread; i++){
+            int idx = threadIdx.x*nodePerThread + i;
+            for(int j = 0; j < nodeNum; j++){
+                if(!getEdge(idx, j)) continue;
+                for(int k = st; k < ed; k++){
+                    UI result = edge[i*entryNum+k] & edge[j*entryNum+k];
+                    atomicAdd(triNum, countOneBits(result));
+                }
+            }
+        }
+    }
+}
+
+__device__ long long countOneBits(UI tar){
     long long ones = 0;
     for(; tar; tar/=2)
         ones += tar % 2;

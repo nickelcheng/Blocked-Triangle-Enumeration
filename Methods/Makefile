@@ -20,8 +20,14 @@ g_edgeIterator: EdgeIterator/edgeIterator.cu
 bitwise: Bitwise/bitwise.cpp
 	$(CC) Bitwise/bitwise.cpp $(CFLAG) -o bitwise
 
+g_tiledBit: TiledBitwise/tiledBitwise.cu
+	$(GCC) TiledBitwise/tiledBitwise.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_tiledBit
+
+tiledBit: TiledBitwise/tiledBitwise.cpp
+	$(CC) TiledBitwise/tiledBitwise.cpp $(CFLAG) -o tiledBit
+
 g_bitwise: Bitwise/bitwise.cu
 	$(GCC) Bitwise/bitwise.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_bitwise
 
 clean:
-	rm -rf forward edgeIterator bitwise g_forward g_edgeIterator g_bruteForce g_bitwise
+	rm -rf forward edgeIterator bitwise g_forward g_edgeIterator g_bruteForce g_bitwise g_tiledBit
