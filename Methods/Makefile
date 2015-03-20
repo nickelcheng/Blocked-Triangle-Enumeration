@@ -3,7 +3,7 @@ CFLAG = -Wall -O2
 GCC = nvcc
 GFLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
 
-all: forward edgeIterator bitwise g_forward g_edgeIterator g_bitwise
+all: forward edgeIterator bitwise tiledBit g_forward g_edgeIterator g_bitwise g_tiledBit
 
 forward: Forward/forward.cpp
 	$(CC) Forward/forward.cpp $(CFLAG) -o forward
@@ -30,4 +30,4 @@ g_bitwise: Bitwise/bitwise.cu
 	$(GCC) Bitwise/bitwise.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_bitwise
 
 clean:
-	rm -rf forward edgeIterator bitwise g_forward g_edgeIterator g_bruteForce g_bitwise g_tiledBit
+	rm -rf forward edgeIterator bitwise tiledBit g_forward g_edgeIterator g_bruteForce g_bitwise g_tiledBit
