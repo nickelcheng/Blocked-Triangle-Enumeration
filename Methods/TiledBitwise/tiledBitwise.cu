@@ -28,6 +28,8 @@ typedef unsigned int UI;
 __global__ void countTriNum(UI *edge, int *triNum, int nodeNum, int nodePerTile);
 __device__ int countOneBits(UI tar);
 
+extern __shared__ UI shared[]; // adjList[entryNum], adjMat[entryPerTile*nodeNum], threadTriNum[threadNum]
+
 int main(int argc, char *argv[]){
     if(argc != 5){
         fprintf(stderr, "usage: tiledBit <input_path> <node_num> <node_per_tile> <thread_per_block>\n");
@@ -39,14 +41,12 @@ int main(int argc, char *argv[]){
 
     int nodeNum = atoi(argv[2]);
     int nodePerTile = atoi(argv[3]);
-	int threadPerBlock = atoi(argv[4]);
     if(nodePerTile % BIT_PER_ENTRY != 0){
         fprintf(stderr, "node per tile must be multiple of %lu\n", BIT_PER_ENTRY);
         return 0;
     }
 
     int entryNum = (int)ceil((double)nodeNum/BIT_PER_ENTRY-0.001);
-	int tileNum = (int)ceil((double)nodeNum/nodePerTile-0.001);
     UI *edge = (UI*)malloc(entryNum*nodeNum*sizeof(UI));
 
     timerStart(1)
@@ -71,8 +71,12 @@ int main(int argc, char *argv[]){
     timerEnd("cuda copy", 1)
 
     timerStart(1)
-//    int smSize = entryPerTile * nodeNum * sizeof(UI);
-    countTriNum<<< tileNum, threadPerBlock >>>(d_edge, d_triNum, nodeNum, nodePerTile);
+	int threadPerBlock = atoi(argv[4]);
+	int tileNum = (int)ceil((double)nodeNum/nodePerTile-0.001);
+    int entryPerTile = nodePerTile / BIT_PER_ENTRY;
+    int smSize = (entryPerTile*nodeNum + threadPerBlock) * sizeof(UI);
+    // adjMat[entryPerTile*nodeNum], threadTriNum[threadPerBlock]
+    countTriNum<<< tileNum, threadPerBlock, smSize >>>(d_edge, d_triNum, nodeNum, nodePerTile);
     cudaDeviceSynchronize();
     timerEnd("find triangle", 1)
 
@@ -94,20 +98,44 @@ __global__ void countTriNum(UI *edge, int *triNum, int nodeNum, int nodePerTile)
     int entryNum = (int)ceil((double)nodeNum/BIT_PER_ENTRY-0.001);
     int entryPerTile = nodePerTile / BIT_PER_ENTRY;
 	int nodePerThread = (int)ceil((double)nodeNum/blockDim.x-0.001);
-    int st = blockIdx.x * entryPerTile;
-    int ed = st + entryPerTile;
-	if(ed > nodeNum) ed = nodeNum;
+    int offset = blockIdx.x * entryPerTile;
+    int bound = entryPerTile;
+    if(offset+bound > nodeNum) bound = nodeNum - offset;
+
+    // move adj matrix tiled area to shared memory
+    for(int i = 0; i < nodePerThread; i++){
+        int idx = threadIdx.x*nodePerThread + i;
+        for(int j = 0; j < bound; j++){
+            shared[idx*entryPerTile+j] = edge[idx*entryNum+j+offset]; // adjMat[idx][j]
+        }
+    }
+    __syncthreads();
+
+    // counting triangle number
+    int tileSize = entryPerTile*nodeNum;
+    int tid = tileSize + threadIdx.x;
+    shared[tid] = 0; // threadTriNum[tid]
     for(int i = 0; i < nodePerThread; i++){
         int idx = threadIdx.x*nodePerThread + i;
         if(idx < nodeNum){
 	        for(int j = 0; j < nodeNum; j++){
                 if(idx == j || !getEdge(idx, j)) continue;
-           	    for(int k = st; k < ed; k++){
-               	    UI result = edge[idx*entryNum+k] & edge[j*entryNum+k];
-                   	atomicAdd(triNum, countOneBits(result));
+           	    for(int k = 0; k < bound; k++){
+                    UI result = shared[idx*entryPerTile+k] & shared[j*entryPerTile+k];
+                    shared[tid] += countOneBits(result); //threadTriNum[tid]
                 }
             }
         }
+    }
+    __syncthreads();
+
+    // sum triangle number
+    if(threadIdx.x == 0){
+        int tmp = 0;
+        for(int i = 0; i < blockDim.x; i++){
+            tmp += shared[tileSize+i]; // threadTriNum[i]
+        }
+        atomicAdd(triNum, tmp);
     }
 }
 
