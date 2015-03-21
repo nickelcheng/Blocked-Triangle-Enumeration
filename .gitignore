@@ -6,5 +6,4 @@ randomGraph
 Dataset
 *forward
 *edgeIterator
-*bitwise
 *tiledBit
