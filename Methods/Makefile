@@ -1,27 +1,49 @@
-CC = g++
-CFLAG = -Wall -O2
-GCC = nvcc
-GFLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
+GCC = g++
+FLAG = -Wall -O2
+NVCC = nvcc
+GPU_FLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
+RDC = -rdc=true
 
-all: forward edgeIterator tiledBit g_forward g_edgeIterator g_tiledBit
+VPATH = $(wildcard */src/)
 
-forward: Forward/forward.cpp
-	$(CC) Forward/forward.cpp $(CFLAG) -o forward
+src = $(wildcard */src/*)
 
-g_forward: Forward/forward.cu
-	$(GCC) Forward/forward.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_forward
+OBJ_DIR = object/
+cudaObj = $(patsubst %.cu,$(OBJ_DIR)%.o,$(notdir $(filter %.cu,$(src))))
+cppObj = $(patsubst %.cpp,$(OBJ_DIR)%.o,$(notdir $(filter %.cpp,$(src))))
 
-edgeIterator: EdgeIterator/edgeIterator.cpp
-	$(CC) EdgeIterator/edgeIterator.cpp $(CFLAG) -o edgeIterator
+listObj = io.o reorder.o forward.o edgeIterator.o triangle.o
+matObj = matFunc.o
 
-g_edgeIterator: EdgeIterator/edgeIterator.cu
-	$(GCC) EdgeIterator/edgeIterator.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_edgeIterator
+CUDA_INC = /opt/cuda/include/
+LIST_HEADER = ListIntersect/header/
+MAT_HEADER = MatrixMul/header/
+UTIL_HEADER = Util/header/
+INCLUDE = -I$(LIST_HEADER) -I$(MAT_HEADER) -I$(UTIL_HEADER) -I$(CUDA_INC)
 
-g_tiledBit: TiledBitwise/tiledBitwise.cu
-	$(GCC) TiledBitwise/tiledBitwise.cu $(GFLAG) -Xcompiler $(CFLAG) -o g_tiledBit
 
-tiledBit: TiledBitwise/tiledBitwise.cpp
-	$(CC) TiledBitwise/tiledBitwise.cpp $(CFLAG) -o tiledBit
+all: cpu gpu
+cpu: list mat
+gpu: g_list g_mat
+
+list: $(addprefix $(OBJ_DIR),list.o $(listObj) tools.o)
+	$(NVCC) $^ -Xcompiler $(FLAG) -o $@
+
+mat: $(addprefix $(OBJ_DIR),mat.o $(matObj) tools.o)
+	$(NVCC) $^ -Xcompiler $(FLAG) -o $@
+
+g_list:$(addprefix $(OBJ_DIR),g_list.o $(listObj) tools.o)
+	$(NVCC) $^ $(GPU_FLAG) -Xcompiler $(FLAG) -o $@
+
+g_mat: $(addprefix $(OBJ_DIR),g_mat.o $(matObj) tools.o)
+	$(NVCC) $^ $(GPU_FLAG) -Xcompiler $(FLAG) -o $@
+
+$(cudaObj): $(OBJ_DIR)%.o: %.cu
+	$(NVCC) -c $< $(GPU_FLAG) $(RDC) -Xcompiler $(FLAG) $(INCLUDE) -o $@
+
+$(cppObj): $(OBJ_DIR)%.o: %.cpp
+	$(GCC) -c $< $(FLAG) $(INCLUDE) -o $@
 
 clean:
-	rm -rf forward edgeIterator tiledBit g_forward g_edgeIterator g_bruteForce g_tiledBit
+	rm -rf $(OBJ_DIR)*
+	rm -rf list mat g_list g_mat
