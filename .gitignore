@@ -2,8 +2,11 @@ degeneracy
 analysisDValue
 relabel
 randomGraph
-*.result
 Dataset
-*forward
-*edgeIterator
-*tiledBit
+
+# exe files
+*list
+*mat
+
+# result files
+*.result
