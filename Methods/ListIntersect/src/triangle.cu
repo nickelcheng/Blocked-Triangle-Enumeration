@@ -16,27 +16,35 @@ int cpuCountTriNum(vector< Node > &node){
     return triNum;
 }
 
-void listCopy(int *offset, int *edgeV, int edgeNum, vector< Node > &node){
+void listCopy(int **offset, int **edgeV, int edgeNum, vector< Node > &node){
     int nodeNum = (int)node.size();
-    offset = (int*)malloc(sizeof(int)*(nodeNum+1));
-    edgeV = (int*)malloc(sizeof(int)*edgeNum);
+    (*offset) = (int*)malloc(sizeof(int)*(nodeNum+1));
+    (*edgeV) = (int*)malloc(sizeof(int)*edgeNum);
 
-    offset[0] = 0;
+    (*offset)[0] = 0;
     for(int i = 0; i < nodeNum; i++){
         int deg = node[i].degree();
-        offset[i+1] = offset[i] + deg;
+        (*offset)[i+1] = (*offset)[i] + deg;
         for(int j = 0; j < deg; j++){
-            int idx = offset[i] + j;
-            edgeV[idx] = node[i].nei[j];
+            int idx = (*offset)[i] + j;
+            (*edgeV)[idx] = node[i].nei[j];
         }
     }
 }
 
-void listCopyToDevice(int nodeNum, int edgeNum, void* h_offset, void** d_offset, void* h_edgeV, void** d_edgeV){
+void listCopyToDevice(vector< Node > &node, int edgeNum, void** d_offset, void** d_edgeV){
+    int nodeNum = (int)node.size();
+    int *h_offset, *h_edgeV;
+
+    listCopy(&h_offset, &h_edgeV, edgeNum, node);
+
     cudaMalloc(d_offset, sizeof(int)*(nodeNum+1));
     cudaMalloc(d_edgeV, sizeof(int)*edgeNum);
-    cudaMemcpy(d_offset, h_offset, sizeof(int)*(nodeNum+1), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_edgeV, h_edgeV, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
+    cudaMemcpy(*d_offset, h_offset, sizeof(int)*(nodeNum+1), cudaMemcpyHostToDevice);
+    cudaMemcpy(*d_edgeV, h_edgeV, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
+
+    free(h_offset);
+    free(h_edgeV);
 }
 
 __global__ void gpuCountTriNum(int *offset, int *edgeV, int *triNum, int nodeNum){

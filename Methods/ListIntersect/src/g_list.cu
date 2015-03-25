@@ -36,14 +36,11 @@ int main(int argc, char *argv[]){
     timerEnd("reordering", 1)
 
     int edgeNum = (int)edge.size();
-    int triNum, *h_offset = NULL, *h_edgeV = NULL;
     int *d_triNum, *d_offset, *d_edgeV;
-    
-    listCopy(h_offset, h_edgeV, edgeNum, node);
 
     timerStart(1)
     initDeviceTriNum((void**)&d_triNum);
-    listCopyToDevice(nodeNum, edgeNum, h_offset, (void**)&d_offset, h_edgeV, (void**)&d_edgeV);
+    listCopyToDevice(node, edgeNum, (void**)&d_offset, (void**)&d_edgeV);
     timerEnd("cuda copy", 1)
 
     timerStart(1)
@@ -52,14 +49,13 @@ int main(int argc, char *argv[]){
     cudaDeviceSynchronize();
     timerEnd("intersection", 1)
 
+    int triNum;
     cudaMemcpy(&triNum, d_triNum, sizeof(int), cudaMemcpyDeviceToHost);
     printf("total triangle: %d\n", triNum);
 
     cudaFree(d_triNum);
     cudaFree(d_offset);
     cudaFree(d_edgeV);
-    free(h_offset);
-    free(h_edgeV);
 
     timerEnd("total", 0)
 
