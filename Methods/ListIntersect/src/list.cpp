@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
     }
     int algo = getAlgo(argv[1]);
     if(algo == -1){
-        fprintf(stderr, "algorithm should be forward or edge\n");
+        fprintf(stderr, "algorithm should be forward, cover_forward, edge, cover_edge or cover\n");
         return 0;
     }
 
@@ -21,21 +21,22 @@ int main(int argc, char *argv[]){
     timerStart(0)
 
     int nodeNum = atoi(argv[3]);
-    vector< Node > node(nodeNum);
+    vector< Node > node;
     vector< Edge > edge;
 
-    timerStart(1)
+//    timerStart(1)
+    initNode(nodeNum, node, algo);
     inputList(argv[2], edge);
-    timerEnd("input", 1)
+//    timerEnd("input", 1)
 
-    timerStart(1)
+//    timerStart(1)
     reorder(algo, node, edge);
-    timerEnd("reordering", 1)
+//    timerEnd("reordering", 1)
 
-    timerStart(1)
+//    timerStart(1)
     int triNum = cpuCountTriNum(node);
     printf("total triangle: %d\n", triNum);
-    timerEnd("intersection", 1)
+//    timerEnd("intersection", 1)
 
 
     timerEnd("total", 0)

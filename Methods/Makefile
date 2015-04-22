@@ -12,7 +12,7 @@ OBJ_DIR = object/
 cudaObj = $(patsubst %.cu,$(OBJ_DIR)%.o,$(notdir $(filter %.cu,$(src))))
 cppObj = $(patsubst %.cpp,$(OBJ_DIR)%.o,$(notdir $(filter %.cpp,$(src))))
 
-listObj = io.o reorder.o forward.o edgeIterator.o triangle.o
+listObj = io.o reorder.o forward.o edgeIterator.o vertexCover.o triangle.o
 matObj = matFunc.o
 
 CUDA_INC = /opt/cuda/include/
