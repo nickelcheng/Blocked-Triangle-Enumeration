@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
     vector< Edge > edge;
 
 //    timerStart(1)
-    initNode(nodeNum, node, algo);
+    initNode(nodeNum, node, useVertexCover(algo));
     inputList(argv[2], edge);
 //    timerEnd("input", 1)
 

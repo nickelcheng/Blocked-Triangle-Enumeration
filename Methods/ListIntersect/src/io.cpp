@@ -25,11 +25,13 @@ void inputList(const char *inFile, vector< Edge > &edge){
     fclose(fp);
 }
 
-void initNode(int nodeNum, vector< Node > &node, int algo){
-    bool useVertexCover = false;
+bool useVertexCover(int algo){
     if(algo == COVER_FORWARD || algo == COVER_EDGE_ITERATOR || algo == COVER)
-        useVertexCover = true;
+        return true;
+    return false;
+}
 
+void initNode(int nodeNum, vector< Node > &node, bool useVC){
     for(int i = 0; i < nodeNum; i++)
-        node.push_back(Node(i, useVertexCover));
+        node.push_back(Node(i, useVC));
 }

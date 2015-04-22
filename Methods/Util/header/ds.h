@@ -20,8 +20,13 @@ struct Node{
     int newOrder;
     int realDeg; // forward
     int leftDeg, inListPos; // edge iterator
-    Node(void){
+    bool inCoverSet;
+    // if vertex cover isn't used, set all nodes in cover set
+    // otherwise, all nodes are not in cover set initially
+    Node(int idx, bool useVertexCover){
         realDeg = 0;
+        newOrder = idx;
+        inCoverSet = !useVertexCover;
         nei.clear();
     }
     void addNei(int v){

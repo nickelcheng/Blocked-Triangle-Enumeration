@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
     }
     int algo = getAlgo(argv[1]);
     if(algo == -1){
-        fprintf(stderr, "algorithm should be forward or edge\n");
+        fprintf(stderr, "algorithm should be forward, cover_forward, edge, cover_edge or cover\n");
         return 0;
     }
 
@@ -24,30 +24,39 @@ int main(int argc, char *argv[]){
     int nodeNum = atoi(argv[3]);
     int threadNum = atoi(argv[4]);
     int blockNum = atoi(argv[5]);
-    vector< Node > node(nodeNum);
+    bool useVC = useVertexCover(algo);
+    vector< Node > node;
     vector< Edge > edge;
 
-    timerStart(1)
+//    timerStart(1)
+    initNode(nodeNum, node, useVC);
     inputList(argv[2], edge);
-    timerEnd("input", 1)
+//    timerEnd("input", 1)
 
-    timerStart(1)
+//    timerStart(1)
     int maxDeg = reorder(algo, node, edge);
-    timerEnd("reordering", 1)
+//    timerEnd("reordering", 1)
 
     int edgeNum = (int)edge.size();
     int *d_triNum, *d_offset, *d_edgeV;
+    bool *d_inCoverSet;
 
-    timerStart(1)
+//    timerStart(1)
     initDeviceTriNum((void**)&d_triNum);
-    listCopyToDevice(node, edgeNum, (void**)&d_offset, (void**)&d_edgeV);
-    timerEnd("cuda copy", 1)
+    if(useVC)
+        listCopyToDevice(node, edgeNum, (void**)&d_offset, (void**)&d_edgeV, (void**)&d_inCoverSet);
+    else
+        listCopyToDevice(node, edgeNum, (void**)&d_offset, (void**)&d_edgeV);
+//    timerEnd("cuda copy", 1)
 
-    timerStart(1)
+//    timerStart(1)
     int smSize = (threadNum+maxDeg) * sizeof(int);
-    gpuCountTriNum<<< blockNum, threadNum, smSize >>>(d_offset, d_edgeV, d_triNum, nodeNum);
+    if(useVC)
+        gpuCountTriNum<<< blockNum, threadNum, smSize >>>(d_offset, d_edgeV, d_triNum, nodeNum, d_inCoverSet);
+    else
+        gpuCountTriNum<<< blockNum, threadNum, smSize >>>(d_offset, d_edgeV, d_triNum, nodeNum);
     cudaDeviceSynchronize();
-    timerEnd("intersection", 1)
+//    timerEnd("intersection", 1)
 
     int triNum;
     cudaMemcpy(&triNum, d_triNum, sizeof(int), cudaMemcpyDeviceToHost);

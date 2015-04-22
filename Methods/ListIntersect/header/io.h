@@ -7,6 +7,7 @@ enum{FORWARD = 0, COVER_FORWARD, EDGE_ITERATOR, COVER_EDGE_ITERATOR, COVER};
 
 int getAlgo(const char *algo);
 void inputList(const char *inFile, vector< Edge > &edge);
-void initNode(int nodeNum, vector< Node > &node, int algo);
+bool useVertexCover(int algo);
+void initNode(int nodeNum, vector< Node > &node, bool useVC);
 
 #endif
