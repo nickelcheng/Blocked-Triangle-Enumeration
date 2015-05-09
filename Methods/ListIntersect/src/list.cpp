@@ -17,29 +17,19 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    timerInit(2)
-    timerStart(0)
-
     int nodeNum = atoi(argv[3]);
     vector< Node > node(nodeNum);
     vector< Edge > edge;
 
-    timerStart(1)
     inputList(argv[2], edge);
-    timerEnd("input", 1)
 
-    timerStart(1)
+    timerInit(1)
+    timerStart(0)
     reorder(algo, node, edge);
-    timerEnd("reordering", 1)
-
-    timerStart(1)
     int triNum = cpuCountTriNum(node);
-    printf("total triangle: %d\n", triNum);
-    timerEnd("intersection", 1)
-
-
     timerEnd("total", 0)
 
+    printf("total triangle: %d\n", triNum);
     return 0;
 }
 

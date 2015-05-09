@@ -10,9 +10,6 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    timerInit(2)
-    timerStart(0)
-
     int nodeNum = atoi(argv[2]);
     int nodePerTile = atoi(argv[3]);
     if(nodePerTile % BIT_PER_ENTRY != 0){
@@ -23,19 +20,16 @@ int main(int argc, char *argv[]){
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
     UI *mat = (UI*)malloc(entryNum*nodeNum*sizeof(UI));
 
-    timerStart(1)
     inputMat(argv[1], mat, entryNum*nodeNum*sizeof(UI), entryNum);
-    timerEnd("input", 1)
 
-    timerStart(1)
+    timerInit(1)
+    timerStart(0)
     int triNum = cpuCountTriNum(nodeNum, nodePerTile, mat);
-    timerEnd("find triangle", 1)
-    printf("total triangle: %d\n", triNum);
+    timerEnd("total", 0)
 
     free(mat);
 
-    timerEnd("total", 0)
-
+    printf("total triangle: %d\n", triNum);
     return 0;
 }
 
