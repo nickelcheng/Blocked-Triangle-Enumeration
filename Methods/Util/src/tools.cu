@@ -1,9 +1,8 @@
 #include "tools.h"
 
-void initDeviceTriNum(void** d_triNum){
+void initDeviceTriNum(int* d_triNum){
     int zero = 0;
-    cudaMalloc(d_triNum, sizeof(int));
-    cudaMemcpy(*d_triNum, &zero, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_triNum, &zero, sizeof(int), cudaMemcpyHostToDevice);
 }
 
 __device__ void sumTriangle(int *triNum, int threadTriNum[]){

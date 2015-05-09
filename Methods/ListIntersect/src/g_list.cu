@@ -18,47 +18,43 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    timerInit(2)
-    timerStart(0)
-
     int nodeNum = atoi(argv[3]);
     int threadNum = atoi(argv[4]);
     int blockNum = atoi(argv[5]);
     vector< Node > node(nodeNum);
     vector< Edge > edge;
 
-    timerStart(1)
     inputList(argv[2], edge);
-    timerEnd("input", 1)
-
-    timerStart(1)
-    int maxDeg = reorder(algo, node, edge);
-    timerEnd("reordering", 1)
 
     int edgeNum = (int)edge.size();
     int *d_triNum, *d_offset, *d_edgeV;
+cudaSetDevice(1);
+    cudaMalloc((void**)&d_triNum, sizeof(int));
+    cudaMalloc((void**)&d_offset, sizeof(int)*(nodeNum+1));
+    cudaMalloc((void**)&d_edgeV, sizeof(int)*edgeNum);
 
-    timerStart(1)
-    initDeviceTriNum((void**)&d_triNum);
-    listCopyToDevice(node, edgeNum, (void**)&d_offset, (void**)&d_edgeV);
-    timerEnd("cuda copy", 1)
+    timerInit(1)
+    timerStart(0)
 
-    timerStart(1)
+    int maxDeg = reorder(algo, node, edge);
+
+    initDeviceTriNum(d_triNum);
+    listCopyToDevice(node, edgeNum, d_offset, d_edgeV);
+
     int smSize = (threadNum+maxDeg) * sizeof(int);
     gpuCountTriNum<<< blockNum, threadNum, smSize >>>(d_offset, d_edgeV, d_triNum, nodeNum);
     cudaDeviceSynchronize();
-    timerEnd("intersection", 1)
 
     int triNum;
     cudaMemcpy(&triNum, d_triNum, sizeof(int), cudaMemcpyDeviceToHost);
-    printf("total triangle: %d\n", triNum);
+    cudaDeviceSynchronize();
+    timerEnd("total", 0)
 
     cudaFree(d_triNum);
     cudaFree(d_offset);
     cudaFree(d_edgeV);
 
-    timerEnd("total", 0)
-
+    printf("total triangle: %d\n", triNum);
     return 0;
 }
 

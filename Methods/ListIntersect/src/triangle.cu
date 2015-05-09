@@ -32,16 +32,14 @@ void listCopy(int **offset, int **edgeV, int edgeNum, vector< Node > &node){
     }
 }
 
-void listCopyToDevice(vector< Node > &node, int edgeNum, void** d_offset, void** d_edgeV){
+void listCopyToDevice(vector< Node > &node, int edgeNum, int* d_offset, int* d_edgeV){
     int nodeNum = (int)node.size();
     int *h_offset, *h_edgeV;
 
     listCopy(&h_offset, &h_edgeV, edgeNum, node);
 
-    cudaMalloc(d_offset, sizeof(int)*(nodeNum+1));
-    cudaMalloc(d_edgeV, sizeof(int)*edgeNum);
-    cudaMemcpy(*d_offset, h_offset, sizeof(int)*(nodeNum+1), cudaMemcpyHostToDevice);
-    cudaMemcpy(*d_edgeV, h_edgeV, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_offset, h_offset, sizeof(int)*(nodeNum+1), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_edgeV, h_edgeV, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
 
     free(h_offset);
     free(h_edgeV);

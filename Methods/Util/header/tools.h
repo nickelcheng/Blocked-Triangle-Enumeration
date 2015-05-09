@@ -6,7 +6,7 @@
 
 #define averageCeil(total,unit) (int)ceil((double)total/unit-0.001)
 
-void initDeviceTriNum(void** d_triNum);
+void initDeviceTriNum(int* d_triNum);
 __device__ void sumTriangle(int *triNum, int threadTriNum[]);
 
 #endif
