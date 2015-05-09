@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]){
     if(argc != 6){
-        fprintf(stderr, "usage: tiledBit <input_path> <node_num> <node_per_tile> <thread_per_block> <block_num>\n");
+        fprintf(stderr, "usage: g_mat <input_path> <node_num> <node_per_tile> <thread_per_block> <block_num>\n");
         return 0;
     }
 

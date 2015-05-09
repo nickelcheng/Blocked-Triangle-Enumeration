@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[]){
     if(argc != 4){
-        fprintf(stderr, "usage: tiledBit <input_path> <node_num> <node_per_tile>\n");
+        fprintf(stderr, "usage: mat <input_path> <node_num> <node_per_tile>\n");
         return 0;
     }
 

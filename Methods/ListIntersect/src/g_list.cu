@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[]){
     if(argc != 6){
-        fprintf(stderr, "usage: listIntersect <algorithm> <input_path> <node_num> <thread_per_block> <block_num>\n");
+        fprintf(stderr, "usage: g_list <algorithm> <input_path> <node_num> <thread_per_block> <block_num>\n");
         return 0;
     }
     int algo = getAlgo(argv[1]);

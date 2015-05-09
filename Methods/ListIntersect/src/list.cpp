@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[]){
     if(argc != 4){
-        fprintf(stderr, "usage: listIntersect <algorithm> <input_path> <node_num>\n");
+        fprintf(stderr, "usage: list <algorithm> <input_path> <node_num>\n");
         return 0;
     }
     int algo = getAlgo(argv[1]);
