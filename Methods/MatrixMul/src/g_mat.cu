@@ -11,9 +11,6 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    timerInit(2)
-    timerStart(0)
-
     int nodeNum = atoi(argv[2]);
     int nodePerTile = atoi(argv[3]);
 	int threadPerBlock = atoi(argv[4]);
@@ -27,33 +24,33 @@ int main(int argc, char *argv[]){
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
     UI *mat = (UI*)malloc(entryNum*nodeNum*sizeof(UI));
 
-    timerStart(1)
     inputMat(argv[1], mat, entryNum*nodeNum*sizeof(UI), entryNum);
-    timerEnd("input", 1)
 
     int triNum, *d_triNum;
     UI *d_mat;
+cudaSetDevice(1);
+    cudaMalloc((void**)&d_triNum, sizeof(int));
+    cudaMalloc((void**)&d_mat, entryNum*nodeNum*sizeof(UI));
 
-    timerStart(1)
-    initDeviceTriNum((void**)&d_triNum);
-    matCopyToDevice(nodeNum, mat, (void**)&d_mat);
-    timerEnd("cuda copy", 1)
+    timerInit(1)
+    timerStart(0)
 
-    timerStart(1)
+    initDeviceTriNum(d_triNum);
+    matCopyToDevice(nodeNum, mat, d_mat);
+
     int smSize = (entryPerTile*nodeNum + threadPerBlock) * sizeof(UI);
     gpuCountTriNum<<< blockNum, threadPerBlock, smSize >>>(d_mat, d_triNum, nodeNum, nodePerTile);
     cudaDeviceSynchronize();
-    timerEnd("find triangle", 1)
 
     cudaMemcpy(&triNum, d_triNum, sizeof(int), cudaMemcpyDeviceToHost);
-	cudaDeviceSynchronize();
-    printf("total triangle: %d\n", triNum/6);
+    cudaDeviceSynchronize();
+    timerEnd("total", 0)
 
     cudaFree(d_triNum);
     cudaFree(d_mat);
     free(mat);
 
-    timerEnd("total", 0)
+    printf("total triangle: %d\n", triNum/6);
 
     return 0;
 }

@@ -13,10 +13,9 @@ void inputMat(const char *inFile, unsigned int *mat, int edgeSize, int entryNum)
     fclose(fp);
 }
 
-void matCopyToDevice(int nodeNum, void* mat, void** d_mat){
+void matCopyToDevice(int nodeNum, void* mat, void* d_mat){
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
-    cudaMalloc(d_mat, entryNum*nodeNum*BIT_PER_ENTRY);
-    cudaMemcpy(*d_mat, mat, entryNum*nodeNum*BIT_PER_ENTRY, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_mat, mat, entryNum*nodeNum*sizeof(UI), cudaMemcpyHostToDevice);
 }
 
 int cpuCountTriNum(int nodeNum, int nodePerTile, UI *mat){
@@ -42,22 +41,24 @@ int cpuCountTriNum(int nodeNum, int nodePerTile, UI *mat){
 }
 
 __global__ void gpuCountTriNum(UI *mat, int *triNum, int nodeNum, int nodePerTile){
+    int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
+    int entryPerTile = nodePerTile / BIT_PER_ENTRY;
+    int nodePerThread = averageCeil(nodeNum, blockDim.x);
+
     int tileNum = averageCeil(nodeNum, nodePerTile);
     int tilePerBlock = averageCeil(tileNum, gridDim.x);
     for(int r = 0; r < tilePerBlock; r++){
         int tileID = blockIdx.x*tilePerBlock + r;
         if(tileID >= tileNum) continue;
-        int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
-        int entryPerTile = nodePerTile / BIT_PER_ENTRY;
-        int nodePerThread = averageCeil(nodeNum, blockDim.x);
         int offset = tileID * entryPerTile;
-        int bound = entryPerTile;
-        if(offset+bound > nodeNum) bound = nodeNum - offset;
+        int tileLen = entryPerTile;
+        if(offset+tileLen > nodeNum) tileLen = nodeNum - offset;
 
         // move adj matrix tiled area to shared memory
         for(int i = 0; i < nodePerThread; i++){
             int idx = threadIdx.x*nodePerThread + i;
-            for(int j = 0; j < bound; j++){
+            if(idx >= nodeNum) continue;
+            for(int j = 0; j < tileLen; j++){
                 shared[idx*entryPerTile+j] = mat[idx*entryNum+j+offset]; // adjMat[idx][j]
             }
         }
@@ -69,13 +70,12 @@ __global__ void gpuCountTriNum(UI *mat, int *triNum, int nodeNum, int nodePerTil
         shared[tid] = 0; // threadTriNum[tid]
         for(int i = 0; i < nodePerThread; i++){
             int idx = threadIdx.x*nodePerThread + i;
-            if(idx < nodeNum){
-	            for(int j = 0; j < nodeNum; j++){
-                    if(idx == j || !getEdge(idx, j)) continue;
-               	    for(int k = 0; k < bound; k++){
-                        UI result = shared[idx*entryPerTile+k] & shared[j*entryPerTile+k];
-                        shared[tid] += countOneBits(result); //threadTriNum[tid]
-                    }
+            if(idx >= nodeNum) continue;
+            for(int j = 0; j < nodeNum; j++){
+                if(idx == j || !getEdge(idx, j)) continue;
+                for(int k = 0; k < tileLen; k++){
+                    UI result = shared[idx*entryPerTile+k] & shared[j*entryPerTile+k];
+                    shared[tid] += countOneBits(result); //threadTriNum[tid]
                 }
             }
         }

@@ -11,7 +11,7 @@ typedef unsigned int UI;
 extern __shared__ UI shared[]; // adjMat[entryPerTile*nodeNum], threadTriNum[threadPerBlock]
 
 void inputMat(const char *inFile, UI *mat, int edgeSize, int entryNum);
-void matCopyToDevice(int nodeNum, void* mat, void** d_mat);
+void matCopyToDevice(int nodeNum, void* mat, void* d_mat);
 int cpuCountTriNum(int nodeNum, int nodePerTile, UI *mat);
 __global__ void gpuCountTriNum(UI *mat, int *triNum, int nodeNum, int nodePerTile);
 __host__ __device__ int countOneBits(UI tar);
