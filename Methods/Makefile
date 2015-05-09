@@ -15,7 +15,7 @@ cppObj = $(patsubst %.cpp,$(OBJ_DIR)%.o,$(notdir $(filter %.cpp,$(src))))
 listObj = io.o reorder.o forward.o edgeIterator.o triangle.o
 matObj = matFunc.o
 
-CUDA_INC = /opt/cuda/include/
+CUDA_INC = /usr/local/cuda-7.0/include/
 LIST_HEADER = ListIntersect/header/
 MAT_HEADER = MatrixMul/header/
 UTIL_HEADER = Util/header/
