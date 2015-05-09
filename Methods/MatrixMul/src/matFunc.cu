@@ -26,7 +26,7 @@ int cpuCountTriNum(int nodeNum, int nodePerTile, UI *mat){
     for(int t = 0; t < round; t++){
         int st = t * entryPerTile;
         int ed = st + entryPerTile;
-        if(ed > nodeNum) ed = nodeNum;
+        if(ed > entryNum) ed = entryNum;
         for(int i = 0; i < nodeNum; i++){
             for(int j = i+1; j < nodeNum; j++){
                 if(!getEdge(i, j)) continue;
@@ -52,7 +52,7 @@ __global__ void gpuCountTriNum(UI *mat, int *triNum, int nodeNum, int nodePerTil
         if(tileID >= tileNum) continue;
         int offset = tileID * entryPerTile;
         int tileLen = entryPerTile;
-        if(offset+tileLen > nodeNum) tileLen = nodeNum - offset;
+        if(offset+tileLen > entryNum) tileLen = entryNum - offset;
 
         // move adj matrix tiled area to shared memory
         for(int i = 0; i < nodePerThread; i++){
