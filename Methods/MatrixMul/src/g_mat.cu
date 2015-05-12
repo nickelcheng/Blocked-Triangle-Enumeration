@@ -23,8 +23,10 @@ int main(int argc, char *argv[]){
 
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
     UI *mat = (UI*)malloc(entryNum*nodeNum*sizeof(UI));
+    UI mask[BIT_PER_ENTRY];
 
-    inputMat(argv[1], mat, entryNum*nodeNum*sizeof(UI), entryNum);
+    createMask(BIT_PER_ENTRY, mask);
+    inputMat(argv[1], mat, entryNum*nodeNum*sizeof(UI), entryNum, mask);
 
     int triNum, *d_triNum;
     UI *d_mat;
