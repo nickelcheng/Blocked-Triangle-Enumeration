@@ -2,7 +2,7 @@
 #include "tools.h"
 #include<cstdio>
 
-void inputMat(const char *inFile, unsigned int *mat, int edgeSize, int entryNum){
+void inputMat(const char *inFile, unsigned int *mat, int edgeSize, int entryNum, UI *mask){
     FILE *fp = fopen(inFile, "r");
     int u, v;
     memset(mat, 0, edgeSize);
@@ -13,12 +13,18 @@ void inputMat(const char *inFile, unsigned int *mat, int edgeSize, int entryNum)
     fclose(fp);
 }
 
+__host__ __device__ void createMask(int maskNum, UI *mask){
+    for(int i = 0; i < maskNum; i++){
+        mask[i] = (UI)1 << i;
+    }
+}
+
 void matCopyToDevice(int nodeNum, void* mat, void* d_mat){
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
     cudaMemcpy(d_mat, mat, entryNum*nodeNum*sizeof(UI), cudaMemcpyHostToDevice);
 }
 
-int cpuCountTriNum(int nodeNum, int nodePerTile, UI *mat){
+int cpuCountTriNum(int nodeNum, int nodePerTile, UI *mat, UI *mask){
     int triNum = 0;
     int round = averageCeil(nodeNum, nodePerTile);
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
@@ -44,6 +50,8 @@ __global__ void gpuCountTriNum(UI *mat, int *triNum, int nodeNum, int nodePerTil
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
     int entryPerTile = nodePerTile / BIT_PER_ENTRY;
     int nodePerThread = averageCeil(nodeNum, blockDim.x);
+    UI mask[BIT_PER_ENTRY];
+    createMask(BIT_PER_ENTRY, mask);
 
     int tileNum = averageCeil(nodeNum, nodePerTile);
     int tilePerBlock = averageCeil(tileNum, gridDim.x);
