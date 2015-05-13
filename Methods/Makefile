@@ -23,7 +23,7 @@ INCLUDE = -I$(LIST_HEADER) -I$(MAT_HEADER) -I$(UTIL_HEADER) -I$(CUDA_INC)
 
 
 all: cpu gpu
-cpu: list mat
+cpu: list mat bruteForce
 gpu: g_list g_mat
 
 list: $(addprefix $(OBJ_DIR),list.o $(listObj) tools.o)
@@ -31,6 +31,9 @@ list: $(addprefix $(OBJ_DIR),list.o $(listObj) tools.o)
 
 mat: $(addprefix $(OBJ_DIR),mat.o $(matObj) tools.o)
 	$(NVCC) $^ -Xcompiler $(FLAG) -o $@
+
+bruteForce: BruteForce/bruteForce.cpp
+	$(GCC) $^ $(FLAG) -I$(UTIL_HEADER) -o $@
 
 g_list:$(addprefix $(OBJ_DIR),g_list.o $(listObj) tools.o)
 	$(NVCC) $^ $(GPU_FLAG) -Xcompiler $(FLAG) -o $@
