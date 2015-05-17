@@ -10,7 +10,7 @@ long long forward(int device, int nodeNum, vector< Edge > &edge, int threadNum, 
     int edgeNum = (int)edge.size();
     int *nodeArr = new int[sizeof(int)*(nodeNum+1)];
     int *edgeArr = new int[sizeof(int)*edgeNum];
-    long long triNum = 0;
+    long long triNum;
     int maxDeg;
 
     forwardReorder(nodeNum, edge);
