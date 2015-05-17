@@ -1,5 +1,6 @@
 #include "solve.h"
 #include "list.h"
+#include "mat.h"
 #include "timer.h"
 
 long long solveBlock(int blockSize, vector< Edge > &edge, int algo){
@@ -16,7 +17,7 @@ long long solveBlock(int blockSize, vector< Edge > &edge, int algo){
         return triNum;
     }
     else if(method == G_FORWARD){
-        int blockNum = 2058;
+        int blockNum = 2048;
         int threadNum = 512;
         timerStart(0)
         long long triNum = forward(GPU, blockSize, edge, threadNum, blockNum);
@@ -24,8 +25,14 @@ long long solveBlock(int blockSize, vector< Edge > &edge, int algo){
         return triNum;
     }
     else if(method == MAT){
+        long long triNum = mat(CPU, blockSize, edge);
+        return triNum;
     }
     else if(method == G_MAT){
+        int blockNum = 2048;
+        int threadNum = 512;
+        long long triNum = mat(GPU, blockSize, edge, threadNum, blockNum);
+        return triNum;
     }
     return FORWARD;
 }
