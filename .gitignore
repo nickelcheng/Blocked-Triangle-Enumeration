@@ -7,6 +7,11 @@ Dataset
 # exe files
 *list
 *mat
+count
+
+# exp scripts
+*exp.sh
+checker.sh
 
 # result files
 *.result
