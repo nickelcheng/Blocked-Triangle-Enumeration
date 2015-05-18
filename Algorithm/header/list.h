@@ -22,7 +22,6 @@ int getMaxDeg(int *nodeArr, int nodeNum);
 
 long long gpuCountTriangle(int *nodeArr, int *edgeArr, int nodeNum, int edgeNum, int maxDeg, int threadNum, int blockNum);
 __global__ void gpuCount(int *nodeArr, int *edgeArr, int nodeNum, long long *triNum);
-__global__ void initTriNum(long long *triNum, int entryNum);
 __host__ __device__ int getDeg(int *nodeArr, int v);
 __host__ __device__ long long intersectList(int sz1, int sz2, int *l1, int *l2);
 

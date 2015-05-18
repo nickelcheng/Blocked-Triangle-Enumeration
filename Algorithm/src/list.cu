@@ -16,14 +16,6 @@ long long gpuCountTriangle(int *nodeArr, int *edgeArr, int nodeNum, int edgeNum,
     cudaMemcpy(d_edgeArr, edgeArr, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
     timerEnd("cuda copy", 0)
 
-    timerStart(0)
-    int initBlock = blockNum/1024 ;
-    if(blockNum % 1024 == 0) initBlock++;
-    int initThread = (blockNum < 1024)? blockNum : 1024;
-    initTriNum<<< initBlock, initThread >>>(d_triNum, blockNum);
-    cudaDeviceSynchronize();
-    timerEnd("cuda init", 0)
-
     int smSize = maxDeg*sizeof(int);
     timerStart(0)
     gpuCount<<< blockNum, threadNum, smSize >>>(d_nodeArr, d_edgeArr, nodeNum, d_triNum);
@@ -45,6 +37,8 @@ long long gpuCountTriangle(int *nodeArr, int *edgeArr, int nodeNum, int edgeNum,
 __global__ void gpuCount(int *nodeArr, int *edgeArr, int nodeNum, long long *triNum){
     __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
+
+    triNum[blockIdx.x] = 0;
 
     for(int u = blockIdx.x; u < nodeNum; u += gridDim.x){
         int uDeg = getDeg(nodeArr, u);
