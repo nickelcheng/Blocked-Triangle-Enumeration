@@ -1,26 +1,19 @@
 #include "list.h"
 #include "binaryTree.h"
-#include "timer.h"
 
 long long gpuCountTriangle(int *nodeArr, int *edgeArr, int nodeNum, int edgeNum, int maxDeg, int threadNum, int blockNum){
     long long *d_triNum, triNum;
     int *d_nodeArr, *d_edgeArr;
 
-    timerInit(1)
-
-    timerStart(0)
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
     cudaMalloc((void**)&d_nodeArr, sizeof(int)*(nodeNum+1));
     cudaMalloc((void**)&d_edgeArr, sizeof(int)*edgeNum);
     cudaMemcpy(d_nodeArr, nodeArr, sizeof(int)*(nodeNum+1), cudaMemcpyHostToDevice);
     cudaMemcpy(d_edgeArr, edgeArr, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
-    timerEnd("cuda copy", 0)
 
     int smSize = maxDeg*sizeof(int);
-    timerStart(0)
     gpuCount<<< blockNum, threadNum, smSize >>>(d_nodeArr, d_edgeArr, nodeNum, d_triNum);
     cudaDeviceSynchronize();
-    timerEnd("counting", 0)
 
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaDeviceSynchronize();

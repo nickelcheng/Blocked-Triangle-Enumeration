@@ -1,36 +1,33 @@
 #include "solve.h"
 #include "list.h"
 #include "mat.h"
-#include "timer.h"
+#include<cstdio>
 
 long long solveBlock(int blockSize, vector< Edge > &edge, int algo){
     int method;
-    if(algo == UNDEF)
+    int blockNum = 1024;
+    int threadNum = 512;
+    if(algo < FORWARD || algo > G_MAT)
         method = scheduler(blockSize, (int)edge.size());
     else method = algo;
 
-    timerInit(1)
     if(method == FORWARD){
-        timerStart(0)
+        printf("use forward\n");
         long long triNum = forward(CPU, blockSize, edge);
-        timerEnd("forward", 0)
         return triNum;
     }
     else if(method == G_FORWARD){
-        int blockNum = 2048;
-        int threadNum = 512;
-        timerStart(0)
+        printf("use g_forward\n");
         long long triNum = forward(GPU, blockSize, edge, threadNum, blockNum);
-        timerEnd("g_forward", 0)
         return triNum;
     }
     else if(method == MAT){
+        printf("use mat\n");
         long long triNum = mat(CPU, blockSize, edge);
         return triNum;
     }
     else if(method == G_MAT){
-        int blockNum = 2048;
-        int threadNum = 512;
+        printf("use g_mat\n");
         long long triNum = mat(GPU, blockSize, edge, threadNum, blockNum);
         return triNum;
     }
@@ -38,5 +35,5 @@ long long solveBlock(int blockSize, vector< Edge > &edge, int algo){
 }
 
 int scheduler(int nodeNum, int edgeNum){
-    return G_FORWARD;
+    return FORWARD;
 }
