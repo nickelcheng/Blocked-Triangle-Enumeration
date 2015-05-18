@@ -11,7 +11,8 @@ long long gpuCountTriangleMat(UI *mat, int entryNum, int nodeNum, int threadNum,
     cudaMalloc((void**)&d_mat, sizeof(UI)*entryNum*nodeNum);
     cudaMemcpy(d_mat, mat, sizeof(UI)*entryNum*nodeNum, cudaMemcpyHostToDevice);
 
-    gpuCountMat<<< blockNum, threadNum >>>(d_mat, entryNum, nodeNum, d_triNum, threadNum, blockNum);
+    int smSize = nodeNum*sizeof(UI);
+    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_mat, entryNum, nodeNum, d_triNum, threadNum, blockNum);
     cudaDeviceSynchronize();
 
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
@@ -29,11 +30,15 @@ __global__ void gpuCountMat(UI *mat, int entryNum, int nodeNum, long long *triNu
     __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
 
-    if(threadIdx.x==0)
-        triNum[blockIdx.x] = 0;
-    __syncthreads();
+    triNum[blockIdx.x] = 0;
 
     for(int e = blockIdx.x; e < entryNum; e += gridDim.x){
+
+        // move tile area to shared memory
+        for(int i = threadIdx.x; i < nodeNum; i++){
+            tile[i] = mat[i*entryNum+e];
+        }
+        __syncthreads();
 
         // count triangle number
         threadTriNum[threadIdx.x] = 0;
@@ -44,7 +49,8 @@ __global__ void gpuCountMat(UI *mat, int entryNum, int nodeNum, long long *triNu
                 UI content = mat[i*entryNum+j];
                 for(int k = j*BIT_PER_ENTRY; content > 0; k++, content/=2){
                     if(content % 2 == 1){ // edge(i, k) exists
-                        threadTriNum[threadIdx.x] += andList(mat, i, k, e, entryNum);
+//                        threadTriNum[threadIdx.x] += andList(mat, i, k, e, entryNum);
+                        threadTriNum[threadIdx.x] += andList(tile, i, k, 0, 1);
                     }
                 }
             }

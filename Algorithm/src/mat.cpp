@@ -15,7 +15,7 @@ long long mat(int device, int nodeNum, vector< Edge > &edge, int threadNum, int 
     createMask(BIT_PER_ENTRY, mask);
     initMatrix(edge, mat, nodeNum, entryNum, mask);
 
-    if(device == CPU)
+    if(device == CPU || nodeNum > MAX_NODE_NUM_LIMIT)
         triNum = cpuCountMat(mat, entryNum, nodeNum);
 
     else

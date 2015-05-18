@@ -9,6 +9,9 @@ typedef unsigned int UI;
 
 #define setEdge(u,v) mat[u*entryNum+(v/BIT_PER_ENTRY)]|=mask[v%BIT_PER_ENTRY]
 
+extern __shared__ UI tile[];
+const int MAX_NODE_NUM_LIMIT = 10*1024;
+
 long long mat(int device, int nodeNum, vector< Edge > &edge, int threadNum=256, int blockNum=1024);
 long long cpuCountMat(UI *mat, int entryNum, int nodeNum);
 void createMask(int maskNum, UI *mask);
