@@ -69,9 +69,9 @@ __global__ void gpuCountMat(UI *mat, int entryNum, int nodeNum, long long *triNu
     }
 }
 
-__host__ __device__ long long andList(UI *mat, int l1, int l2, int entry, int entryNum){
+__host__ __device__ long long andList(UI *mat, int l1, int l2, int entry, int width){
     long long triNum = 0;
-    UI result = mat[l1*entryNum+entry] & mat[l2*entryNum+entry];
+    UI result = mat[l1*width+entry] & mat[l2*width+entry];
     triNum = countOneBits(result);
     return triNum;
 }

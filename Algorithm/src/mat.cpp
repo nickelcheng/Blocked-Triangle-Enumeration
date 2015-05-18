@@ -9,11 +9,9 @@
 long long mat(int device, int nodeNum, vector< Edge > &edge, int threadNum, int blockNum){
     int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
     UI *mat = new UI[entryNum*nodeNum];
-    UI mask[BIT_PER_ENTRY];
     long long triNum = 0;
 
-    createMask(BIT_PER_ENTRY, mask);
-    initMatrix(edge, mat, nodeNum, entryNum, mask);
+    initMatrix(edge, mat, nodeNum, entryNum);
 
     if(device == CPU || nodeNum > MAX_NODE_NUM_LIMIT)
         triNum = cpuCountMat(mat, entryNum, nodeNum);
@@ -43,13 +41,26 @@ long long cpuCountMat(UI *mat, int entryNum, int nodeNum){
             }
             for(int k = cst; content > 0; k++, content/=2){
                 if(content % 2 == 1){ // edge(i, k) exists
-                    for(int e = 0; e < entryNum; e++)
+                    for(int e = 0; e < entryNum; e++){
                         triNum += andList(mat, i, k, e, entryNum);
+                    }
                 }
             }
         }
     }
     return triNum/3;
+}
+
+void initMatrix(vector< Edge > &edge, UI *mat, int nodeNum, int entryNum){
+    UI mask[BIT_PER_ENTRY];
+    createMask(BIT_PER_ENTRY, mask);
+
+    memset(mat, 0, sizeof(UI)*entryNum*nodeNum);
+    vector< Edge >::iterator e = edge.begin();
+    for(; e != edge.end(); ++e){
+        setEdge(mat, e->u, e->v, entryNum, mask);
+        setEdge(mat, e->v, e->u, entryNum, mask);
+    }
 }
 
 void createMask(int maskNum, UI *mask){
@@ -58,12 +69,8 @@ void createMask(int maskNum, UI *mask){
     }
 }
 
-void initMatrix(vector< Edge > &edge, UI *mat, int nodeNum, int entryNum, UI *mask){
-    memset(mat, 0, sizeof(UI)*entryNum*nodeNum);
-    vector< Edge >::iterator e = edge.begin();
-    for(; e != edge.end(); ++e){
-        setEdge(e->u, e->v);
-        setEdge(e->v, e->u);
-    }
+void setEdge(UI *mat, int u, int v, int width, UI *mask){
+    int row = u, col = v/BIT_PER_ENTRY;
+    int bit = v % BIT_PER_ENTRY;
+    mat[row*width+col] |= mask[bit];
 }
-
