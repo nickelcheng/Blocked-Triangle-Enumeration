@@ -5,6 +5,7 @@
 #include "solve.h"
 #include "tool.h"
 #include "timer.h"
+#include "block.h"
 
 int main(int argc, char *argv[]){
     if(argc != 4 && argc != 5){
@@ -31,7 +32,6 @@ int main(int argc, char *argv[]){
 
     forwardReorder(nodeNum, edge);
     splitBlock(blockSize, block, edge);
-    relabelBlock(blockSize, blockDim, block);
 
 /*    for(int i = 0; i < blockDim; i++){
         for(int j = i; j < blockDim; j++){
@@ -46,17 +46,30 @@ int main(int argc, char *argv[]){
 
     long long triNum = 0;
     for(int i = 0; i < blockDim; i++){
-//        printf("solve block[%d][%d]\n", i, i);
-        timerStart(1)
+        relabelBlock(block[i][i], blockSize, 0, 0);
+/*        printf("solve %d\n", i);
+        printf("relabel block %d -> (0,0)\n", i);
+        printBlock(block[i][i], i, i)*/;
         triNum += solveBlock(blockSize, block[i][i], algo);
-        timerEnd("sm", 1)
-    }
 
-/*    for(int i = 0; i < blockDim; i++){
         for(int j = i+1; j < blockDim; j++){
-            triNum += combine(i, j);
+            relabelBlock(block[i][j], blockSize, 0, 1);
+            relabelBlock(block[j][j], blockSize, 1, 1);
+/*            printf("merge %d & %d\n", i, j);
+            printBlock(block[i][j], i, j);
+            printBlock(block[j][j], j, j);*/
+            triNum += mergeBlock(block, i, j, blockSize);
+
+            for(int k = j+1; k < blockDim; k++){
+                relabelBlock(block[i][k], blockSize, 0, 2);
+                relabelBlock(block[j][k], blockSize, 1, 2);
+/*                printf("intersect %d, base (%d,%d)\n", k, i, j);
+                printBlock(block[i][k], i, k);
+                printBlock(block[j][k], j, k);*/
+                triNum += intersectBlock(block, i, j, k, blockSize);
+            }
         }
-    }*/
+    }
 
     timerEnd("total", 0)
 
