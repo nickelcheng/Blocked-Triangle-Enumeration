@@ -10,6 +10,7 @@ SampleTest
 *mat
 count
 bruteForce
+proc
 
 # exp scripts
 *exp.sh
