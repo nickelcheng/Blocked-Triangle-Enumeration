@@ -12,7 +12,7 @@ long long gpuCountTriangle(int *nodeArr, int *edgeArr, int nodeNum, int edgeNum,
     cudaMemcpy(d_edgeArr, edgeArr, sizeof(int)*edgeNum, cudaMemcpyHostToDevice);
 
     int smSize = maxDeg*sizeof(int);
-    gpuCount<<< blockNum, threadNum, smSize >>>(d_nodeArr, d_edgeArr, nodeNum, d_triNum);
+    gpuCountList<<< blockNum, threadNum, smSize >>>(d_nodeArr, d_edgeArr, nodeNum, d_triNum);
     cudaDeviceSynchronize();
 
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
@@ -27,7 +27,7 @@ long long gpuCountTriangle(int *nodeArr, int *edgeArr, int nodeNum, int edgeNum,
     return triNum;
 }
 
-__global__ void gpuCount(int *nodeArr, int *edgeArr, int nodeNum, long long *triNum){
+__global__ void gpuCountList(int *nodeArr, int *edgeArr, int nodeNum, long long *triNum){
     __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
 

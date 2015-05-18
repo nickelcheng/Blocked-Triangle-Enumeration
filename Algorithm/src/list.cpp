@@ -6,7 +6,7 @@
 
 using namespace std;
 
-long long forward(int device, int nodeNum, vector< Edge > &edge, int threadNum, int blockNum){
+long long forward(int device, int nodeNum, vector< Edge > edge, int threadNum, int blockNum){
     int edgeNum = (int)edge.size();
     int *nodeArr = new int[sizeof(int)*(nodeNum+1)];
     int *edgeArr = new int[sizeof(int)*edgeNum];
@@ -18,7 +18,7 @@ long long forward(int device, int nodeNum, vector< Edge > &edge, int threadNum, 
     maxDeg = getMaxDeg(nodeArr, nodeNum);
 
     if(device == CPU || maxDeg > MAX_DEG_LIMIT)
-        triNum = cpuCount(nodeArr, edgeArr, nodeNum);
+        triNum = cpuCountList(nodeArr, edgeArr, nodeNum);
 
     else
         triNum = gpuCountTriangle(nodeArr, edgeArr, nodeNum, edgeNum, maxDeg, threadNum, blockNum);
@@ -29,7 +29,7 @@ long long forward(int device, int nodeNum, vector< Edge > &edge, int threadNum, 
     return triNum;
 }
 
-long long cpuCount(int *nodeArr, int *edgeArr, int nodeNum){
+long long cpuCountList(int *nodeArr, int *edgeArr, int nodeNum){
     long long triNum = 0;
     for(int u = 0; u < nodeNum; u++){
         int uDeg = getDeg(nodeArr, u);

@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
         relabelBlock(block[i][i], blockSize, 0, 0);
 /*        printf("solve %d\n", i);
         printf("relabel block %d -> (0,0)\n", i);
-        printBlock(block[i][i], i, i)*/;
+        printBlock(block[i][i], i, i);*/
         triNum += solveBlock(blockSize, block[i][i], algo);
 
         for(int j = i+1; j < blockDim; j++){
