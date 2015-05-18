@@ -3,10 +3,8 @@
 #include "mat.h"
 #include<cstdio>
 
-long long solveBlock(int blockSize, vector< Edge > &edge, int algo){
+long long solveBlock(int blockSize, vector< Edge > &edge, int algo, int blockNum, int threadNum){
     int method;
-    int blockNum = 1024;
-    int threadNum = 512;
     if(algo < FORWARD || algo > G_MAT)
         method = scheduler(blockSize, (int)edge.size());
     else method = algo;
