@@ -33,13 +33,11 @@ long long cpuCount(int *nodeArr, int *edgeArr, int nodeNum){
     long long triNum = 0;
     for(int u = 0; u < nodeNum; u++){
         int uDeg = getDeg(nodeArr, u);
-        long long tmp = 0;
         for(int i = nodeArr[u]; i < nodeArr[u+1]; i++){
             int v = edgeArr[i];
             int vDeg = getDeg(nodeArr, v);
-            tmp += intersectList(uDeg, vDeg, &edgeArr[nodeArr[u]], &edgeArr[nodeArr[v]]);
+            triNum += intersectList(uDeg, vDeg, &edgeArr[nodeArr[u]], &edgeArr[nodeArr[v]]);
         }
-        triNum += tmp;
     }
     return triNum;
 }
