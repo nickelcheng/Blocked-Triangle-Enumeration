@@ -1,6 +1,7 @@
 #include "reorder.h"
 #include "struct.h"
 #include<cstring>
+#include<cstdio>
 
 void forwardReorder(int nodeNum, vector< Edge > &edge){
     vector< vector< int > > degList(nodeNum);
@@ -25,8 +26,10 @@ void forwardReorder(int nodeNum, vector< Edge > &edge){
     }
 
     for(e = edge.begin(); e != edge.end(); ++e){
-        e->u = node[e->u].newOrder;
-        e->v = node[e->v].newOrder;
+        int newU = node[e->u].newOrder;
+        int newV = node[e->v].newOrder;
+        if(newU < newV) e->u=newU, e->v=newV;
+        else e->u=newV, e->v=newU;
     }
 }
 
