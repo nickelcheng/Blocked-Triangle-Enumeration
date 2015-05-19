@@ -3,6 +3,9 @@
 
 #include<vector>
 
+#define H2D cudaMemcpyHostToDevice
+#define D2H cudaMemcpyDeviceToHost
+
 using namespace std;
 
 typedef struct Node{
