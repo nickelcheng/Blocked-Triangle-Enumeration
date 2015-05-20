@@ -1,72 +1,94 @@
 #include "mat.h"
 #include "binaryTree.h"
 
-#include<cstdio>
-
-long long gpuCountTriangleMat(UI *mat, int entryNum, int nodeNum, int threadNum, int blockNum){
+long long gpuCountTriangleMat(const ListArray &edge, const BitMat &target, int threadNum, int blockNum){
     long long *d_triNum, triNum;
-    UI *d_mat;
+    ListArray *d_edge;
+    BitMat *d_target;
+    int *d_edgeArr, *d_nodeArr, *d_mat;
 
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
-    cudaMalloc((void**)&d_mat, sizeof(UI)*entryNum*nodeNum);
-    cudaMemcpy(d_mat, mat, sizeof(UI)*entryNum*nodeNum, cudaMemcpyHostToDevice);
 
-    int smSize = nodeNum*sizeof(UI);
-    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_mat, entryNum, nodeNum, d_triNum, threadNum, blockNum);
+    // copy edge to device
+    cudaMalloc((void**)&d_edge, sizeof(ListArray));
+    cudaMemcpy(d_edge, &edge, sizeof(ListArray), H2D);
+    // edge.nodeArr
+    cudaMalloc((void**)&d_nodeArr, sizeof(int)*(edge.nodeNum+1));
+    cudaMemcpy(d_nodeArr, edge.nodeArr, sizeof(int)*(edge.nodeNum+1), H2D);
+    cudaMemcpy(&(d_edge->nodeArr), &d_nodeArr, sizeof(int*), H2D);
+    // edge.edgeArr
+    cudaMalloc((void**)&d_edgeArr, sizeof(int)*edge.edgeNum);
+    cudaMemcpy(d_edgeArr, edge.edgeArr, sizeof(int)*edge.edgeNum, H2D);
+    cudaMemcpy(&(d_edge->edgeArr), &d_edgeArr, sizeof(int*), H2D);
+
+    // copy target to device
+    cudaMalloc((void**)&d_target, sizeof(BitMat));
+    cudaMemcpy(d_target, &target, sizeof(BitMat), H2D);
+    // target.mat
+    cudaMalloc((void**)&d_mat, sizeof(UI)*target.entryNum*target.nodeNum);
+    cudaMemcpy(d_mat, target.mat, sizeof(UI)*target.entryNum*target.nodeNum, H2D);
+    cudaMemcpy(&(d_target->mat), &d_mat, sizeof(UI*), H2D);
+
+    int smSize = target.nodeNum*sizeof(UI);
+    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
     cudaDeviceSynchronize();
 
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaDeviceSynchronize();
-    cudaMemcpy(&triNum, d_triNum, sizeof(long long), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&triNum, d_triNum, sizeof(long long), D2H);
     cudaDeviceSynchronize();
 
     cudaFree(d_triNum);
+    cudaFree(d_edge);
+    cudaFree(d_target);
+    cudaFree(d_edgeArr);
+    cudaFree(d_nodeArr);
     cudaFree(d_mat);
 
-    return triNum/6;
+    return triNum;
 }
 
-__global__ void gpuCountMat(UI *mat, int entryNum, int nodeNum, long long *triNum, int threadNum, int blockNum){
-/*    __shared__ long long threadTriNum[1024];
+__global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long long *triNum){
+    __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
 
     triNum[blockIdx.x] = 0;
 
-    for(int e = blockIdx.x; e < entryNum; e += gridDim.x){
+    for(int e = blockIdx.x; e < target->entryNum; e += gridDim.x){
 
         // move tile area to shared memory
-        for(int i = threadIdx.x; i < nodeNum; i++){
-            tile[i] = mat[i*entryNum+e];
+        int offset = e * target->nodeNum;
+        for(int i = threadIdx.x; i < target->nodeNum; i++){
+            tile[i] = target->mat[offset+i];
         }
         __syncthreads();
 
         // count triangle number
         threadTriNum[threadIdx.x] = 0;
-        for(int i = threadIdx.x; i < nodeNum; i += blockDim.x){
-            // iterator through each entry of the row
-            for(int j = 0; j < entryNum; j++){
-                // iterator through each bit
-                UI content = mat[i*entryNum+j];
-                for(int k = j*BIT_PER_ENTRY; content > 0; k++, content/=2){
-                    if(content % 2 == 1){ // edge(i, k) exists
-//                        threadTriNum[threadIdx.x] += andList(mat, i, k, e, entryNum);
-                        threadTriNum[threadIdx.x] += andList(tile, i, k, 0, 1);
-                    }
-                }
+        // iterator through each edge (u, v)
+        int range = edge->nodeNum;
+        for(int u = 0; u < range; u++){
+            const int *uNei = edge->neiStart(u);
+            int uDeg = edge->getDeg(u);
+            for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
+                int v = uNei[i];
+/*                UI e1 = target->getContent(u, e);
+                UI e2 = target->getContent(v, e);
+                threadTriNum[threadIdx.x] += countOneBits(e1 & e2);*/
+                threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v]);
             }
         }
         __syncthreads();
 
         binaryTreeSum(threadTriNum, blockDim.x, bound);
-        if(threadIdx.x==0){
+        if(threadIdx.x==0)
             triNum[blockIdx.x] += threadTriNum[0];
-        }
 
 //        if(threadIdx.x==0)
 //            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);
 
         __syncthreads();
-    }*/
+    }
 }
 
 __host__ __device__ long long countOneBits(UI tar){

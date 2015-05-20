@@ -67,10 +67,10 @@ long long scheduler(
 //        printf("use mat\n");
         triNum = mat(CPU, edge, edgeRange, target, nodeNum, entryNum);
     }
-/*    else if(proc == G_MAT){
+    else if(proc == G_MAT){
 //        printf("use g_mat\n");
-        triNum = mat(GPU, blockSize, edge, threadNum, blockNum);
-    }*/
+        triNum = mat(GPU, edge, edgeRange, target, nodeNum, entryNum, threadNum, blockNum);
+    }
     return triNum;
 }
 
