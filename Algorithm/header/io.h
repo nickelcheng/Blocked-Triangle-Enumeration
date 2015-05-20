@@ -7,7 +7,7 @@
 using namespace std;
 
 void inputEdge(const char *inFile, vector< Edge > &edge);
-void printBlock(vector< Edge > &edge, int x, int y);
+void printEdge(const vector< Edge > &edge);
 
 #endif
 

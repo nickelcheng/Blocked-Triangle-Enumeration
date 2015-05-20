@@ -1,5 +1,4 @@
 #include "listArray.h"
-#include<algorithm>
 #include<cstring>
 #include<cstdio>
 
@@ -8,24 +7,22 @@ ListArray::~ListArray(void){
     delete [] edgeArr;
 }
 
-void ListArray::initArray(vector< Edge > edge, int n){
+void ListArray::initArray(const vector< Edge > &edge, int n){
     nodeNum = n, edgeNum = (int)edge.size();
     nodeArr = new int[sizeof(int)*(n+1)];
     edgeArr = new int[sizeof(int)*edgeNum];
     memset(nodeArr, -1, sizeof(int)*(nodeNum+1));
 
-    std::sort(edge.begin(), edge.end());
-
-    edge.push_back(Edge(nodeNum, -1));
-    for(int i = 0; i < edgeNum; i++){
+    for(int i = 0; i < edgeNum-1; i++){
         edgeArr[i] = edge[i].v;
         if(edge[i].u != edge[i+1].u){
             nodeArr[edge[i+1].u] = i+1;
         }
     }
-    edge.pop_back();
+    edgeArr[edgeNum-1] = edge[edgeNum-1].v;
 
     nodeArr[edge[0].u] = 0;
+    nodeArr[nodeNum] = edgeNum;
     for(int i = nodeNum; i > 0; i--){
         if(nodeArr[i-1] == -1) nodeArr[i-1] = nodeArr[i];
     }

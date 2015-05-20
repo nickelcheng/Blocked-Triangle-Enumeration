@@ -10,9 +10,8 @@ void inputEdge(const char *inFile, vector< Edge > &edge){
     fclose(fp);
 }
 
-void printBlock(vector< Edge > &edge, int x, int y){
-    vector< Edge >::iterator e = edge.begin();
-    printf("block[%d][%d]:", x, y);
+void printEdge(const vector< Edge > &edge){
+    vector< Edge >::const_iterator e = edge.begin();
     for(; e != edge.end(); ++e){
         printf(" (%d,%d)", e->u, e->v);
     }

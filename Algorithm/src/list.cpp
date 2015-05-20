@@ -5,8 +5,6 @@
 #include <cstring>
 #include <algorithm>
 
-#include<cstdio>
-
 using namespace std;
 
 long long list(
@@ -17,6 +15,7 @@ long long list(
 ){
     ListArray edgeList, tarList;
     long long triNum = 0;
+
 
     edgeList.initArray(edge, edgeRange);
     tarList.initArray(target, nodeNum);

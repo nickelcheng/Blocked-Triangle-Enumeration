@@ -30,15 +30,12 @@ int main(int argc, char *argv[]){
 
     forwardReorder(nodeNum, edge);
     splitBlock(blockSize, block, edge);
+    sortBlock(block, blockDim);
 
 /*    for(int i = 0; i < blockDim; i++){
         for(int j = i; j < blockDim; j++){
             printf("block[%d][%d]:", i, j);
-            vector< Edge >::iterator it = block[i][j].begin();
-            for(; it != block[i][j].end(); ++it){
-                printf(" (%d,%d)", it->u, it->v);
-            }
-            printf("\n");
+            printEdge(block[i][j]);
         }
     }*/
 

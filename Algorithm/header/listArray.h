@@ -11,7 +11,7 @@
 class ListArray{
     public:
         ~ListArray(); // destructor
-        void initArray(vector< Edge > edge, int n);
+        void initArray(const vector< Edge > &edge, int n);
         int getMaxDegree() const;
         DECORATE int getDeg(int v) const;
         DECORATE int getNodeNum() const;

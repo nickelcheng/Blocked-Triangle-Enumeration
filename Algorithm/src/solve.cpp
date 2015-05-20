@@ -3,12 +3,14 @@
 #include "list.h"
 #include "mat.h"
 #include<cstdio>
+#include<algorithm>
 
 long long solveBlock(
     const vector< Edge > &edge, int blockSize,
     int assignProc, int blockNum, int threadNum
 ){
     if(edge.empty()) return 0;
+
     int proc = scheduler(blockSize, blockSize, assignProc);
     return depatch(proc, edge, blockSize, edge, blockSize, blockNum, threadNum);
 }
@@ -17,6 +19,8 @@ long long mergeBlock(
     const vector< Matrix > &block, int x, int y, int blockSize,
     int assignProc, int blockNum, int threadNum
 ){
+    if(block[x][y].empty()) return 0;
+
     vector< Edge > edge;
     edge.insert(edge.end(), block[x][x].begin(), block[x][x].end());
     edge.insert(edge.end(), block[y][y].begin(), block[y][y].end());
@@ -27,6 +31,7 @@ long long mergeBlock(
     for(int i = 0; e != block[x][y].end(); ++e, i++){
         edge.push_back(Edge(e->v, e->u));
     }
+    std::sort(edge.begin(), edge.end());
     
     int proc = scheduler(2*blockSize, (int)edge.size(), assignProc);
     return depatch(proc, block[x][y], blockSize, edge, 2*blockSize, blockNum, threadNum);
@@ -36,6 +41,8 @@ long long intersectBlock(
     const vector< Matrix > &block, int x, int y, int z, int blockSize,
     int assignProc, int blockNum, int threadNum
 ){
+    if(block[x][y].empty()) return 0;
+
     vector< Edge > edge;
     edge.insert(edge.end(), block[x][z].begin(), block[x][z].end());
     edge.insert(edge.end(), block[y][z].begin(), block[y][z].end());

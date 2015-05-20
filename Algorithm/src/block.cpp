@@ -1,6 +1,7 @@
 #include "block.h"
 #include "io.h"
 #include "list.h"
+#include<algorithm>
 
 void initBlock(int blockDim, vector< Matrix > &block){
     for(int i = 0; i < blockDim; i++)
@@ -13,8 +14,15 @@ void splitBlock(int blockSize, vector< Matrix > &block, vector< Edge > &edge){
         int u = it->u, v = it->v;
         int ublock = u / blockSize;
         int vblock = v / blockSize;
-        if(u < v) block[ublock][vblock].push_back(Edge(u, v));
-        else block[vblock][ublock].push_back(Edge(v, u));
+        block[ublock][vblock].push_back(Edge(u, v));
+    }
+}
+
+void sortBlock(vector< Matrix > &block, int blockDim){
+    for(int i = 0; i < blockDim; i++){
+        for(int j = i; j < blockDim; j++){
+            std::sort(block[i][j].begin(), block[i][j].end());
+        }
     }
 }
 
