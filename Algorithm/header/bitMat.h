@@ -9,28 +9,14 @@ typedef unsigned int UI;
 
 class BitMat{
     public:
-        BitMat(int node);
+        BitMat(int node, int entry);
         ~BitMat();
         void initMat(const vector< Edge > &edge);
-        virtual UI getContent(int x, int y) const = 0;
-        virtual void setEdge(int u, int v, const UI *mask) = 0;
+        UI getContent(int x, int y) const;
+        void setEdge(int u, int v, const UI *mask);
 //    protected:
         UI *mat;
-        int nodeNum, entryNum;
-};
-
-class EdgeMat: public BitMat{
-    public:
-        EdgeMat(int node);
-        void setEdge(int u, int v, const UI *mask);
-        UI getContent(int node, int entry) const;
-};
-
-class TarMat: public BitMat{
-    public:
-        TarMat(int node);
-        void setEdge(int u, int v, const UI *mask);
-        UI getContent(int node, int entry) const;
+        int nodeNum, entryNum; // width and height
 };
 
 #endif
