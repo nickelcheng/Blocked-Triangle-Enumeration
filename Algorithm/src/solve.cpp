@@ -60,11 +60,11 @@ long long depatch(
 //        printf("use g_list\n");
         triNum = list(GPU, edge, edgeRange, target, nodeNum, threadNum, blockNum);
     }
-/*    else if(proc == MAT){
+    else if(proc == MAT){
 //        printf("use mat\n");
-        triNum = mat(CPU, blockSize, edge);
+        triNum = mat(CPU, edge, edgeRange, target, nodeNum);
     }
-    else if(proc == G_MAT){
+/*    else if(proc == G_MAT){
 //        printf("use g_mat\n");
         triNum = mat(GPU, blockSize, edge, threadNum, blockNum);
     }*/

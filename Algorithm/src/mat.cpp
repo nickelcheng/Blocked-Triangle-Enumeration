@@ -6,71 +6,59 @@
 
 #include<cstdio>
 
-long long mat(int device, int nodeNum, vector< Edge > &edge, int threadNum, int blockNum){
-    int entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
-    UI *mat = new UI[entryNum*nodeNum];
+long long mat(
+    int device,
+    const vector< Edge > &edge, int edgeRange,
+    const vector< Edge > &target, int nodeNum,
+    int threadNum, int blockNum
+){
+    EdgeMat edgeMat(edgeRange);
+    TarMat tarMat(nodeNum);
     long long triNum = 0;
 
-    initMatrix(edge, mat, nodeNum, entryNum);
+    edgeMat.initMat(edge);
+    tarMat.initMat(target);
+    
+    if(device == CPU || tarMat.nodeNum > MAX_NODE_NUM_LIMIT)
+        triNum = cpuCountMat(edgeMat, tarMat);
 
-    if(device == CPU || nodeNum > MAX_NODE_NUM_LIMIT)
-        triNum = cpuCountMat(mat, entryNum, nodeNum);
+/*    else
+        triNum = gpuCountTriangleMat(edgeMat, tarMat, threadNum, blockNum);*/
 
-    else
-        triNum = gpuCountTriangleMat(mat, entryNum, nodeNum, threadNum, blockNum);
-
-    delete [] mat;
 
     return triNum;
 }
 
-long long cpuCountMat(UI *mat, int entryNum, int nodeNum){
+long long cpuCountMat(const EdgeMat &edge, const TarMat &target){
     long long triNum = 0;
-    for(int i = 0; i < nodeNum; i++){
-        int offset = i / BIT_PER_ENTRY;
+    // iterator through each row in edge
+    for(int i = 0; i < edge.nodeNum; i++){
+        int entryOffset = i / BIT_PER_ENTRY;
         int bit = i % BIT_PER_ENTRY;
 
         // iterator through each entry of the row
-        for(int j = offset; j < entryNum; j++){
+        for(int j = entryOffset; j < edge.entryNum; j++){
             // iterator through each bit
-            UI content = mat[i*entryNum+j];
-            int cst = j*BIT_PER_ENTRY;
-            if(j == offset){
+            UI content = edge.getContent(i, j);
+            int bitOffset = j*BIT_PER_ENTRY;
+            if(j == entryOffset){ // first entry of this round
+                // elimate some bits
                 for(int s = bit; s >= 0; s--, content/=2);
-                cst = i+1;
+                bitOffset = i+1; // start from next node of i
             }
-            for(int k = cst; content > 0; k++, content/=2){
+            for(int k = bitOffset; content > 0; k++, content/=2){
                 if(content % 2 == 1){ // edge(i, k) exists
-                    for(int e = 0; e < entryNum; e++){
-                        triNum += andList(mat, i, k, e, entryNum);
+                    for(int e = 0; e < target.entryNum; e++){
+                        UI e1 = target.getContent(i, e);
+                        UI e2 = target.getContent(k, e);
+                        long long tmp;
+                        tmp = countOneBits(e1 & e2);
+                        triNum += tmp;
                     }
                 }
             }
         }
     }
-    return triNum/3;
+    return triNum;
 }
 
-void initMatrix(vector< Edge > &edge, UI *mat, int nodeNum, int entryNum){
-    UI mask[BIT_PER_ENTRY];
-    createMask(BIT_PER_ENTRY, mask);
-
-    memset(mat, 0, sizeof(UI)*entryNum*nodeNum);
-    vector< Edge >::iterator e = edge.begin();
-    for(; e != edge.end(); ++e){
-        setEdge(mat, e->u, e->v, entryNum, mask);
-        setEdge(mat, e->v, e->u, entryNum, mask);
-    }
-}
-
-void createMask(int maskNum, UI *mask){
-    for(int i = 0; i < maskNum; i++){
-        mask[i] = (UI)1 << i;
-    }
-}
-
-void setEdge(UI *mat, int u, int v, int width, UI *mask){
-    int row = u, col = v/BIT_PER_ENTRY;
-    int bit = v % BIT_PER_ENTRY;
-    mat[row*width+col] |= mask[bit];
-}

@@ -27,7 +27,7 @@ long long gpuCountTriangleMat(UI *mat, int entryNum, int nodeNum, int threadNum,
 }
 
 __global__ void gpuCountMat(UI *mat, int entryNum, int nodeNum, long long *triNum, int threadNum, int blockNum){
-    __shared__ long long threadTriNum[1024];
+/*    __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
 
     triNum[blockIdx.x] = 0;
@@ -62,18 +62,11 @@ __global__ void gpuCountMat(UI *mat, int entryNum, int nodeNum, long long *triNu
             triNum[blockIdx.x] += threadTriNum[0];
         }
 
-/*        if(threadIdx.x==0)
-            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);*/
+//        if(threadIdx.x==0)
+//            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);
 
         __syncthreads();
-    }
-}
-
-__host__ __device__ long long andList(UI *mat, int l1, int l2, int entry, int width){
-    long long triNum = 0;
-    UI result = mat[l1*width+entry] & mat[l2*width+entry];
-    triNum = countOneBits(result);
-    return triNum;
+    }*/
 }
 
 __host__ __device__ long long countOneBits(UI tar){
