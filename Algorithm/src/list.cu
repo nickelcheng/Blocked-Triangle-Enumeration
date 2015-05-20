@@ -1,6 +1,5 @@
 #include "list.h"
 #include "binaryTree.h"
-#include<cstdio>
 
 long long gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg, int threadNum, int blockNum){
     long long *d_triNum, triNum;
@@ -68,7 +67,7 @@ __global__ void gpuCountList(const ListArray *edge, const ListArray *target, lon
         
         // move node u's adj list (in target) to shared memory
         int uDeg = edge->getDeg(u);
-        for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
+        for(int i = threadIdx.x; i < uLen; i += blockDim.x){
             uAdj[i] = uList[i];
         }
         __syncthreads();
@@ -102,7 +101,6 @@ __host__ __device__ long long intersectList(int sz1, int sz2, const int *l1, con
         if(l1[i] > l2[j]) i--;
         else if(l1[i] < l2[j]) j--;
         else{
-//            printf(" %d", l1[i]);
             i--, j--;
             triNum++;
         }
