@@ -9,54 +9,44 @@
 long long mat(
     int device,
     const vector< Edge > &edge, int edgeRange,
-    const vector< Edge > &target, int nodeNum,
-    int threadNum, int blockNum
+    const vector< Edge > &target, int nodeNum, int entryNum
 ){
-    EdgeMat edgeMat(edgeRange);
-    TarMat tarMat(nodeNum);
+    ListArray edgeList;
+    BitMat tarMat(nodeNum, entryNum);
     long long triNum = 0;
 
-    edgeMat.initMat(edge);
+    edgeList.initArray(edge, edgeRange);
     tarMat.initMat(target);
     
     if(device == CPU || tarMat.nodeNum > MAX_NODE_NUM_LIMIT)
-        triNum = cpuCountMat(edgeMat, tarMat);
+        triNum = cpuCountMat(edgeList, tarMat);
 
 /*    else
         triNum = gpuCountTriangleMat(edgeMat, tarMat, threadNum, blockNum);*/
 
-
     return triNum;
 }
 
-long long cpuCountMat(const EdgeMat &edge, const TarMat &target){
+long long cpuCountMat(const ListArray &edge, const BitMat &target){
     long long triNum = 0;
-    // iterator through each row in edge
-    for(int i = 0; i < edge.nodeNum; i++){
-        int entryOffset = i / BIT_PER_ENTRY;
-        int bit = i % BIT_PER_ENTRY;
+    // iterator through each edge
+    int range = edge.getNodeNum();
+    for(int u = 0; u < range; u++){
 
-        // iterator through each entry of the row
-        for(int j = entryOffset; j < edge.entryNum; j++){
-            // iterator through each bit
-            UI content = edge.getContent(i, j);
-            int bitOffset = j*BIT_PER_ENTRY;
-            if(j == entryOffset){ // first entry of this round
-                // elimate some bits
-                for(int s = bit; s >= 0; s--, content/=2);
-                bitOffset = i+1; // start from next node of i
+        const int *uNei = edge.neiStart(u);
+        int uDeg = edge.getDeg(u);
+        for(int i = 0; i < uDeg; i++){
+            int v = uNei[i];
+//            printf("intersect %d & %d\n", u, v);
+            long long tmp = 0;
+            for(int e = 0; e < target.entryNum; e++){
+                UI e1 = target.getContent(u, e);
+                UI e2 = target.getContent(v, e);
+                tmp += countOneBits(e1 & e2);
+//                if(u==5&&v==39) printf("%u %u\n", e1, e2);
             }
-            for(int k = bitOffset; content > 0; k++, content/=2){
-                if(content % 2 == 1){ // edge(i, k) exists
-                    for(int e = 0; e < target.entryNum; e++){
-                        UI e1 = target.getContent(i, e);
-                        UI e2 = target.getContent(k, e);
-                        long long tmp;
-                        tmp = countOneBits(e1 & e2);
-                        triNum += tmp;
-                    }
-                }
-            }
+            triNum += tmp;
+//            printf("%d & %d => %lld\n", u, v, tmp);
         }
     }
     return triNum;

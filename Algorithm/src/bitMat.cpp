@@ -3,10 +3,10 @@
 #include <cstring>
 #include <cstdio>
 
-BitMat::BitMat(int node){
+BitMat::BitMat(int node, int entry){
     nodeNum = node;
-    entryNum = averageCeil(nodeNum, BIT_PER_ENTRY);
-    mat = new UI[sizeof(UI)*node*entryNum];
+    entryNum = entry;
+    mat = new UI[sizeof(UI)*entryNum*nodeNum];
     memset(mat, 0, sizeof(UI)*entryNum*nodeNum);
 }
 
@@ -25,29 +25,14 @@ void BitMat::initMat(const vector< Edge > &edge){
     }
 }
 
-EdgeMat::EdgeMat(int node) : BitMat(node){
-}
-
-UI EdgeMat::getContent(int node, int entry) const{
-    return mat[node*entryNum+entry];
-}
-
-void EdgeMat::setEdge(int u, int v, const UI *mask){
-    int row = u, col = v / BIT_PER_ENTRY;
-    int bit = v % BIT_PER_ENTRY;
-    mat[row*entryNum+col] |= mask[bit];
-}
-
-TarMat::TarMat(int node) : BitMat(node){
-}
-
-UI TarMat::getContent(int node, int entry) const{
+UI BitMat::getContent(int node, int entry) const{
     return mat[entry*nodeNum+node];
 }
 
-void TarMat::setEdge(int u, int v, const UI *mask){
+void BitMat::setEdge(int u, int v, const UI *mask){
     int row = v / 32, col = u;
     int bit = v % BIT_PER_ENTRY;
     mat[row*nodeNum+col] |= mask[bit];
 }
+
 
