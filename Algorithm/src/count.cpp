@@ -7,6 +7,8 @@
 #include "timer.h"
 #include "block.h"
 
+int assignProc;
+
 int main(int argc, char *argv[]){
     if(argc != 4 && argc != 5){
         fprintf(stderr, "usage: count <input_path> <node_num> <block_size> (<assign_proc>)\n");
@@ -16,8 +18,9 @@ int main(int argc, char *argv[]){
     int nodeNum = atoi(argv[2]);
     int blockSize = atoi(argv[3]);
     int blockDim = averageCeil(nodeNum, blockSize);
-    int assignProc = UNDEF;
+    extern int assignProc;
     if(argc == 5) assignProc = atoi(argv[4]);
+    else assignProc = UNDEF;
 
     vector< Edge > edge;
     vector< Matrix > block(blockDim);
@@ -45,7 +48,7 @@ int main(int argc, char *argv[]){
 /*        printf("solve %d\n", i);
         printf("relabel block %d -> (0,0)\n", i);
         printBlock(block[i][i], i, i);*/
-        triNum += solveBlock(block[i][i], blockSize, assignProc);
+        triNum += solveBlock(block[i][i], blockSize);
 
         for(int j = i+1; j < blockDim; j++){
             relabelBlock(block[i][j], blockSize, 0, 1);
@@ -53,15 +56,15 @@ int main(int argc, char *argv[]){
 /*            printf("merge %d & %d\n", i, j);
             printBlock(block[i][j], i, j);
             printBlock(block[j][j], j, j);*/
-            triNum += mergeBlock(block, i, j, blockSize, assignProc);
+            triNum += mergeBlock(block, i, j, blockSize);
 
             for(int k = j+1; k < blockDim; k++){
-                relabelBlock(block[i][k], blockSize, 0, 2);
-                relabelBlock(block[j][k], blockSize, 1, 2);
+                relabelBlock(block[i][k], blockSize, 0, 0);
+                relabelBlock(block[j][k], blockSize, 1, 0);
 /*                printf("intersect %d, base (%d,%d)\n", k, i, j);
                 printBlock(block[i][k], i, k);
                 printBlock(block[j][k], j, k);*/
-                triNum += intersectBlock(block, i, j, k, blockSize, assignProc);
+                triNum += intersectBlock(block, i, j, k, blockSize);
             }
         }
     }

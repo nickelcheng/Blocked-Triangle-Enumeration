@@ -5,6 +5,8 @@
 #include<cstdio>
 #include <cstdlib>
 
+int assignProc, threadNum, blockNum;
+
 int main(int argc, char *argv[]){
     if(argc != 4 && argc != 6){
         fprintf(stderr, "usage: proc <assign_proc> <input_path> <node_num> <thread_per_block> <block_num>\n");
@@ -12,8 +14,8 @@ int main(int argc, char *argv[]){
     }
 
     int nodeNum = atoi(argv[3]);
-    int assignProc = atoi(argv[1]);
-    int threadNum = 256, blockNum = 1024;
+    extern int assignProc, threadNum, blockNum;
+    assignProc = atoi(argv[1]);
 
     if(assignProc < LIST || assignProc > G_MAT){
         fprintf(stderr, "algo choice\n0: forward\n1: g_forward\n2: mat\n3: g_mat\n");
@@ -33,7 +35,7 @@ int main(int argc, char *argv[]){
     
     timerInit(1)
     timerStart(0)
-    long long triNum = solveBlock(edge, nodeNum, assignProc, blockNum, threadNum);
+    long long triNum = solveBlock(edge, nodeNum);
     timerEnd("time", 0)
 
     printf("total triangle: %lld\n", triNum);

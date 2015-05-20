@@ -2,23 +2,18 @@
 #include "reorder.h"
 #include "list.h"
 #include "mat.h"
+#include "tool.h"
 #include<cstdio>
 #include<algorithm>
 
-long long solveBlock(
-    const vector< Edge > &edge, int blockSize,
-    int assignProc, int blockNum, int threadNum
-){
+long long solveBlock(const vector< Edge > &edge, int blockSize){
     if(edge.empty()) return 0;
 
-    int proc = scheduler(blockSize, blockSize, assignProc);
-    return depatch(proc, edge, blockSize, edge, blockSize, blockNum, threadNum);
+    int entry = averageCeil(blockSize, BIT_PER_ENTRY);
+    return scheduler(edge, blockSize, edge, blockSize, entry);
 }
 
-long long mergeBlock(
-    const vector< Matrix > &block, int x, int y, int blockSize,
-    int assignProc, int blockNum, int threadNum
-){
+long long mergeBlock(const vector< Matrix > &block, int x, int y, int blockSize){
     if(block[x][y].empty()) return 0;
 
     vector< Edge > edge;
@@ -33,14 +28,11 @@ long long mergeBlock(
     }
     std::sort(edge.begin(), edge.end());
     
-    int proc = scheduler(2*blockSize, (int)edge.size(), assignProc);
-    return depatch(proc, block[x][y], blockSize, edge, 2*blockSize, blockNum, threadNum);
+    int entry = averageCeil(2*blockSize, BIT_PER_ENTRY);
+    return scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
 }
 
-long long intersectBlock(
-    const vector< Matrix > &block, int x, int y, int z, int blockSize,
-    int assignProc, int blockNum, int threadNum
-){
+long long intersectBlock(const vector< Matrix > &block, int x, int y, int z, int blockSize){
     if(block[x][y].empty()) return 0;
 
     vector< Edge > edge;
@@ -48,16 +40,20 @@ long long intersectBlock(
     edge.insert(edge.end(), block[y][z].begin(), block[y][z].end());
     if(edge.empty()) return 0;
 
-    int proc = scheduler(2*blockNum, (int)edge.size(), assignProc);
-    return depatch(proc, block[x][y], blockSize, edge, 2*blockSize, blockNum, threadNum);
+    int entry = averageCeil(blockSize, BIT_PER_ENTRY);
+    return scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
 }
 
-long long depatch(
-    int proc,
+long long scheduler(
     const vector< Edge > &edge, int edgeRange, 
-    const vector< Edge > &target, int nodeNum, 
-    int blockNum, int threadNum
+    const vector< Edge > &target, int nodeNum, int entryNum
 ){
+    // todo: auto deside proc, blockNum, and threadNum
+    int proc = LIST, threadNum = 256, blockNum = 1024;
+    extern int assignProc;
+    if(assignProc >= LIST && assignProc <= G_MAT)
+        proc = assignProc;
+
     long long triNum = 0;
     if(proc == LIST){
 //        printf("use list\n");
@@ -69,18 +65,12 @@ long long depatch(
     }
     else if(proc == MAT){
 //        printf("use mat\n");
-        triNum = mat(CPU, edge, edgeRange, target, nodeNum);
+        triNum = mat(CPU, edge, edgeRange, target, nodeNum, entryNum);
     }
 /*    else if(proc == G_MAT){
 //        printf("use g_mat\n");
         triNum = mat(GPU, blockSize, edge, threadNum, blockNum);
     }*/
     return triNum;
-}
-
-int scheduler(int nodeNum, int edgeNum, int assignProc){
-    if(assignProc >= LIST && assignProc <= G_MAT)
-        return assignProc;
-    return LIST;
 }
 
