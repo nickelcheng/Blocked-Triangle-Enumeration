@@ -3,6 +3,6 @@
 
 #include<cmath>
 
-#define averageCeil(total,unit) (int)ceil((double)total/unit-0.001)
+#define averageCeil(total,unit) (int)ceil((double)total/unit-1e-8)
 
 #endif
