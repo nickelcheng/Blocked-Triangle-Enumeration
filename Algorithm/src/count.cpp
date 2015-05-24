@@ -10,22 +10,22 @@
 int assignProc;
 
 int main(int argc, char *argv[]){
-    if(argc != 4 && argc != 5){
-        fprintf(stderr, "usage: count <input_path> <node_num> <block_size> (<assign_proc>)\n");
+    if(argc != 3 && argc != 4){
+        fprintf(stderr, "usage: count <input_path> <block_size> (<assign_proc>)\n");
         return 0;
     }
 
-    int nodeNum = atoi(argv[2]);
-    int blockSize = atoi(argv[3]);
-    int blockDim = averageCeil(nodeNum, blockSize);
+    int blockSize = atoi(argv[2]);
     extern int assignProc;
-    if(argc == 5) assignProc = atoi(argv[4]);
+    if(argc == 4) assignProc = atoi(argv[3]);
     else assignProc = UNDEF;
 
     vector< Edge > edge;
+
+    int nodeNum = inputEdge(argv[1], edge);
+    int blockDim = averageCeil(nodeNum, blockSize);
     vector< Matrix > block(blockDim);
 
-    inputEdge(argv[1], edge);
     initBlock(blockDim, block);
 
     timerInit(2)

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void inputEdge(const char *inFile, vector< Edge > &edge);
+int inputEdge(const char *inFile, vector< Edge > &edge);
 void printEdge(const vector< Edge > &edge);
 
 #endif

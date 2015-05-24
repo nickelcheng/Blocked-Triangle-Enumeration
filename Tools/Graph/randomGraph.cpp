@@ -13,6 +13,7 @@ int main(int argc, char *argv[]){
     double density = atof(argv[2]);
     int edgeNum = 0;
 
+    printf("%d\n", nodeNum);
     srand(time(NULL));
     for(int i = 0; i < nodeNum-1; i++){
         for(int j = i+1; j < nodeNum; j++){
