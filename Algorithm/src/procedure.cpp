@@ -4,6 +4,7 @@
 
 #include<cstdio>
 #include <cstdlib>
+#include <algorithm>
 
 int assignProc, threadNum, blockNum;
 
@@ -34,7 +35,7 @@ int main(int argc, char *argv[]){
     
     timerInit(1)
     timerStart(0)
-    sort(edge.begin(), edge.end());
+    std::sort(edge.begin(), edge.end());
     long long triNum = solveBlock(edge, nodeNum);
     timerEnd("time", 0)
 
