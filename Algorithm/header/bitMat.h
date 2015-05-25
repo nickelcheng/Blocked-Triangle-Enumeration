@@ -9,9 +9,8 @@ typedef unsigned int UI;
 
 class BitMat{
     public:
-        BitMat(int node, int entry);
         ~BitMat();
-        void initMat(const vector< Edge > &edge);
+        void initMat(const vector< Edge > &edge, int node, int entry);
         UI getContent(int x, int y) const;
         void setEdge(int u, int v, const UI *mask);
 //    protected:

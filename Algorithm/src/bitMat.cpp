@@ -3,18 +3,16 @@
 #include <cstring>
 #include <cstdio>
 
-BitMat::BitMat(int node, int entry){
-    nodeNum = node;
-    entryNum = entry;
-    mat = new UI[sizeof(UI)*entryNum*nodeNum];
-    memset(mat, 0, sizeof(UI)*entryNum*nodeNum);
-}
-
 BitMat::~BitMat(void){
     delete [] mat;
 }
 
-void BitMat::initMat(const vector< Edge > &edge){
+void BitMat::initMat(const vector< Edge > &edge, int node, int entry){
+    nodeNum = node;
+    entryNum = entry;
+    mat = new UI[sizeof(UI)*entryNum*nodeNum];
+    memset(mat, 0, sizeof(UI)*entryNum*nodeNum);
+
     UI mask[BIT_PER_ENTRY];
     for(int i = 0; i < (int)BIT_PER_ENTRY; i++)
         mask[i] = (UI)1 << i;
