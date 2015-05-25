@@ -1,12 +1,17 @@
 #include "list.h"
 #include "binaryTree.h"
 
-long long gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg, int threadNum, int blockNum){
+long long gpuCountTriangle(const ListArg &listArg){
+    const ListArray &edge = listArg.edge;
+    const ListArray &target = listArg.target;
+    int maxDeg = listArg.maxDeg;
+    int threadNum = listArg.threadNum;
+    int blockNum = listArg.blockNum;
+
     long long *d_triNum, triNum;
     ListArray *d_edge, *d_target;
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;
-
-
+    
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
     // copy edge to device
@@ -33,15 +38,10 @@ long long gpuCountTriangle(const ListArray &edge, const ListArray &target, int m
     cudaMemcpy(d_target_edgeArr, target.edgeArr, sizeof(int)*target.edgeNum, H2D);
     cudaMemcpy(&(d_target->edgeArr), &d_target_edgeArr, sizeof(int*), H2D);
 
-
     int smSize = maxDeg*sizeof(int);
     gpuCountList<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
-    cudaDeviceSynchronize();
-
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
-    cudaDeviceSynchronize();
-    cudaMemcpy(&triNum, d_triNum, sizeof(long long), cudaMemcpyDeviceToHost);
-    cudaDeviceSynchronize();
+    cudaMemcpy(&triNum, d_triNum, sizeof(long long), D2H);
 
     cudaFree(d_triNum);
     cudaFree(d_edge);

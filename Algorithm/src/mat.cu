@@ -1,7 +1,12 @@
 #include "mat.h"
 #include "binaryTree.h"
 
-long long gpuCountTriangleMat(const ListArray &edge, const BitMat &target, int threadNum, int blockNum){
+long long gpuCountTriangleMat(const MatArg &matArg){
+    const ListArray &edge = matArg.edge;
+    const BitMat &target = matArg.target;
+    int threadNum = matArg.threadNum;
+    int blockNum = matArg.blockNum;
+
     long long *d_triNum, triNum;
     ListArray *d_edge;
     BitMat *d_target;
@@ -31,12 +36,8 @@ long long gpuCountTriangleMat(const ListArray &edge, const BitMat &target, int t
 
     int smSize = target.nodeNum*sizeof(UI);
     gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
-    cudaDeviceSynchronize();
-
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
-    cudaDeviceSynchronize();
     cudaMemcpy(&triNum, d_triNum, sizeof(long long), D2H);
-    cudaDeviceSynchronize();
 
     cudaFree(d_triNum);
     cudaFree(d_edge);

@@ -5,6 +5,7 @@
 #include<cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <pthread.h>
 
 int assignProc, threadNum, blockNum;
 
@@ -36,7 +37,18 @@ int main(int argc, char *argv[]){
     timerInit(1)
     timerStart(0)
     std::sort(edge.begin(), edge.end());
-    long long triNum = solveBlock(edge, nodeNum);
+    solveBlock(edge, nodeNum);
+
+    long long triNum = 0;
+    extern vector< pthread_t* > threads;
+    vector< pthread_t* >::iterator it;
+    for(it = threads.begin(); it != threads.end(); ++it){
+        void *ans;
+        pthread_join(**it, &ans);
+        triNum += *(long long*)ans;
+        delete (long long*)ans;
+        delete *it;
+    }
     timerEnd("time", 0)
 
     printf("total triangle: %lld\n", triNum);

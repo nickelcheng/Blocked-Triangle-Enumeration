@@ -5,22 +5,27 @@
 #include "tool.h"
 #include<cstdio>
 #include<algorithm>
+#include "timer.h"
 
-long long solveBlock(const vector< Edge > &edge, int blockSize){
-    if(edge.empty()) return 0;
+pthread_t cpuThread;
+vector< pthread_t* > threads;
+bool flag;
+
+void solveBlock(const vector< Edge > &edge, int blockSize){
+    if(edge.empty()) return;
 
     int entry = averageCeil(blockSize, BIT_PER_ENTRY);
-    return scheduler(edge, blockSize, edge, blockSize, entry);
+    scheduler(edge, blockSize, edge, blockSize, entry);
 }
 
-long long mergeBlock(const vector< Matrix > &block, int x, int y, int blockSize){
-    if(block[x][y].empty()) return 0;
+void mergeBlock(const vector< Matrix > &block, int x, int y, int blockSize){
+    if(block[x][y].empty()) return;
 
     vector< Edge > edge;
     edge.insert(edge.end(), block[x][x].begin(), block[x][x].end());
     edge.insert(edge.end(), block[y][y].begin(), block[y][y].end());
     edge.insert(edge.end(), block[x][y].begin(), block[x][y].end());
-    if(edge.empty()) return 0;
+    if(edge.empty()) return;
 
     vector< Edge >::const_iterator e = block[x][y].begin();
     for(int i = 0; e != block[x][y].end(); ++e, i++){
@@ -29,22 +34,22 @@ long long mergeBlock(const vector< Matrix > &block, int x, int y, int blockSize)
     std::sort(edge.begin(), edge.end());
     
     int entry = averageCeil(2*blockSize, BIT_PER_ENTRY);
-    return scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
+    scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
 }
 
-long long intersectBlock(const vector< Matrix > &block, int x, int y, int z, int blockSize){
-    if(block[x][y].empty()) return 0;
+void intersectBlock(const vector< Matrix > &block, int x, int y, int z, int blockSize){
+    if(block[x][y].empty()) return;
 
     vector< Edge > edge;
     edge.insert(edge.end(), block[x][z].begin(), block[x][z].end());
     edge.insert(edge.end(), block[y][z].begin(), block[y][z].end());
-    if(edge.empty()) return 0;
+    if(edge.empty()) return;
 
     int entry = averageCeil(blockSize, BIT_PER_ENTRY);
-    return scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
+    scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
 }
 
-long long scheduler(
+void scheduler(
     const vector< Edge > &edge, int edgeRange, 
     const vector< Edge > &target, int nodeNum, int entryNum
 ){
@@ -53,24 +58,46 @@ long long scheduler(
     extern int assignProc;
     if(assignProc >= LIST && assignProc <= G_MAT)
         proc = assignProc;
+    else
+        getStrategy(nodeNum, (int)target.size(), proc);
 
-    long long triNum = 0;
+/*    timerInit(1)
+    timerStart(0)*/
+
     if(proc == LIST){
 //        printf("use list\n");
-        triNum = list(CPU, edge, edgeRange, target, nodeNum);
+        list(CPU, edge, edgeRange, target, nodeNum);
     }
     else if(proc == G_LIST){
 //        printf("use g_list\n");
-        triNum = list(GPU, edge, edgeRange, target, nodeNum, threadNum, blockNum);
+        list(GPU, edge, edgeRange, target, nodeNum, threadNum, blockNum);
     }
     else if(proc == MAT){
 //        printf("use mat\n");
-        triNum = mat(CPU, edge, edgeRange, target, nodeNum, entryNum);
+        mat(CPU, edge, edgeRange, target, nodeNum, entryNum);
     }
     else if(proc == G_MAT){
 //        printf("use g_mat\n");
-        triNum = mat(GPU, edge, edgeRange, target, nodeNum, entryNum, threadNum, blockNum);
+        mat(GPU, edge, edgeRange, target, nodeNum, entryNum, threadNum, blockNum);
     }
-    return triNum;
+//    timerEnd("time", 0)
+}
+
+void getStrategy(int nodeNum, int edgeNum, int &proc){
+    double density = edgeNum / (nodeNum*(nodeNum-1)) * 100;
+    int cpu, gpu;
+    if((nodeNum <= 1024 && density < 10) || (nodeNum <= 2048 && density < 7))
+        cpu = LIST;
+    else
+        cpu = MAT;
+    if((nodeNum <= 1024 && density < 30) || (nodeNum <= 10240 && density < 20) || nodeNum > 10240)
+        gpu = G_LIST;
+    else
+        gpu = G_MAT;
+
+    if(nodeNum <= 1024 || (nodeNum <= 1536 && density < 20) || (nodeNum <= 2048 && density < 15) || (nodeNum <= 3072 && density < 8) || (nodeNum <= 6144 && density < 4))
+        proc = cpu;
+    else
+        proc = gpu;
 }
 

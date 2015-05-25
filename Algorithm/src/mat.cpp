@@ -1,34 +1,52 @@
 #include "mat.h"
 #include "tool.h"
 #include "solve.h"
+#include <pthread.h>
 
-#include <cstring>
+extern vector< pthread_t* > threads;
 
-#include<cstdio>
-
-long long mat(
+void mat(
     int device,
     const vector< Edge > &edge, int edgeRange,
     const vector< Edge > &target, int nodeNum, int entryNum,
     int threadNum, int blockNum
 ){
-    ListArray edgeList;
-    BitMat tarMat(nodeNum, entryNum);
-    long long triNum = 0;
+    MatArg *matArg = new MatArg;
 
-    edgeList.initArray(edge, edgeRange);
-    tarMat.initMat(target);
+    matArg->edge.initArray(edge, edgeRange);
+    matArg->target.initMat(target, nodeNum, entryNum);
     
-    if(device == CPU || tarMat.nodeNum > MAX_NODE_NUM_LIMIT)
-        triNum = cpuCountMat(edgeList, tarMat);
+    threads.push_back(new pthread_t);
 
-    else
-        triNum = gpuCountTriangleMat(edgeList, tarMat, threadNum, blockNum);
+    if(device == CPU || matArg->target.nodeNum > MAX_NODE_NUM_LIMIT){
+        pthread_create(threads.back(), NULL, callCpuMat, (void*)matArg);
+    }
 
-    return triNum;
+    else{
+        matArg->threadNum = threadNum;
+        matArg->blockNum = blockNum;
+
+        pthread_create(threads.back(), NULL, callGpuMat, (void*)matArg);
+    }
 }
 
-long long cpuCountMat(const ListArray &edge, const BitMat &target){
+void *callCpuMat(void *arg){
+    long long *triNum = new long long;
+    *triNum = cpuCountMat(*(MatArg*)arg);
+    delete (MatArg*)arg;
+    pthread_exit((void*)triNum);
+}
+
+void *callGpuMat(void *arg){
+    long long *triNum = new long long;
+    *triNum = gpuCountTriangleMat(*(MatArg*)arg);
+    delete (MatArg*)arg;
+    pthread_exit((void*)triNum);
+}
+
+long long cpuCountMat(const MatArg &matArg){
+    const ListArray &edge = matArg.edge;
+    const BitMat &target = matArg.target;
     long long triNum = 0;
     for(int e = 0; e < target.entryNum; e++){
     // iterator through each edge
