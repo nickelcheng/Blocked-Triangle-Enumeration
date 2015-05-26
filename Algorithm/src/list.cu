@@ -89,7 +89,7 @@ __global__ void gpuCountList(const ListArray *edge, const ListArray *target, lon
             triNum[blockIdx.x] += threadTriNum[0];
 
 //        if(threadIdx.x==0)
-//            triNum[u] = linearSum(threadTriNum, blockDim.x);
+//            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);
 
         __syncthreads();
     }

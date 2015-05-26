@@ -21,7 +21,7 @@ __global__ void sumTriangle(long long *triNum, int entryNum){
 __device__ void binaryTreeSum(long long *triNum, int entryNum, int bound){
     int aliveBound = bound;
     while(aliveBound >= 1){
-        if(threadIdx.x < aliveBound){
+        if(threadIdx.x < aliveBound && threadIdx.x+aliveBound < entryNum){
             triNum[threadIdx.x] += triNum[threadIdx.x+aliveBound];
             triNum[threadIdx.x+aliveBound] = 0;
         }

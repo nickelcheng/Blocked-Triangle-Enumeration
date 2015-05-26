@@ -65,19 +65,15 @@ void scheduler(
     timerStart(0)*/
 
     if(proc == LIST){
-//        printf("use list\n");
         list(CPU, edge, edgeRange, target, nodeNum);
     }
     else if(proc == G_LIST){
-//        printf("use g_list\n");
         list(GPU, edge, edgeRange, target, nodeNum, threadNum, blockNum);
     }
     else if(proc == MAT){
-//        printf("use mat\n");
         mat(CPU, edge, edgeRange, target, nodeNum, entryNum);
     }
     else if(proc == G_MAT){
-//        printf("use g_mat\n");
         mat(GPU, edge, edgeRange, target, nodeNum, entryNum, threadNum, blockNum);
     }
 //    timerEnd("time", 0)
