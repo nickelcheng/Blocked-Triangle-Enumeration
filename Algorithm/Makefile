@@ -1,7 +1,7 @@
 GCC = g++
 FLAG = -Wall -O2 -lpthread
 NVCC = nvcc
-GPU_FLAG = --ptxas-options="-dlcm=cg" -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
+GPU_FLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
 RDC = -rdc=true
 
 VPATH = src
