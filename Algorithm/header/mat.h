@@ -4,16 +4,11 @@
 #include "struct.h"
 #include "listArray.h"
 #include "bitMat.h"
+#include "threadHandler.h"
 #include<cuda_runtime.h>
 
 typedef unsigned int UI;
 #define BIT_PER_ENTRY (sizeof(UI)*8)
-
-typedef struct matArg{
-    ListArray edge;
-    BitMat target;
-    int threadNum, blockNum;
-} MatArg;
 
 extern __shared__ UI tile[];
 const int MAX_NODE_NUM_LIMIT = 10*1024;

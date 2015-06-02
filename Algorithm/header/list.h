@@ -3,12 +3,8 @@
 
 #include "struct.h"
 #include "listArray.h"
+#include "threadHandler.h"
 #include <cuda_runtime.h>
-
-typedef struct listArg{
-    ListArray edge, target;
-    int maxDeg, threadNum, blockNum;
-} ListArg;
 
 extern __shared__ int uAdj[];
 

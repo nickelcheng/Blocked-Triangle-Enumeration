@@ -1,9 +1,9 @@
 #include "mat.h"
 #include "tool.h"
 #include "solve.h"
+#include "threadHandler.h"
 #include <pthread.h>
-
-extern vector< pthread_t* > threads;
+#include <cstdio>
 
 void mat(
     int device,
@@ -13,35 +13,27 @@ void mat(
 ){
     MatArg *matArg = new MatArg;
 
+    extern pthread_t threads[10];
+    extern int currTid;
+
     matArg->edge.initArray(edge, edgeRange);
     matArg->target.initMat(target, nodeNum, entryNum);
     
-    threads.push_back(new pthread_t);
+    currTid %= 10;
+    waitAndAddTriNum(currTid);
 
     if(device == CPU || matArg->target.nodeNum > MAX_NODE_NUM_LIMIT){
-        pthread_create(threads.back(), NULL, callCpuMat, (void*)matArg);
+        matArg->device = CPU;
+        pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
     }
 
     else{
         matArg->threadNum = threadNum;
         matArg->blockNum = blockNum;
+        matArg->device = GPU;
 
-        pthread_create(threads.back(), NULL, callGpuMat, (void*)matArg);
+        pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
     }
-}
-
-void *callCpuMat(void *arg){
-    long long *triNum = new long long;
-    *triNum = cpuCountMat(*(MatArg*)arg);
-    delete (MatArg*)arg;
-    pthread_exit((void*)triNum);
-}
-
-void *callGpuMat(void *arg){
-    long long *triNum = new long long;
-    *triNum = gpuCountTriangleMat(*(MatArg*)arg);
-    delete (MatArg*)arg;
-    pthread_exit((void*)triNum);
 }
 
 long long cpuCountMat(const MatArg &matArg){

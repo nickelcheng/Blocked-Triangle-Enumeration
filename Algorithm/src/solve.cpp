@@ -7,10 +7,6 @@
 #include<algorithm>
 #include "timer.h"
 
-pthread_t cpuThread;
-vector< pthread_t* > threads;
-bool flag;
-
 void solveBlock(const vector< Edge > &edge, int blockSize){
     if(edge.empty()) return;
 

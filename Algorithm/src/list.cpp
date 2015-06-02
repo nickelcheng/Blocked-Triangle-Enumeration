@@ -5,9 +5,6 @@
 #include <cstring>
 #include <algorithm>
 #include <pthread.h>
-#include<cstdio>
-
-extern vector< pthread_t* > threads;
 
 void list(
     int device,
@@ -17,36 +14,28 @@ void list(
 ){
     ListArg *listArg = new ListArg;
 
+    extern pthread_t threads[10];
+    extern int currTid;
+
     listArg->edge.initArray(edge, edgeRange);
     listArg->target.initArray(target, nodeNum);
 
-    threads.push_back(new pthread_t);
+    currTid %= 10;
+    waitAndAddTriNum(currTid);
 
     if(device == CPU || listArg->maxDeg > MAX_DEG_LIMIT){
-        pthread_create(threads.back(), NULL, callCpuList, (void*)listArg);
+        listArg->device = CPU;
+        pthread_create(&threads[currTid++], NULL, callList, (void*)listArg);
     }
 
     else{
         listArg->maxDeg = listArg->target.getMaxDegree();
         listArg->threadNum = threadNum;
         listArg->blockNum = blockNum;
+        listArg->device = GPU;
 
-        pthread_create(threads.back(), NULL, callGpuList, (void*)listArg);
+        pthread_create(&threads[currTid++], NULL, callList, (void*)listArg);
     }
-}
-
-void *callCpuList(void *arg){
-    long long *triNum = new long long;
-    *triNum = cpuCountList(*(ListArg*)arg);
-    delete (ListArg*)arg;
-    pthread_exit((void*)triNum);
-}
-
-void *callGpuList(void *arg){
-    long long *triNum = new long long;
-    *triNum = gpuCountTriangle(*(ListArg*)arg);
-    delete (ListArg*)arg;
-    pthread_exit((void*)triNum);
 }
 
 long long cpuCountList(const ListArg &listArg){

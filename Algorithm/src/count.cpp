@@ -1,14 +1,18 @@
 #include<cstdio>
 #include<cstdlib>
+#include<cstring>
 #include "io.h"
 #include "reorder.h"
 #include "solve.h"
 #include "tool.h"
 #include "timer.h"
 #include "block.h"
-#include <pthread.h>
+#include "threadHandler.h"
 
-int assignProc;
+int assignProc, currTid;
+pthread_t threads[10];
+bool threadUsed[10];
+long long triNum;
 
 int main(int argc, char *argv[]){
     if(argc != 3 && argc != 4){
@@ -46,6 +50,9 @@ int main(int argc, char *argv[]){
     timerEnd("init", 1)
     timerStart(1)
 
+    currTid = 0;
+    triNum = 0;
+    memset(threadUsed, false, 10);
     for(int i = 0; i < blockDim; i++){
         relabelBlock(block[i][i], blockSize, 0, 0);
         for(int j = i+1; j < blockDim; j++){
@@ -74,16 +81,7 @@ int main(int argc, char *argv[]){
         solveBlock(block[i][i], blockSize);
     }
 
-    long long triNum = 0;
-    extern vector< pthread_t* > threads;
-    vector< pthread_t* >::iterator it;
-    for(it = threads.begin(); it != threads.end(); ++it){
-        void *ans;
-        pthread_join(**it, &ans);
-        triNum += *(long long*)ans;
-        delete (long long*)ans;
-        delete *it;
-    }
+    for(int i = 0; i < 10; i++) waitAndAddTriNum(i);
     timerEnd("solve", 1)
 
     timerEnd("total", 0)
