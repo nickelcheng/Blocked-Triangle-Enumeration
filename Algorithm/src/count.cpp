@@ -10,8 +10,8 @@
 #include "threadHandler.h"
 
 int assignProc, currTid;
-pthread_t threads[10];
-bool threadUsed[10];
+pthread_t threads[MAX_THREAD_NUM];
+bool threadUsed[MAX_THREAD_NUM];
 long long triNum;
 
 int main(int argc, char *argv[]){

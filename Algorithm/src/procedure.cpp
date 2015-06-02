@@ -1,13 +1,18 @@
 #include "io.h"
 #include "solve.h"
 #include "timer.h"
+#include "threadHandler.h"
 
 #include<cstdio>
 #include <cstdlib>
 #include <algorithm>
 #include <pthread.h>
 
-int assignProc, threadNum, blockNum;
+int assignProc, currTid, threadNum, blockNum;
+pthread_t threads[MAX_THREAD_NUM];
+bool threadUsed[MAX_THREAD_NUM];
+long long triNum;
+
 
 int main(int argc, char *argv[]){
     if(argc != 3 && argc != 5){
@@ -37,18 +42,10 @@ int main(int argc, char *argv[]){
     timerInit(1)
     timerStart(0)
     std::sort(edge.begin(), edge.end());
+    triNum = 0;
     solveBlock(edge, nodeNum);
 
-    long long triNum = 0;
-    extern vector< pthread_t* > threads;
-    vector< pthread_t* >::iterator it;
-    for(it = threads.begin(); it != threads.end(); ++it){
-        void *ans;
-        pthread_join(**it, &ans);
-        triNum += *(long long*)ans;
-        delete (long long*)ans;
-        delete *it;
-    }
+    for(int i = 0; i < 10; i++) waitAndAddTriNum(i);
     timerEnd("time", 0)
 
     printf("total triangle: %lld\n", triNum);

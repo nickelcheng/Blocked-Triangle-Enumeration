@@ -14,7 +14,7 @@ void list(
 ){
     ListArg *listArg = new ListArg;
 
-    extern pthread_t threads[10];
+    extern pthread_t threads[MAX_THREAD_NUM];
     extern int currTid;
 
     listArg->edge.initArray(edge, edgeRange);

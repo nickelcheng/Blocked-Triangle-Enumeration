@@ -13,7 +13,7 @@ void mat(
 ){
     MatArg *matArg = new MatArg;
 
-    extern pthread_t threads[10];
+    extern pthread_t threads[MAX_THREAD_NUM];
     extern int currTid;
 
     matArg->edge.initArray(edge, edgeRange);
