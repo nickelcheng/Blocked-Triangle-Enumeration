@@ -14,9 +14,8 @@ cppObj = $(patsubst %.cpp,$(OBJ_DIR)%.o, $(filter %.cpp,$(src)))
 obj = $(cudaObj) $(cppObj)
 procObj = $(OBJ_DIR)procedure.o
 
-CUDA_INC = /usr/local/cuda-7.0/include/
 HEADER_DIR = header/
-INCLUDE = -I$(HEADER_DIR) -I$(CUDA_INC)
+INCLUDE = -I$(HEADER_DIR)
 
 
 all: count proc

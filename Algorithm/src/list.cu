@@ -95,7 +95,7 @@ __global__ void gpuCountList(const ListArray *edge, const ListArray *target, lon
     }
 }
 
-__host__ __device__ long long intersectList(int sz1, int sz2, const int *l1, const int *l2){
+DECORATE long long intersectList(int sz1, int sz2, const int *l1, const int *l2){
     long long triNum = 0;
     for(int i = sz1-1, j = sz2-1; i >= 0 && j >= 0;){
         if(l1[i] > l2[j]) i--;

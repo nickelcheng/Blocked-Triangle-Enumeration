@@ -37,7 +37,7 @@ int ListArray::getMaxDegree(void) const{
     return mmax;
 }
 
-__host__ __device__ int ListArray::getDeg(int v) const{
+DECORATE  int ListArray::getDeg(int v) const{
     if(v < 0 || v >= nodeNum) return 0;
     return nodeArr[v+1] - nodeArr[v];
 }

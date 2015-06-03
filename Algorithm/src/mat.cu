@@ -92,7 +92,7 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long lo
     }
 }
 
-__host__ __device__ long long countOneBits(UI tar){
+DECORATE long long countOneBits(UI tar){
     long long ones = 0;
     for(; tar; tar/=2)
         ones += tar % 2;

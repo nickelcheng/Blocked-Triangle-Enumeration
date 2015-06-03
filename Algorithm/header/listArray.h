@@ -1,12 +1,13 @@
 #ifndef __LIST_ARRAY_H__
 #define __LIST_ARRAY_H__
-//#ifdef __CUDACC__
+
+#ifdef __NVCC__
 #define DECORATE __host__ __device__
-/*#else
+#else
 #define DECORATE
-#endif*/
+#endif
+
 #include "struct.h"
-#include <cuda_runtime.h>
 
 class ListArray{
     public:
