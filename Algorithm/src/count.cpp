@@ -34,7 +34,6 @@ int main(int argc, char *argv[]){
 
     timerInit(2)
     timerStart(0)
-    timerStart(1)
 
     forwardReorder(nodeNum, edge);
     splitBlock(blockSize, block, edge);
@@ -46,9 +45,6 @@ int main(int argc, char *argv[]){
             printEdge(block[i][j]);
         }
     }*/
-
-    timerEnd("init", 1)
-    timerStart(1)
 
     currTid = 0;
     triNum = 0;
@@ -82,7 +78,6 @@ int main(int argc, char *argv[]){
     }
 
     for(int i = 0; i < 10; i++) waitAndAddTriNum(i);
-    timerEnd("solve", 1)
 
     timerEnd("total", 0)
 
