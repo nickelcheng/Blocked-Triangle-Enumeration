@@ -11,6 +11,7 @@ SampleTest
 count
 bruteForce
 proc
+cardInfo
 
 # exp scripts
 *exp.sh

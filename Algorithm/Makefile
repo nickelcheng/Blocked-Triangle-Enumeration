@@ -20,6 +20,9 @@ INCLUDE = -I$(HEADER_DIR)
 
 all: count proc
 
+cardInfo: ../Tools/gpuCardInfo.cu
+	$(NVCC) $^ -o $@
+
 count: $(filter-out $(OBJ_DIR)procedure.o, $(obj))
 	$(NVCC) $^ -Xcompiler $(FLAG) -o $@
 
@@ -35,3 +38,4 @@ $(cppObj): $(OBJ_DIR)%.o: %.cpp
 clean:
 	rm -rf $(OBJ_DIR)*
 	rm -rf count proc
+	rm -rf cardInfo
