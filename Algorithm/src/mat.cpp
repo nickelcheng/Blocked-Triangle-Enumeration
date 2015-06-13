@@ -14,6 +14,7 @@ void mat(
     MatArg *matArg = new MatArg;
 
     extern pthread_t threads[MAX_THREAD_NUM];
+    extern bool threadUsed[MAX_THREAD_NUM];
     extern int currTid;
 
     matArg->edge.initArray(edge, edgeRange);
@@ -21,6 +22,7 @@ void mat(
     
     currTid %= 10;
     waitAndAddTriNum(currTid);
+    threadUsed[currTid] = true;
 
     if(device == CPU || matArg->target.nodeNum > MAX_NODE_NUM_LIMIT){
         matArg->device = CPU;

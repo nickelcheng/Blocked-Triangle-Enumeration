@@ -77,7 +77,8 @@ int main(int argc, char *argv[]){
         solveBlock(block[i][i], blockSize);
     }
 
-    for(int i = 0; i < 10; i++) waitAndAddTriNum(i);
+    for(int i = 0; i < MAX_THREAD_NUM; i++)
+        waitAndAddTriNum(i);
 
     timerEnd("total", 0)
 

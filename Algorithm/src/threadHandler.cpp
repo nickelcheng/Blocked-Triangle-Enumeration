@@ -8,14 +8,13 @@ extern pthread_t threads[MAX_THREAD_NUM];
 extern bool threadUsed[MAX_THREAD_NUM];
 
 void waitAndAddTriNum(int tid){
+    if(!threadUsed[tid]) return;
     extern long long triNum;
-    if(threadUsed[tid]){
-        void *ans;
-        pthread_join(threads[tid], &ans);
-        triNum += *(long long*)ans;
-        delete (long long*)ans;
-    }
-    else threadUsed[tid] = true;
+    void *ans;
+    pthread_join(threads[tid], &ans);
+    triNum += *(long long*)ans;
+    delete (long long*)ans;
+    threadUsed[tid] = false;
 }
 
 void *callList(void *arg){

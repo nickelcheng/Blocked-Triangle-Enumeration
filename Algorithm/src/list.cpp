@@ -15,13 +15,16 @@ void list(
     ListArg *listArg = new ListArg;
 
     extern pthread_t threads[MAX_THREAD_NUM];
+    extern bool threadUsed[MAX_THREAD_NUM];
     extern int currTid;
 
     listArg->edge.initArray(edge, edgeRange);
     listArg->target.initArray(target, nodeNum);
+    listArg->maxDeg = listArg->target.getMaxDegree();
 
     currTid %= 10;
     waitAndAddTriNum(currTid);
+    threadUsed[currTid] = true;
 
     if(device == CPU || listArg->maxDeg > MAX_DEG_LIMIT){
         listArg->device = CPU;
@@ -29,7 +32,6 @@ void list(
     }
 
     else{
-        listArg->maxDeg = listArg->target.getMaxDegree();
         listArg->threadNum = threadNum;
         listArg->blockNum = blockNum;
         listArg->device = GPU;
