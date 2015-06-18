@@ -29,7 +29,7 @@ int main(int argc, char *argv[]){
     int nodeNum = inputEdge(argv[1], edge);
     vector< Matrix > block;
 
-    //forwardReorder(nodeNum, edge);
+    forwardReorder(nodeNum, edge);
     int blockDim = initBlock(edge, nodeNum, blockSize, block);
 
 /*    timerInit(2)

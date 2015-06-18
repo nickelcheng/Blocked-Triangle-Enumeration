@@ -3,8 +3,6 @@
 
 #include "struct.h"
 
-const int EDGE_NUM_LIMIT = 8;//640*1024*1024;
-
 int initBlock(const vector< Edge > &edge, int nodeNum, int blockSize, vector< Matrix > &block);
 void countBlockEdgeNum(const vector< Edge > &edge, int blockDim, int blockSize, vector< int* > &blockEdgeNum);
 int integrateBlock(const vector< int* > &blockEdgeNum, int blockDim, int *newBlockID);

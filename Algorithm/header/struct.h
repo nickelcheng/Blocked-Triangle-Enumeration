@@ -6,6 +6,8 @@
 #define H2D cudaMemcpyHostToDevice
 #define D2H cudaMemcpyDeviceToHost
 
+const int EDGE_NUM_LIMIT = 250*1024*1024;
+
 using namespace std;
 
 typedef struct Node{
