@@ -3,8 +3,12 @@
 
 #include "struct.h"
 
-void initBlock(int blockDim, vector< Matrix > &block);
-void splitBlock(int blockSize, vector< Matrix > &block, vector< Edge > &edge);
+const int EDGE_NUM_LIMIT = 8;//640*1024*1024;
+
+int initBlock(const vector< Edge > &edge, int nodeNum, int blockSize, vector< Matrix > &block);
+void countBlockEdgeNum(const vector< Edge > &edge, int blockDim, int blockSize, vector< int* > &blockEdgeNum);
+int integrateBlock(const vector< int* > &blockEdgeNum, int blockDim, int *newBlockID);
+void splitBlock(const vector< Edge > &edge, const int* newBlockID, int blockSize, int blockDim, vector< Matrix > &block);
 void sortBlock(vector< Matrix > &block, int blockDim);
 void relabelBlock(vector< Edge > &edge, int blockSize, int uOffset, int vOffset);
 
