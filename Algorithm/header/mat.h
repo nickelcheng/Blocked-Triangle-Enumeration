@@ -1,13 +1,7 @@
 #ifndef __MAT_H__
 #define __MAT_H__
 
-#ifdef __NVCC__
-#define DECORATE __host__ __device__
-#else
-#define DECORATE
-#endif
-
-#include "struct.h"
+#include "main.h"
 #include "listArray.h"
 #include "bitMat.h"
 #include "threadHandler.h"

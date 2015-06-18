@@ -1,13 +1,7 @@
 #ifndef __REORDER_H__
 #define __REORDER_H__
 
-#include "struct.h"
-
-#ifdef __NVCC__
-#define DECORATE __host__ __device__
-#else
-#define DECORATE
-#endif
+#include "main.h"
 
 typedef struct forwardNode{
     int oriOrder;

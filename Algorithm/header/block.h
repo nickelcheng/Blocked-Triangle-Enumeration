@@ -1,7 +1,7 @@
 #ifndef __BLOCK_H__
 #define __BLOCK_H__
 
-#include "struct.h"
+#include "main.h"
 
 int initBlock(const vector< Edge > &edge, int nodeNum, int blockSize, vector< Matrix > &block);
 void countBlockEdgeNum(const vector< Edge > &edge, int blockDim, int blockSize, vector< int* > &blockEdgeNum);

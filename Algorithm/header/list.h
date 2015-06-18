@@ -1,13 +1,7 @@
 #ifndef __LIST_H__
 #define __LIST_H__
 
-#ifdef __NVCC__
-#define DECORATE __host__ __device__
-#else
-#define DECORATE
-#endif
-
-#include "struct.h"
+#include "main.h"
 #include "listArray.h"
 #include "threadHandler.h"
 

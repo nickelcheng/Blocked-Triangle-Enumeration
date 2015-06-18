@@ -1,7 +1,7 @@
 #ifndef __BIT_MAT_H__
 #define __BIT_MAT_H__
 
-#include "struct.h"
+#include "main.h"
 
 typedef unsigned int UI;
 

@@ -1,7 +1,7 @@
 #ifndef __SOLVE_H__
 #define __SOLVE_H__
 
-#include "struct.h"
+#include "main.h"
 
 enum{LIST = 0, G_LIST, MAT, G_MAT, UNDEF};
 enum{CPU = 0, GPU};

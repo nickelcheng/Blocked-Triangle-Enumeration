@@ -2,7 +2,7 @@
 #define __IO_H__
 
 #include<vector>
-#include "struct.h"
+#include "main.h"
 
 using namespace std;
 

@@ -1,7 +1,13 @@
-#ifndef __STRUCT_H__
-#define __STRUCT_H__
+#ifndef __MAIN_H__
+#define __MAIN_H__
 
 #include<vector>
+
+#ifdef __NVCC__
+#define DECORATE __host__ __device__
+#else
+#define DECORATE
+#endif
 
 #define H2D cudaMemcpyHostToDevice
 #define D2H cudaMemcpyDeviceToHost
