@@ -25,10 +25,7 @@ typedef struct Node{
 
 typedef struct Edge{
     int u, v;
-    Edge(int _u, int _v){
-        u = _u, v = _v;
-    }
-    bool operator < (const Edge &a) const{
+    DECORATE bool operator < (const Edge &a) const{
         if(u != a.u) return u < a.u;
         return v < a.v;
     }

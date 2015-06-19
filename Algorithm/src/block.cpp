@@ -92,7 +92,7 @@ void splitBlock(
         int u = it->u, v = it->v;
         int ublock = newID[u/blockSize];
         int vblock = newID[v/blockSize];
-        block[ublock][vblock].push_back(Edge(u, v));
+        block[ublock][vblock].push_back((Edge){u, v});
     }
 }
 

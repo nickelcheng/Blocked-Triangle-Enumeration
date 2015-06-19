@@ -6,7 +6,7 @@ int inputEdge(const char *inFile, vector< Edge > &edge){
     int u, v, n;
     fscanf(fp, "%d", &n);
     while(fscanf(fp, "%d%d", &u, &v) != EOF){
-        edge.push_back(Edge(u,v));
+        edge.push_back((Edge){u,v});
     }
     fclose(fp);
     return n;

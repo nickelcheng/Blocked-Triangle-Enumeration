@@ -4,7 +4,7 @@
 #include<vector>
 #include "main.h"
 
-using namespace std;
+using std::vector;
 
 int inputEdge(const char *inFile, vector< Edge > &edge);
 void printEdge(const vector< Edge > &edge);
