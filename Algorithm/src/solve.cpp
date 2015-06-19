@@ -7,7 +7,7 @@
 #include<algorithm>
 #include "timer.h"
 
-void solveBlock(const vector< Edge > &edge, int blockSize){
+/*void solveBlock(const vector< Edge > &edge, int blockSize){
     if(edge.empty()) return;
 
     int entry = averageCeil(blockSize, BIT_PER_ENTRY);
@@ -57,8 +57,8 @@ void scheduler(
     else
         getStrategy(nodeNum, (int)target.size(), proc);
 
-/*    timerInit(1)
-    timerStart(0)*/
+//    timerInit(1)
+//    timerStart(0)
 
     if(proc == LIST){
         list(CPU, edge, edgeRange, target, nodeNum);
@@ -92,4 +92,4 @@ void getStrategy(int nodeNum, int edgeNum, int &proc){
     else
         proc = gpu;
 }
-
+*/

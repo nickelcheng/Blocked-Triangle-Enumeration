@@ -6,7 +6,7 @@
 enum{LIST = 0, G_LIST, MAT, G_MAT, UNDEF};
 enum{CPU = 0, GPU};
 
-void solveBlock(const vector< Edge > &edge, int blockSize);
+/*void solveBlock(const vector< Edge > &edge, int blockSize);
 
 void mergeBlock(const vector< Matrix > &block, int x, int y, int blockSize);
 
@@ -18,5 +18,5 @@ void scheduler(
 );
 
 void getStrategy(int nodeNum, int edgeNum, int &proc);
-
+*/
 #endif

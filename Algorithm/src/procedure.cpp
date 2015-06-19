@@ -15,7 +15,7 @@ long long triNum;
 
 
 int main(int argc, char *argv[]){
-    if(argc != 3 && argc != 5){
+/*    if(argc != 3 && argc != 5){
         fprintf(stderr, "usage: proc <assign_proc> <input_path> <thread_per_block> <block_num>\n");
         return 0;
     }
@@ -49,6 +49,6 @@ int main(int argc, char *argv[]){
     timerEnd("time", 0)
 
     printf("total triangle: %lld\n", triNum);
-
+*/
     return 0;
 }
