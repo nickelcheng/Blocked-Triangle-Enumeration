@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
     int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
 
     ListArrMatrix listArrBlock(blockDim);
-//    initListArrBlock();
+    initListArrBlock(edgeBlock, rowWidth, blockDim, listArrBlock);
     
 
 /*    timerInit(2)

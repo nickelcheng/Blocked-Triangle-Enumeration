@@ -32,8 +32,15 @@ void splitBlock(
 );
 
 /*void sortBlock(vector< Matrix > &block, int blockDim);
-void relabelBlock(vector< Edge > &edge, int blockSize, int uOffset, int vOffset);
+void relabelBlock(vector< Edge > &edge, int blockSize, int uOffset, int vOffset);*/
 
-void initListArrBlock();*/
+void initListArrBlock(
+    const EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim,
+    ListArrMatrix &listArrBlock
+);
+
+#ifdef __NVCC__
+
+#endif
 
 #endif
