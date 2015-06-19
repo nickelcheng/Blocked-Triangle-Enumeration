@@ -2,12 +2,38 @@
 #define __BLOCK_H__
 
 #include "main.h"
+#include "listArray.h"
 
-int initBlock(const vector< Edge > &edge, int nodeNum, int blockSize, vector< Matrix > &block);
-void countBlockEdgeNum(const vector< Edge > &edge, int blockDim, int blockSize, vector< int* > &blockEdgeNum);
-int integrateBlock(const vector< int* > &blockEdgeNum, int blockDim, int *newBlockID);
-void splitBlock(const vector< Edge > &edge, const int* newBlockID, int blockSize, int blockDim, vector< Matrix > &block);
-void sortBlock(vector< Matrix > &block, int blockDim);
+typedef vector< Edge > Entry;
+typedef vector< Entry > EdgeRow;
+typedef vector< EdgeRow > EdgeMatrix;
+
+typedef vector< ListArray > ListArrRow;
+typedef vector< ListArrRow > ListArrMatrix;
+
+int initEdgeBlock(
+    const vector< Edge > &edge, int nodeNum, int blockSize,
+    EdgeMatrix &block, vector< int > &rowWidth
+);
+
+void countBlockEdgeNum(
+    const vector< Edge > &edge, int blockDim, int blockSize,
+    vector< int* > &blockEdgeNum
+);
+
+int integrateBlock(
+    const vector< int* > &blockEdgeNum, int blockDim,
+    int *newID, vector< int > &rowWidth
+);
+
+void splitBlock(
+    const vector< Edge > &edge, const int* newID, int blockSize, int blockDim,
+    EdgeMatrix &block
+);
+
+/*void sortBlock(vector< Matrix > &block, int blockDim);
 void relabelBlock(vector< Edge > &edge, int blockSize, int uOffset, int vOffset);
+
+void initListArrBlock();*/
 
 #endif

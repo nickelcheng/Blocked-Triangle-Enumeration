@@ -34,7 +34,4 @@ typedef struct Edge{
     }
 } Edge;
 
-typedef struct vector< Edge > Row;
-typedef struct vector< Row > Matrix;
-
 #endif

@@ -27,10 +27,15 @@ int main(int argc, char *argv[]){
     vector< Edge > edge;
 
     int nodeNum = inputEdge(argv[1], edge);
-    vector< Matrix > block;
+    EdgeMatrix edgeBlock;
+    vector< int > rowWidth;
 
     forwardReorder(nodeNum, edge);
-    int blockDim = initBlock(edge, nodeNum, blockSize, block);
+    int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
+
+    ListArrMatrix listArrBlock(blockDim);
+//    initListArrBlock();
+    
 
 /*    timerInit(2)
     timerStart(0)
@@ -38,12 +43,12 @@ int main(int argc, char *argv[]){
     splitBlock(blockSize, block, edge);
     sortBlock(block, blockDim);*/
 
-    for(int i = 0; i < blockDim; i++){
+/*    for(int i = 0; i < blockDim; i++){
         for(int j = i; j < blockDim; j++){
             printf("block[%d][%d]:", i, j);
             printEdge(block[i][j]);
         }
-    }
+    }*/
 
 /*    currTid = 0;
     triNum = 0;
