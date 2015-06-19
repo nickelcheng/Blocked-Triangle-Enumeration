@@ -3,10 +3,10 @@
 
 #include "main.h"
 
-typedef struct forwardNode{
+typedef struct ForwardNode{
     int oriOrder;
     int realDeg;
-    DECORATE bool operator < (const forwardNode &a) const{
+    DECORATE bool operator < (const ForwardNode &a) const{
         return realDeg < a.realDeg;
     }
 } ForwardNode;
