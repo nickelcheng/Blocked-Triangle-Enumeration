@@ -1,11 +1,9 @@
 #include "reorder.h"
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
 #include <thrust/sort.h>
 #include <omp.h>
 
 void forwardReorder(int nodeNum, vector< Edge > &edge){
-    thrust::host_vector< ForwardNode > node(nodeNum);
+    ForwardNode *node = new ForwardNode[nodeNum];
     #pragma omp parallel for
     for(int i = 0; i < nodeNum; i++){
         node[i].oriOrder = i;
@@ -18,9 +16,7 @@ void forwardReorder(int nodeNum, vector< Edge > &edge){
         node[e->v].realDeg++;
     }
 
-    thrust::device_vector< ForwardNode > d_node = node;
-    thrust::sort(d_node.begin(), d_node.end());
-    thrust::copy(d_node.begin(), d_node.end(), node.begin());
+    thrust::sort(node, node+nodeNum);
 
     int *newOrder = new int[nodeNum];
     #pragma omp parallel for
@@ -35,5 +31,8 @@ void forwardReorder(int nodeNum, vector< Edge > &edge){
         if(newU < newV) edge[i].u=newU, edge[i].v=newV;
         else edge[i].u=newV, edge[i].v=newU;
     }
+
+    delete [] node;
+    delete [] newOrder;
 }
 
