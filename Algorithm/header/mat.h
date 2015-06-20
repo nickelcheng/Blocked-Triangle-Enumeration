@@ -7,7 +7,6 @@
 #include "threadHandler.h"
 
 typedef unsigned int UI;
-#define BIT_PER_ENTRY (sizeof(UI)*8)
 
 #ifdef __NVCC__
 extern __shared__ UI tile[];

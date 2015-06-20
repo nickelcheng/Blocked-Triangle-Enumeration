@@ -1,7 +1,7 @@
 #ifndef __BIT_MAT_H__
 #define __BIT_MAT_H__
 
-#include "main.h"
+#include "listArray.h"
 
 typedef unsigned int UI;
 
@@ -10,10 +10,12 @@ typedef unsigned int UI;
 class BitMat{
     public:
         ~BitMat();
-        void initMat(const vector< Edge > &edge, int node, int entry);
+        static void createMask(void);
+        void initMat(const ListArray &edge, int entry);
         UI getContent(int x, int y) const;
-        void setEdge(int u, int v, const UI *mask);
+        void setEdge(int u, int v);
 //    protected:
+        static UI mask[BIT_PER_ENTRY];
         UI *mat;
         int nodeNum, entryNum; // width and height
 };
