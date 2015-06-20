@@ -31,9 +31,6 @@ void splitBlock(
     EdgeMatrix &block
 );
 
-/*void sortBlock(vector< Matrix > &block, int blockDim);
-void relabelBlock(vector< Edge > &edge, int blockSize, int uOffset, int vOffset);*/
-
 void initListArrBlock(
     const EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim, int blockSize,
     ListArrMatrix &listArrBlock

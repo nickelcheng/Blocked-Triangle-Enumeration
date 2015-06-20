@@ -4,6 +4,7 @@
 #include "tool.h"
 #include<algorithm>
 #include<cstdio>
+#include <omp.h>
 
 int initEdgeBlock(
     const vector< Edge > &edge, int nodeNum, int blockSize,
@@ -35,6 +36,7 @@ void countBlockEdgeNum(
     const vector< Edge > &edge, int blockDim, int blockSize,
     vector< int* > &blockEdgeNum
 ){
+    #pragma omp parallel for
     for(int i = 0; i < blockDim; i++){
         blockEdgeNum[i] = new int [blockDim];
         for(int j = i; j < blockDim; j++){
@@ -42,12 +44,16 @@ void countBlockEdgeNum(
         }
     }
 
-    vector< Edge >::const_iterator it = edge.begin();
-    for(; it != edge.end(); ++it){
-        int u = it->u, v = it->v;
+    int edgeNum = (int)edge.size();
+    #pragma omp parallel for
+    for(int i = 0; i < edgeNum; i++){
+        int u = edge[i].u, v = edge[i].v;
         int ublock = u / blockSize;
         int vblock = v / blockSize;
+        #pragma omp critical
+        {
         blockEdgeNum[ublock][vblock]++;
+        }
     }
 }
 
@@ -84,38 +90,21 @@ void splitBlock(
     EdgeMatrix &block
 ){
     block = EdgeMatrix(blockDim);
+    #pragma omp parallel for
     for(int i = 0; i < blockDim; i++){
         block[i] = EdgeRow(blockDim);
     }
-    vector< Edge >::const_iterator it = edge.begin();
-    for(; it != edge.end(); ++it){
-        int u = it->u, v = it->v;
+
+    int edgeNum = (int)edge.size();
+    #pragma omp parallel for
+    for(int i = 0; i < edgeNum; i++){
+        int u = edge[i].u, v = edge[i].v;
         int ublock = newID[u/blockSize];
         int vblock = newID[v/blockSize];
+        #pragma omp critical
+        {
         block[ublock][vblock].push_back((Edge){u, v});
-    }
-}
-
-/*void sortBlock(Matrix &block, int blockDim){
-    for(int i = 0; i < blockDim; i++){
-        for(int j = i; j < blockDim; j++){
-            std::sort(block[i][j].begin(), block[i][j].end());
         }
     }
 }
-
-void relabelBlock(vector< Edge > &edge, int blockSize, int uOffset, int vOffset){
-    if(edge.empty()) return;
-    int currUOffset = edge.front().u / blockSize;
-    int currVOffset = edge.front().v / blockSize;
-    if(uOffset == currUOffset && vOffset == currVOffset) return;
-
-    int uDiff = (uOffset-currUOffset) * blockSize;
-    int vDiff = (vOffset-currVOffset) * blockSize;
-    vector< Edge >::iterator e = edge.begin();
-    for(; e != edge.end(); ++e){
-        e->u += uDiff;
-        e->v += vDiff;
-    }
-}*/
 
