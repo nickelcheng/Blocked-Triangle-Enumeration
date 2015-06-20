@@ -11,6 +11,7 @@ class ListArray{
         DECORATE int getDeg(int v) const;
         DECORATE int getNodeNum() const;
         DECORATE const int* neiStart(int v) const;
+        void integrate(const ListArray &a, ListArray &res) const;
         DECORATE void print() const;
 //    private:
         int *nodeArr, nodeNum;

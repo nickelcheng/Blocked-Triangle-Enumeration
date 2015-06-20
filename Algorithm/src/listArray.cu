@@ -36,6 +36,20 @@ DECORATE const int* ListArray::neiStart(int v) const{
     return &edgeArr[nodeArr[v]];
 }
 
+void ListArray::integrate(const ListArray &a, ListArray &res) const{
+    res.initArray(nodeNum+a.nodeNum, edgeNum+a.edgeNum);
+    for(int i = 0; i < nodeNum; i++)
+        res.nodeArr[i] = nodeArr[i];
+    for(int i = 0, j = nodeNum; i < a.nodeNum; i++, j++)
+        res.nodeArr[j] = a.nodeArr[i] + edgeNum;
+    res.nodeArr[res.nodeNum] = res.edgeNum;
+
+    for(int i = 0; i < edgeNum; i++)
+        res.edgeArr[i] = edgeArr[i];
+    for(int i = 0, j = edgeNum; i < a.edgeNum; i++, j++)
+        res.edgeArr[j] = a.edgeArr[i];
+}
+
 DECORATE void ListArray::print(void) const{
     printf("node:");
     for(int i = 0; i <= nodeNum; i++){
