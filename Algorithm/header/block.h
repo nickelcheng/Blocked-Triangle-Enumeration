@@ -41,7 +41,6 @@ void initListArrBlock(
 
 #ifdef __NVCC__
 __global__ void relabelBlock(int edgeNum, int uOffset, int vOffset, Edge *edge);
-__global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArray *listArr);
 #endif
 
 #endif

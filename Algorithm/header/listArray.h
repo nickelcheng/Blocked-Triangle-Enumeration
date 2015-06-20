@@ -18,4 +18,8 @@ class ListArray{
         int *edgeArr, edgeNum;
 };
 
+#ifdef __NVCC__
+__global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArray *listArr);
+#endif
+
 #endif

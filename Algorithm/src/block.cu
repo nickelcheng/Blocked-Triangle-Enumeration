@@ -58,28 +58,3 @@ __global__ void relabelBlock(int edgeNum, int uOffset, int vOffset, Edge *edge){
     }
 }
 
-__global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArray *listArr){
-    int idx = blockDim.x*blockIdx.x + threadIdx.x;
-    int threads = blockDim.x * gridDim.x;
-
-    for(int i = idx; i < nodeNum; i+=threads)
-        listArr->nodeArr[i] = -1;
-
-    for(int i = idx; i < edgeNum; i+=threads){
-        listArr->edgeArr[i] = edge[i].v;
-        if(i > 0){
-            if(edge[i-1].u != edge[i].u)
-                listArr->nodeArr[edge[i].u] = i;
-        }
-    }
-    listArr->nodeArr[edge[0].u] = 0;
-    listArr->nodeArr[nodeNum] = edgeNum;
-
-    for(int i = idx; i <= nodeNum; i+=threads){
-        if(listArr->nodeArr[i] != -1 && i > 0){
-            for(int j = i-1; j >= 0 && listArr->nodeArr[j]==-1; j--){
-                listArr->nodeArr[j] = listArr->nodeArr[i];
-            }
-        }
-    }
-}
