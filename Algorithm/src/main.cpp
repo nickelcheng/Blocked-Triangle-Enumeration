@@ -21,6 +21,10 @@ int main(int argc, char *argv[]){
     }
 
     int blockSize = atoi(argv[2]);
+    if(blockSize % 1024 != 0){
+        fprintf(stderr, "block size must be mutiple of 1024\n");
+        return 0;
+    }
     if(argc == 4) assignProc = atoi(argv[3]);
     else assignProc = UNDEF;
 
@@ -37,7 +41,6 @@ int main(int argc, char *argv[]){
     ListArrMatrix listArrBlock(blockDim);
     initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
     
-
 /*    timerInit(2)
     timerStart(0)
 

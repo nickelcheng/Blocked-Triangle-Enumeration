@@ -28,13 +28,19 @@ void initListArrBlock(
             int nodeNum = rowWidth[i]*blockSize;
             int edgeNum = (int)edgeBlock[i][j].size();
             Edge *pd_edge = thrust::raw_pointer_cast(d_edge.data());
-            relabelBlock<<< 1, 1 >>>(edgeNum, offset[i], offset[j], pd_edge);
+
+            int gpuBlock = edgeNum/1024;
+            int gpuThread = (edgeNum<1024) ? edgeNum : 1024;
+            relabelBlock<<< gpuBlock, gpuThread >>>(edgeNum, offset[i], offset[j], pd_edge);
 
             cudaMalloc((void**)&d_nodeArr, sizeof(int)*(nodeNum+1));
             cudaMalloc((void**)&d_edgeArr, sizeof(int)*edgeNum);
             cudaMemcpy(&(d_listArr->nodeArr), &d_nodeArr, sizeof(int*), H2D);
             cudaMemcpy(&(d_listArr->edgeArr), &d_edgeArr, sizeof(int*), H2D);
-            edge2listArr<<< 1, 1 >>>(pd_edge, nodeNum, edgeNum, d_listArr);
+
+            gpuBlock = nodeNum/1024;
+            gpuThread = (nodeNum<1024) ? nodeNum : 1024;
+            edge2listArr<<< gpuBlock, gpuThread >>>(pd_edge, nodeNum, edgeNum, d_listArr);
 
             listArrBlock[i][j].initArray(nodeNum, edgeNum);
             cudaMemcpy(listArrBlock[i][j].nodeArr, d_nodeArr, sizeof(int)*(nodeNum+1), D2H);
@@ -52,7 +58,10 @@ void initListArrBlock(
 __global__ void relabelBlock(int edgeNum, int uOffset, int vOffset, Edge *edge){
     if(edgeNum == 0) return;
     if(uOffset == 0 && vOffset == 0) return;
-    for(int i = 0; i < edgeNum; i++){
+    int idx = blockDim.x*blockIdx.x + threadIdx.x;
+    int threads = blockDim.x * gridDim.x;
+
+    for(int i = idx; i < edgeNum; i+=threads){
         edge[i].u -= uOffset;
         edge[i].v -= vOffset;
     }
