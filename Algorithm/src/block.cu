@@ -34,14 +34,11 @@ void initListArrBlock(
             cudaMalloc((void**)&d_edgeArr, sizeof(int)*edgeNum);
             cudaMemcpy(&(d_listArr->nodeArr), &d_nodeArr, sizeof(int*), H2D);
             cudaMemcpy(&(d_listArr->edgeArr), &d_edgeArr, sizeof(int*), H2D);
-            printf("node: %d, edge: %d\n", nodeNum, edgeNum);
             edge2listArr<<< 1, 1 >>>(pd_edge, nodeNum, edgeNum, d_listArr);
 
-            printf("list arr block[%d][%d]\n", i, j);
             listArrBlock[i][j].initArray(nodeNum, edgeNum);
             cudaMemcpy(listArrBlock[i][j].nodeArr, d_nodeArr, sizeof(int)*(nodeNum+1), D2H);
             cudaMemcpy(listArrBlock[i][j].edgeArr, d_edgeArr, sizeof(int)*edgeNum, D2H);
-            printf("yoo\n");
 
             cudaFree(d_nodeArr);
             cudaFree(d_edgeArr);
