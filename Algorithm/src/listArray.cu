@@ -7,25 +7,10 @@ ListArray::~ListArray(void){
     delete [] edgeArr;
 }
 
-void ListArray::initArray(const vector< Edge > &edge, int n){
-    nodeNum = n, edgeNum = (int)edge.size();
+void ListArray::initArray(int n, int e){
+    nodeNum = n, edgeNum = e;
     nodeArr = new int[sizeof(int)*(n+1)];
-    edgeArr = new int[sizeof(int)*edgeNum];
-    memset(nodeArr, -1, sizeof(int)*(nodeNum+1));
-
-    for(int i = 0; i < edgeNum-1; i++){
-        edgeArr[i] = edge[i].v;
-        if(edge[i].u != edge[i+1].u){
-            nodeArr[edge[i+1].u] = i+1;
-        }
-    }
-    edgeArr[edgeNum-1] = edge[edgeNum-1].v;
-
-    nodeArr[edge[0].u] = 0;
-    nodeArr[nodeNum] = edgeNum;
-    for(int i = nodeNum; i > 0; i--){
-        if(nodeArr[i-1] == -1) nodeArr[i-1] = nodeArr[i];
-    }
+    edgeArr = new int[sizeof(int)*e];
 }
 
 int ListArray::getMaxDegree(void) const{

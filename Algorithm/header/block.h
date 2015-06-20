@@ -35,12 +35,13 @@ void splitBlock(
 void relabelBlock(vector< Edge > &edge, int blockSize, int uOffset, int vOffset);*/
 
 void initListArrBlock(
-    const EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim,
+    const EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim, int blockSize,
     ListArrMatrix &listArrBlock
 );
 
 #ifdef __NVCC__
-
+__global__ void relabelBlock(int edgeNum, int uOffset, int vOffset, Edge *edge);
+__global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArray *listArr);
 #endif
 
 #endif

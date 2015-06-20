@@ -12,7 +12,7 @@ void list(
     const vector< Edge > &target, int nodeNum,
     int threadNum, int blockNum
 ){
-    ListArg *listArg = new ListArg;
+/*    ListArg *listArg = new ListArg;
 
     extern pthread_t threads[MAX_THREAD_NUM];
     extern bool threadUsed[MAX_THREAD_NUM];
@@ -37,7 +37,7 @@ void list(
         listArg->device = GPU;
 
         pthread_create(&threads[currTid++], NULL, callList, (void*)listArg);
-    }
+    }*/
 }
 
 long long cpuCountList(const ListArg &listArg){

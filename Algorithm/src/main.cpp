@@ -32,9 +32,10 @@ int main(int argc, char *argv[]){
 
     forwardReorder(nodeNum, edge);
     int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
+    rowWidth.resize(blockDim);
 
     ListArrMatrix listArrBlock(blockDim);
-    initListArrBlock(edgeBlock, rowWidth, blockDim, listArrBlock);
+    initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
     
 
 /*    timerInit(2)

@@ -11,7 +11,7 @@ void mat(
     const vector< Edge > &target, int nodeNum, int entryNum,
     int threadNum, int blockNum
 ){
-    MatArg *matArg = new MatArg;
+/*    MatArg *matArg = new MatArg;
 
     extern pthread_t threads[MAX_THREAD_NUM];
     extern bool threadUsed[MAX_THREAD_NUM];
@@ -35,7 +35,7 @@ void mat(
         matArg->device = GPU;
 
         pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
-    }
+    }*/
 }
 
 long long cpuCountMat(const MatArg &matArg){
