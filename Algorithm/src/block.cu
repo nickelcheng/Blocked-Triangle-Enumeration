@@ -34,6 +34,12 @@ void initListArrBlock(
             }
 
             Edge *pd_edge = thrust::raw_pointer_cast(d_edge.data());
+            int edgeBlock = edgeNum/1024;
+            int edgeThread = (edgeNum<1024) ? edgeNum : 1024;
+            if(edgeNum % 1024 != 0) edgeBlock++;
+            int nodeBlock = nodeNum/1024;
+            int nodeThread = (nodeNum<1024) ? nodeNum : 1024;
+            if(nodeNum % 1024 != 0) nodeBlock++;
 
             int gpuBlock = edgeNum/1024;
             int gpuThread = (edgeNum<1024) ? edgeNum : 1024;
@@ -44,9 +50,9 @@ void initListArrBlock(
             cudaMemcpy(&(d_listArr->nodeArr), &d_nodeArr, sizeof(int*), H2D);
             cudaMemcpy(&(d_listArr->edgeArr), &d_edgeArr, sizeof(int*), H2D);
 
-            gpuBlock = nodeNum/1024;
-            gpuThread = (nodeNum<1024) ? nodeNum : 1024;
-            edge2listArr<<< gpuBlock, gpuThread >>>(pd_edge, nodeNum, edgeNum, d_listArr);
+            initNodeArr<<< nodeBlock, nodeThread >>>(nodeNum, d_listArr);
+            edge2listArr<<< edgeBlock, edgeThread >>>(pd_edge, nodeNum, edgeNum, d_listArr);
+            removeEmptyFlag<<< nodeBlock, nodeThread >>>(nodeNum, d_listArr);
 
             cudaMemcpy(listArrBlock[i][j].nodeArr, d_nodeArr, sizeof(int)*(nodeNum+1), D2H);
             cudaMemcpy(listArrBlock[i][j].edgeArr, d_edgeArr, sizeof(int)*edgeNum, D2H);

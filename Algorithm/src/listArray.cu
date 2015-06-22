@@ -32,7 +32,8 @@ DECORATE int ListArray::getNodeNum() const{
 }
 
 DECORATE const int* ListArray::neiStart(int v) const{
-    if(v < 0 || v >= nodeNum) return 0;
+    if(v < 0 || v >= nodeNum) return NULL;
+    if(nodeArr[v] >= edgeNum) return NULL;
     return &edgeArr[nodeArr[v]];
 }
 
@@ -62,12 +63,17 @@ DECORATE void ListArray::print(void) const{
     printf("\n");
 }
 
-__global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArray *listArr){
+__global__ void initNodeArr(int nodeNum, ListArray *listArr){
     int idx = blockDim.x*blockIdx.x + threadIdx.x;
     int threads = blockDim.x * gridDim.x;
 
     for(int i = idx; i < nodeNum; i+=threads)
         listArr->nodeArr[i] = -1;
+}
+
+__global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArray *listArr){
+    int idx = blockDim.x*blockIdx.x + threadIdx.x;
+    int threads = blockDim.x * gridDim.x;
 
     for(int i = idx; i < edgeNum; i+=threads){
         listArr->edgeArr[i] = edge[i].v;
@@ -78,6 +84,11 @@ __global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArr
     }
     listArr->nodeArr[edge[0].u] = 0;
     listArr->nodeArr[nodeNum] = edgeNum;
+}
+
+__global__ void removeEmptyFlag(int nodeNum, ListArray *listArr){
+    int idx = blockDim.x*blockIdx.x + threadIdx.x;
+    int threads = blockDim.x * gridDim.x;
 
     for(int i = idx; i <= nodeNum; i+=threads){
         if(listArr->nodeArr[i] != -1 && i > 0){
