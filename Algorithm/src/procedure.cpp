@@ -11,6 +11,7 @@
 int assignProc, currTid, threadNum, blockNum;
 pthread_t threads[MAX_THREAD_NUM];
 bool threadUsed[MAX_THREAD_NUM];
+pthread_mutex_t lock;
 long long triNum;
 
 
