@@ -5,7 +5,6 @@
 #include "reorder.h"
 #include "solve.h"
 #include "tool.h"
-#include "timer.h"
 #include "block.h"
 #include "threadHandler.h"
 
@@ -28,10 +27,18 @@ int main(int argc, char *argv[]){
     vector< Edge > edge;
 
     int nodeNum = inputEdge(argv[1], edge);
+
+    // resolve first cuda call slow timing issue
+    cudaFree(0);
+
+    int edgeNum = (int)edge.size();
+    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
+
+    if(density > 0.01)
+        forwardReorder(nodeNum, edge);
+
     EdgeMatrix edgeBlock;
     vector< int > rowWidth;
-
-    forwardReorder(nodeNum, edge);
     int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
     rowWidth.resize(blockDim);
     fprintf(stderr, "blockDim: %d\n", blockDim);
@@ -39,42 +46,21 @@ int main(int argc, char *argv[]){
         rowWidth[i] *= blockSize;
 //        printf("%d %d\n", i, rowWidth[i]);
     }
-    timerEnd("split block", 1)
 
     ListArrMatrix listArrBlock(blockDim);
     initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
-    
-/*    timerInit(2)
-    timerStart(0)
 
-    timerStart(1)
     pthread_mutex_init(&lock, NULL);
 
-/*    for(int i = 0; i < blockDim; i++){
-        for(int j = i; j < blockDim; j++){
-            printf("block[%d][%d]:", i, j);
-            printEdge(block[i][j]);
-        }
-    }*/
-
-/*    currTid = 0;
+    BitMat::createMask();
+    currTid = 0;
     triNum = 0;
-    memset(threadUsed, false, 10);
-    for(int i = 0; i < blockDim; i++){
-        relabelBlock(block[i][i], blockSize, 0, 0);
-        for(int j = i+1; j < blockDim; j++){
-            relabelBlock(block[i][j], blockSize, 0, 1);
-            relabelBlock(block[j][j], blockSize, 1, 1);
-//            printf("merge %d & %d\n", i, j);
-            printBlock(block[i][j], i, j);
-            printBlock(block[j][j], j, j);*/
-/*            mergeBlock(block, i, j, blockSize);
+    memset(threadUsed, false, MAX_THREAD_NUM);
+    findTriangle(listArrBlock, rowWidth, blockDim);
 
     pthread_mutex_destroy(&lock);
-    timerEnd("count", 1)
 
-    timerEnd("total", 0)
-
-    printf("total triangle: %lld\n", triNum);*/
+    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
+    printf("total triangle: %lld\n", triNum);
     return 0;
 }
