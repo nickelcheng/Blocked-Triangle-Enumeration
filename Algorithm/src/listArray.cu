@@ -61,14 +61,12 @@ void ListArray::relabel(ListArray &res) const{
 }
 
 DECORATE void ListArray::print(void) const{
-    printf("node:");
-    for(int i = 0; i <= nodeNum; i++){
+    printf("node(%d):\n", nodeNum);
+    for(int i = 0; i <= nodeNum; i++)
         printf(" %d", nodeArr[i]);
-    }
-    printf("\nedge:");
-    for(int i = 0; i < edgeNum; i++){
+    printf("\nedge(%d):\n", edgeNum);
+    for(int i = 0; i < edgeNum; i++)
         printf(" %d", edgeArr[i]);
-    }
     printf("\n");
 }
 
