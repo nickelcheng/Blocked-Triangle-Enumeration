@@ -69,6 +69,7 @@ __global__ void gpuCountList(const ListArray *edge, const ListArray *target, lon
     // iterator through each edge (u, v)
     int range = edge->nodeNum;
     for(int u = blockIdx.x; u < range; u += gridDim.x){
+        threadTriNum[threadIdx.x] = 0;
         int uLen = target->getDeg(u);
         if(uLen > 0){
             const int *uList = target->neiStart(u);
@@ -81,7 +82,6 @@ __global__ void gpuCountList(const ListArray *edge, const ListArray *target, lon
             __syncthreads();
 
             // counting triangle number
-            threadTriNum[threadIdx.x] = 0;
             const int *uNei = edge->neiStart(u);
             for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
                 int v = uNei[i];
