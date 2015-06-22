@@ -1,6 +1,7 @@
 #include "block.h"
 #include "tool.h"
 #include <omp.h>
+#include <algorithm>
 
 int initEdgeBlock(
     const vector< Edge > &edge, int nodeNum, int blockSize,
@@ -93,6 +94,54 @@ void setEmptyArray(int nodeNum, int *arr){
     #pragma omp parallel for
     for(int i = 0; i <= nodeNum; i++){
         arr[i] = 1;
+    }
+}
+
+void cTransBlock(vector< Edge > &edge, int nodeNum, int uOffset, int vOffset, ListArray &listArr){
+    int edgeNum = (int)edge.size();
+    listArr.initArray(nodeNum, edgeNum);
+    if(listArr.edgeNum == 0){
+        setEmptyArray(nodeNum, listArr.nodeArr);
+        return;
+    }
+
+    std::sort(edge.begin(), edge.end());
+    cRelabelBlock(uOffset, vOffset, edge);
+    cEdge2ListArr(edge, listArr);
+}
+
+void cRelabelBlock(int uOffset, int vOffset, vector< Edge > &edge){
+    if(uOffset == 0 && vOffset == 0) return;
+    int edgeNum = (int)edge.size();
+    #pragma omp parallel for
+    for(int i = 0; i < edgeNum; i++){
+        edge[i].u -= uOffset;
+        edge[i].v -= vOffset;
+    }
+}
+
+void cEdge2ListArr(const vector< Edge > &edge, ListArray &listArr){
+    int nodeNum = listArr.nodeNum;
+    int edgeNum = listArr.edgeNum;
+
+    #pragma omp parallel for
+    for(int i = 0; i < nodeNum; i++)
+        listArr.nodeArr[i] = -1;
+
+    #pragma omp parallel for
+    for(int i = 0; i < edgeNum-1; i++){
+        listArr.edgeArr[i] = edge[i].v;
+        if(edge[i].u != edge[i+1].u){
+            listArr.nodeArr[edge[i+1].u] = i+1;
+        }
+    }
+    listArr.edgeArr[edgeNum-1] = edge[edgeNum-1].v;
+
+    listArr.nodeArr[edge[0].u] = 0;
+    listArr.nodeArr[nodeNum] = edgeNum;
+    for(int i = nodeNum; i > 0; i--){
+        if(listArr.nodeArr[i-1] == -1)
+            listArr.nodeArr[i-1] = listArr.nodeArr[i];
     }
 }
 

@@ -31,12 +31,16 @@ void splitBlock(
     EdgeMatrix &block
 );
 
+void cTransBlock(vector< Edge > &edge, int nodeNum, int uOffset, int vOffset, ListArray &listArr);
+void cRelabelBlock(int uOffset, int vOffset, vector< Edge > &edge);
+void cEdge2ListArr(const vector< Edge > &edge, ListArray &listArr);
+
 void initListArrBlock(
-    const EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim, int blockSize,
+    EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim, int blockSize,
     ListArrMatrix &listArrBlock
 );
 
-void transBlock(
+void gTransBlock(
     const vector< Edge > &edge, int nodeNum, int uOffset, int vOffset,
     ListArray &listArr, ListArray *d_listArr
 );

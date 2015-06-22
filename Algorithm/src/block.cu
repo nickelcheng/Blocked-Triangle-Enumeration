@@ -3,7 +3,7 @@
 #include <thrust/sort.h>
 
 void initListArrBlock(
-    const EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim, int blockSize,
+    EdgeMatrix &edgeBlock, const vector< int > &rowWidth, int blockDim, int blockSize,
     ListArrMatrix &listArrBlock
 ){
     for(int i = 0; i < blockDim; i++){
@@ -22,7 +22,7 @@ void initListArrBlock(
         for(int j = i; j < blockDim; j++){
             int vOffset = offset[j];
             if(i != j) vOffset -= rowWidth[i];
-            transBlock(edgeBlock[i][j], rowWidth[i], offset[i], vOffset, listArrBlock[i][j], d_listArr);
+            gTransBlock(edgeBlock[i][j], rowWidth[i], offset[i], vOffset, listArrBlock[i][j], d_listArr);
         }
     }
 
@@ -30,7 +30,7 @@ void initListArrBlock(
     delete [] offset;
 }
 
-void transBlock(
+void gTransBlock(
     const vector< Edge > &edge, int nodeNum, int uOffset, int vOffset,
     ListArray &listArr, ListArray *d_listArr
 ){
