@@ -17,7 +17,6 @@ void initListArrBlock(
     offset[0] = 0;
     for(int i = 1; i < blockDim; i++){
         offset[i] = offset[i-1] + rowWidth[i-1];
-        offset[i] *= blockSize;
     }
 
     for(int i = 0; i < blockDim; i++){
@@ -25,7 +24,7 @@ void initListArrBlock(
             thrust::device_vector< Edge > d_edge = edgeBlock[i][j];
             thrust::sort(d_edge.begin(), d_edge.end());
 
-            int nodeNum = rowWidth[i]*blockSize;
+            int nodeNum = rowWidth[i];
             int edgeNum = (int)edgeBlock[i][j].size();
             listArrBlock[i][j].initArray(nodeNum, edgeNum);
             if(listArrBlock[i][j].edgeNum == 0){
@@ -41,9 +40,9 @@ void initListArrBlock(
             int nodeThread = (nodeNum<1024) ? nodeNum : 1024;
             if(nodeNum % 1024 != 0) nodeBlock++;
 
-            int gpuBlock = edgeNum/1024;
-            int gpuThread = (edgeNum<1024) ? edgeNum : 1024;
-            relabelBlock<<< gpuBlock, gpuThread >>>(edgeNum, offset[i], offset[j], pd_edge);
+            int vOffset = offset[j];
+            if(i != j) vOffset -= rowWidth[i];
+            relabelBlock<<< edgeBlock, edgeThread >>>(edgeNum, offset[i], vOffset, pd_edge);
 
             cudaMalloc((void**)&d_nodeArr, sizeof(int)*(nodeNum+1));
             cudaMalloc((void**)&d_edgeArr, sizeof(int)*edgeNum);

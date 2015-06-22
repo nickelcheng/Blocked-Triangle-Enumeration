@@ -21,10 +21,6 @@ int main(int argc, char *argv[]){
     }
 
     int blockSize = atoi(argv[2]);
-    if(blockSize % 1024 != 0){
-        fprintf(stderr, "block size must be mutiple of 1024\n");
-        return 0;
-    }
     if(argc == 4) assignProc = atoi(argv[3]);
     else assignProc = UNDEF;
 
@@ -37,6 +33,12 @@ int main(int argc, char *argv[]){
     forwardReorder(nodeNum, edge);
     int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
     rowWidth.resize(blockDim);
+    fprintf(stderr, "blockDim: %d\n", blockDim);
+    for(int i = 0; i < (int)rowWidth.size(); i++){
+        rowWidth[i] *= blockSize;
+//        printf("%d %d\n", i, rowWidth[i]);
+    }
+    timerEnd("split block", 1)
 
     ListArrMatrix listArrBlock(blockDim);
     initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
