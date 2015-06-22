@@ -36,6 +36,8 @@ void initListArrBlock(
     ListArrMatrix &listArrBlock
 );
 
+void setEmptyArray(int nodeNum, int *arr);
+
 #ifdef __NVCC__
 __global__ void relabelBlock(int edgeNum, int uOffset, int vOffset, Edge *edge);
 #endif

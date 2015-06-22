@@ -27,6 +27,12 @@ void initListArrBlock(
 
             int nodeNum = rowWidth[i]*blockSize;
             int edgeNum = (int)edgeBlock[i][j].size();
+            listArrBlock[i][j].initArray(nodeNum, edgeNum);
+            if(listArrBlock[i][j].edgeNum == 0){
+                setEmptyArray(nodeNum, listArrBlock[i][j].nodeArr);
+                continue;
+            }
+
             Edge *pd_edge = thrust::raw_pointer_cast(d_edge.data());
 
             int gpuBlock = edgeNum/1024;
@@ -42,7 +48,6 @@ void initListArrBlock(
             gpuThread = (nodeNum<1024) ? nodeNum : 1024;
             edge2listArr<<< gpuBlock, gpuThread >>>(pd_edge, nodeNum, edgeNum, d_listArr);
 
-            listArrBlock[i][j].initArray(nodeNum, edgeNum);
             cudaMemcpy(listArrBlock[i][j].nodeArr, d_nodeArr, sizeof(int)*(nodeNum+1), D2H);
             cudaMemcpy(listArrBlock[i][j].edgeArr, d_edgeArr, sizeof(int)*edgeNum, D2H);
 
@@ -56,7 +61,6 @@ void initListArrBlock(
 }
 
 __global__ void relabelBlock(int edgeNum, int uOffset, int vOffset, Edge *edge){
-    if(edgeNum == 0) return;
     if(uOffset == 0 && vOffset == 0) return;
     int idx = blockDim.x*blockIdx.x + threadIdx.x;
     int threads = blockDim.x * gridDim.x;
