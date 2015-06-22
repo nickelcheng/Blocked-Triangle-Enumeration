@@ -12,6 +12,7 @@
 int assignProc, currTid;
 pthread_t threads[MAX_THREAD_NUM];
 bool threadUsed[MAX_THREAD_NUM];
+pthread_mutex_t lock;
 long long triNum;
 
 int main(int argc, char *argv[]){
@@ -46,8 +47,8 @@ int main(int argc, char *argv[]){
 /*    timerInit(2)
     timerStart(0)
 
-    splitBlock(blockSize, block, edge);
-    sortBlock(block, blockDim);*/
+    timerStart(1)
+    pthread_mutex_init(&lock, NULL);
 
 /*    for(int i = 0; i < blockDim; i++){
         for(int j = i; j < blockDim; j++){
@@ -69,26 +70,8 @@ int main(int argc, char *argv[]){
             printBlock(block[j][j], j, j);*/
 /*            mergeBlock(block, i, j, blockSize);
 
-            for(int k = j+1; k < blockDim; k++){
-                relabelBlock(block[i][k], blockSize, 0, 0);
-                relabelBlock(block[j][k], blockSize, 1, 0);
-//                printf("intersect %d, base (%d,%d)\n", k, i, j);
-                printBlock(block[i][k], i, k);
-                printBlock(block[j][k], j, k);*/
-/*                intersectBlock(block, i, j, k, blockSize);
-            }
-        }
-    }
-    for(int i = 0; i < blockDim; i++){
-        relabelBlock(block[i][i], blockSize, 0, 0);
-//        printf("solve %d\n", i);
-        printf("relabel block %d -> (0,0)\n", i);
-        printBlock(block[i][i], i, i);*/
-/*        solveBlock(block[i][i], blockSize);
-    }
-
-    for(int i = 0; i < MAX_THREAD_NUM; i++)
-        waitAndAddTriNum(i);
+    pthread_mutex_destroy(&lock);
+    timerEnd("count", 1)
 
     timerEnd("total", 0)
 

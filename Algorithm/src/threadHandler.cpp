@@ -7,35 +7,34 @@
 extern pthread_t threads[MAX_THREAD_NUM];
 extern bool threadUsed[MAX_THREAD_NUM];
 
-void waitAndAddTriNum(int tid){
+void waitThread(int tid){
     if(!threadUsed[tid]) return;
-    extern long long triNum;
-    void *ans;
-    pthread_join(threads[tid], &ans);
-    triNum += *(long long*)ans;
-    delete (long long*)ans;
+    pthread_join(threads[tid], NULL);
     threadUsed[tid] = false;
 }
 
 void *callList(void *arg){
-    long long *triNum = new long long;
-    if(((ListArg*)arg)->device == CPU)
-        *triNum = cpuCountList(*(ListArg*)arg);
+    if(((ListArg*)arg)->device == CPU){
+        cpuCountList(*(ListArg*)arg);
+        if(((ListArg*)arg)->delTar)
+            delete((ListArg*)arg)->target;
+    }
     else
-        *triNum = gpuCountTriangle(*(ListArg*)arg);
-        
+        gpuCountTriangle(*(ListArg*)arg);
+
     delete (ListArg*)arg;
-    pthread_exit((void*)triNum);
+    pthread_exit(NULL);
 }
 
 void *callMat(void *arg){
-    long long *triNum = new long long;
-    if(((MatArg*)arg)->device == CPU)
-        *triNum = cpuCountMat(*(MatArg*)arg);
+    if(((MatArg*)arg)->device == CPU){
+        cpuCountMat(*(MatArg*)arg);
+        delete((MatArg*)arg)->target;
+    }
     else
-        *triNum = gpuCountTriangleMat(*(MatArg*)arg);
+        gpuCountTriangleMat(*(MatArg*)arg);
 
     delete (MatArg*)arg;
-    pthread_exit((void*)triNum);
+    pthread_exit(NULL);
 }
 
