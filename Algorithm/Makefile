@@ -25,7 +25,7 @@ all: count proc
 cardInfo: ../Tools/gpuCardInfo.cu
 	$(NVCC) $^ -o $@
 
-count: $(filter-out $(OBJ_DIR)procedure.o, $(obj))
+count: $(filter-out $(OBJ_DIR)g_procedure.o, $(obj))
 	$(NVCC) $^ -Xcompiler "$(FLAG)" -o $@
 
 proc: $(filter-out $(OBJ_DIR)g_main.o, $(obj))
