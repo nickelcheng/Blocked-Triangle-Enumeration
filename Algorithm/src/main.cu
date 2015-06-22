@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
     double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
 
     if(density > 0.01)
-        forwardReorder(nodeNum, edge);
+        gForwardReorder(nodeNum, edge);
 
     EdgeMatrix edgeBlock;
     vector< int > rowWidth;

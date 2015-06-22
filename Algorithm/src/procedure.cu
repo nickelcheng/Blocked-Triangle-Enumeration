@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
     double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
 
     if(density > 0.01)
-        forwardReorder(nodeNum, edge);
+        cForwardReorder(nodeNum, edge);
 
     ListArray listArr, *d_listArr;
     cudaMalloc((void**)&d_listArr, sizeof(ListArray));
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]){
 
     timerEnd("time", 0)
 
-    printf("%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
+//    printf("%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);
     return 0;
 }

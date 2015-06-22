@@ -2,11 +2,11 @@
 #include <thrust/sort.h>
 #include <omp.h>
 
-void forwardReorder(int nodeNum, vector< Edge > &edge){
+void gForwardReorder(int nodeNum, vector< Edge > &edge){
     ForwardNode *node = new ForwardNode[nodeNum];
     #pragma omp parallel for
     for(int i = 0; i < nodeNum; i++){
-        node[i].oriOrder = i;
+        node[i].order = i;
         node[i].realDeg = 0;
     }
 
@@ -21,7 +21,7 @@ void forwardReorder(int nodeNum, vector< Edge > &edge){
     int *newOrder = new int[nodeNum];
     #pragma omp parallel for
     for(int i = 0; i < nodeNum; i++)
-        newOrder[node[i].oriOrder] = i;
+        newOrder[node[i].order] = i;
 
     int edgeNum = (int)edge.size();
     #pragma omp parallel for
