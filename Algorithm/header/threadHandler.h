@@ -6,20 +6,20 @@
 
 const int MAX_THREAD_NUM = 48;
 
-typedef struct listArg{
-    ListArray edge, target;
-    int maxDeg, threadNum, blockNum;
+typedef struct ListArg{
+    const ListArray *edge, *target;
+    int maxDeg;
     int device;
+    bool delTar;
 } ListArg;
 
-typedef struct matArg{
-    ListArray edge;
-    BitMat target;
-    int threadNum, blockNum;
+typedef struct MatArg{
+    const ListArray *edge;
+    const BitMat *target;
     int device;
 } MatArg;
 
-void waitAndAddTriNum(int tid);
+void waitThread(int tid);
 void *callList(void *arg);
 void *callMat(void *arg);
 
