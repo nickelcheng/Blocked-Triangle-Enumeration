@@ -1,6 +1,5 @@
 #include "mat.h"
 #include "binaryTree.h"
-#include "solve.h"
 
 void gpuCountTriangleMat(const MatArg &matArg){
     const ListArray &edge = *(matArg.edge);
@@ -11,7 +10,7 @@ void gpuCountTriangleMat(const MatArg &matArg){
     BitMat *d_target;
     int *d_edgeArr, *d_nodeArr, *d_mat;
 
-    int blockNum = GPU_BLOCK_NUM;
+    extern int blockNum, threadNum;
     if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
@@ -38,7 +37,7 @@ void gpuCountTriangleMat(const MatArg &matArg){
     delete &target;
 
     int smSize = target.nodeNum*sizeof(UI);
-    gpuCountMat<<< blockNum, GPU_THREAD_NUM, smSize >>>(d_edge, d_target, d_triNum);
+    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
 

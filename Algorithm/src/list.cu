@@ -1,6 +1,5 @@
 #include "list.h"
 #include "binaryTree.h"
-#include "solve.h"
 
 void gpuCountTriangle(const ListArg &listArg){
     const ListArray &edge = *(listArg.edge);
@@ -11,7 +10,7 @@ void gpuCountTriangle(const ListArg &listArg){
     ListArray *d_edge, *d_target;
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;
     
-    int blockNum = GPU_BLOCK_NUM;
+    extern int blockNum, threadNum;
     if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
@@ -42,7 +41,7 @@ void gpuCountTriangle(const ListArg &listArg){
     if(listArg.delTar) delete &target;
 
     int smSize = maxDeg*sizeof(int);
-    gpuCountList<<< blockNum, GPU_THREAD_NUM, smSize >>>(d_edge, d_target, d_triNum);
+    gpuCountList<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
 

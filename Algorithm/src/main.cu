@@ -7,19 +7,29 @@
 #include "threadHandler.h"
 
 int assignProc, currTid;
+int blockNum, threadNum;
 pthread_t threads[MAX_THREAD_NUM];
 bool threadUsed[MAX_THREAD_NUM];
 pthread_mutex_t lock;
 long long triNum;
 
 int main(int argc, char *argv[]){
-    if(argc != 3 && argc != 4){
-        fprintf(stderr, "usage: count <input_path> <block_size> (<assign_proc>)\n");
+    if(argc != 3 && argc != 4 && argc != 6){
+        fprintf(stderr, "usage: count <input_path> <block_size> (<assign_proc> <block_num> <thread_num)\n");
         return 0;
     }
 
     int blockSize = atoi(argv[2]);
-    if(argc == 4) assignProc = atoi(argv[3]);
+    if(argc >= 4){
+        assignProc = atoi(argv[3]);
+        if(assignProc == G_LIST || assignProc == G_MAT){
+            if(argc != 6){
+                fprintf(stderr, "use default %d blocks, %d threads\n", GPU_BLOCK_NUM, GPU_THREAD_NUM);
+                blockNum = GPU_BLOCK_NUM;
+                threadNum = GPU_THREAD_NUM;
+            }
+        }
+    }
     else assignProc = UNDEF;
 
     vector< Edge > edge;
