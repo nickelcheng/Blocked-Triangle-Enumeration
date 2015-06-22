@@ -1,95 +1,70 @@
 #include "solve.h"
-#include "reorder.h"
 #include "list.h"
 #include "mat.h"
 #include "tool.h"
-#include<cstdio>
-#include<algorithm>
-#include "timer.h"
 
-/*void solveBlock(const vector< Edge > &edge, int blockSize){
-    if(edge.empty()) return;
+long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth, int blockDim){
+    for(int b = 0; b < blockDim; b++){
+        const ListArray &base = block[b][b];
 
-    int entry = averageCeil(blockSize, BIT_PER_ENTRY);
-    scheduler(edge, blockSize, edge, blockSize, entry);
-}
+        // solve block
+        fprintf(stderr, "solve block %d\n", b);
+        scheduler(base, base, rowWidth[b], false);
 
-void mergeBlock(const vector< Matrix > &block, int x, int y, int blockSize){
-    if(block[x][y].empty()) return;
+        for(int i = b+1; i < blockDim; i++){
+            const ListArray &ext = block[b][i];
+            ListArray *target;
 
-    vector< Edge > edge;
-    edge.insert(edge.end(), block[x][x].begin(), block[x][x].end());
-    edge.insert(edge.end(), block[y][y].begin(), block[y][y].end());
-    edge.insert(edge.end(), block[x][y].begin(), block[x][y].end());
-    if(edge.empty()) return;
+            // 2-way merge-1
+            fprintf(stderr, "2-1merge %d %d\n", b, i);
+            scheduler(base, ext, rowWidth[i], false);
 
-    vector< Edge >::const_iterator e = block[x][y].begin();
-    for(int i = 0; e != block[x][y].end(); ++e, i++){
-        edge.push_back(Edge(e->v, e->u));
+            target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
+            ext.integrate(block[i][i], true, *target);
+            // 2-way merge-2
+            fprintf(stderr, "2-2merge %d %d\n", b, i);
+            scheduler(ext, *target, rowWidth[i], true);
+
+            for(int j = i+1; j < blockDim; j++){
+                target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
+                block[b][j].integrate(block[i][j], false, *target);
+                // 3-way merge
+                printf("3merge %d %d %d\n", b, i, j);
+                scheduler(ext, *target, rowWidth[j], true);
+            }
+        }
     }
-    std::sort(edge.begin(), edge.end());
-    
-    int entry = averageCeil(2*blockSize, BIT_PER_ENTRY);
-    scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
-}
 
-void intersectBlock(const vector< Matrix > &block, int x, int y, int z, int blockSize){
-    if(block[x][y].empty()) return;
+    for(int i = 0; i < MAX_THREAD_NUM; i++)
+        waitThread(i);
 
-    vector< Edge > edge;
-    edge.insert(edge.end(), block[x][z].begin(), block[x][z].end());
-    edge.insert(edge.end(), block[y][z].begin(), block[y][z].end());
-    if(edge.empty()) return;
-
-    int entry = averageCeil(blockSize, BIT_PER_ENTRY);
-    scheduler(block[x][y], blockSize, edge, 2*blockSize, entry);
+    return 0;
 }
 
 void scheduler(
-    const vector< Edge > &edge, int edgeRange, 
-    const vector< Edge > &target, int nodeNum, int entryNum
+    const ListArray &edge, const ListArray &target, int width, bool delTar
 ){
-    // todo: auto deside proc, blockNum, and threadNum
-    int proc = LIST, threadNum = 256, blockNum = 1024;
+    int device, proc;
+    getStrategy(edge, target, device, proc);
+
+    if(proc == LIST)
+        list(device, edge, target, delTar);
+    else{
+        BitMat *tarMat = new BitMat; // delete in callMat or gpuCountTriangleMat
+        int entry = averageCeil(width, BIT_PER_ENTRY);
+        tarMat->initMat(target, entry);
+        if(delTar) delete &target;
+        mat(device, edge, *tarMat);
+    }
+}
+
+void getStrategy(const ListArray &edge, const ListArray &target, int &device, int &proc){
+    device = CPU, proc = LIST; // default
     extern int assignProc;
-    if(assignProc >= LIST && assignProc <= G_MAT)
-        proc = assignProc;
-    else
-        getStrategy(nodeNum, (int)target.size(), proc);
-
-//    timerInit(1)
-//    timerStart(0)
-
-    if(proc == LIST){
-        list(CPU, edge, edgeRange, target, nodeNum);
+    switch(assignProc){
+        case LIST: device = CPU, proc = LIST; break;
+        case G_LIST: device = GPU, proc = LIST; break;
+        case MAT: device = CPU, proc = MAT; break;
+        case G_MAT: device = GPU, proc = MAT; break;
     }
-    else if(proc == G_LIST){
-        list(GPU, edge, edgeRange, target, nodeNum, threadNum, blockNum);
-    }
-    else if(proc == MAT){
-        mat(CPU, edge, edgeRange, target, nodeNum, entryNum);
-    }
-    else if(proc == G_MAT){
-        mat(GPU, edge, edgeRange, target, nodeNum, entryNum, threadNum, blockNum);
-    }
-//    timerEnd("time", 0)
 }
-
-void getStrategy(int nodeNum, int edgeNum, int &proc){
-    double density = edgeNum / (nodeNum*(nodeNum-1)) * 100;
-    int cpu, gpu;
-    if((nodeNum <= 1024 && density < 10) || (nodeNum <= 2048 && density < 7))
-        cpu = LIST;
-    else
-        cpu = MAT;
-    if((nodeNum <= 1024 && density < 30) || (nodeNum <= 10240 && density < 20) || nodeNum > 10240)
-        gpu = G_LIST;
-    else
-        gpu = G_MAT;
-
-    if(nodeNum <= 1024 || (nodeNum <= 1536 && density < 20) || (nodeNum <= 2048 && density < 15) || (nodeNum <= 3072 && density < 8) || (nodeNum <= 6144 && density < 4))
-        proc = cpu;
-    else
-        proc = gpu;
-}
-*/

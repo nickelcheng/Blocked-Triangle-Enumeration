@@ -1,22 +1,20 @@
 #ifndef __SOLVE_H__
 #define __SOLVE_H__
 
-#include "main.h"
+#include "block.h"
+#include "listArray.h"
+#include <thrust/device_vector.h>
+#include <vector>
 
+using std::vector;
+
+const int GPU_BLOCK_NUM = 16000;
+const int GPU_THREAD_NUM = 256;
 enum{LIST = 0, G_LIST, MAT, G_MAT, UNDEF};
 enum{CPU = 0, GPU};
 
-/*void solveBlock(const vector< Edge > &edge, int blockSize);
+long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth, int blockDim);
+void scheduler(const ListArray &edge, const ListArray &target, int entry, bool delTar);
+void getStrategy(const ListArray &edge, const ListArray &target, int &device, int &proc);
 
-void mergeBlock(const vector< Matrix > &block, int x, int y, int blockSize);
-
-void intersectBlock(const vector< Matrix > &block, int x, int y, int z, int blockSize);
-
-void scheduler(
-    const vector< Edge > &edge, int edgeRange,
-    const vector< Edge > &target, int nodeNum, int entryNum
-);
-
-void getStrategy(int nodeNum, int edgeNum, int &proc);
-*/
 #endif
