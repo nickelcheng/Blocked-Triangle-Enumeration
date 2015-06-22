@@ -1,17 +1,18 @@
 #include "list.h"
 #include "binaryTree.h"
+#include "solve.h"
 
-long long gpuCountTriangle(const ListArg &listArg){
-    const ListArray &edge = listArg.edge;
-    const ListArray &target = listArg.target;
+void gpuCountTriangle(const ListArg &listArg){
+    const ListArray &edge = *(listArg.edge);
+    const ListArray &target = *(listArg.target);
     int maxDeg = listArg.maxDeg;
-    int threadNum = listArg.threadNum;
-    int blockNum = listArg.blockNum;
 
-    long long *d_triNum, triNum;
+    long long *d_triNum, ans;
     ListArray *d_edge, *d_target;
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;
     
+    int blockNum = GPU_BLOCK_NUM;
+    if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
     // copy edge to device
@@ -38,10 +39,12 @@ long long gpuCountTriangle(const ListArg &listArg){
     cudaMemcpy(d_target_edgeArr, target.edgeArr, sizeof(int)*target.edgeNum, H2D);
     cudaMemcpy(&(d_target->edgeArr), &d_target_edgeArr, sizeof(int*), H2D);
 
+    if(listArg.delTar) delete &target;
+
     int smSize = maxDeg*sizeof(int);
-    gpuCountList<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
+    gpuCountList<<< blockNum, GPU_THREAD_NUM, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
-    cudaMemcpy(&triNum, d_triNum, sizeof(long long), D2H);
+    cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
 
     cudaFree(d_triNum);
     cudaFree(d_edge);
@@ -51,7 +54,11 @@ long long gpuCountTriangle(const ListArg &listArg){
     cudaFree(d_target_edgeArr);
     cudaFree(d_target_nodeArr);
 
-    return triNum;
+    extern long long triNum;
+    extern pthread_mutex_t lock;
+    pthread_mutex_lock(&lock);
+    triNum += ans;
+    pthread_mutex_unlock(&lock);
 }
 
 __global__ void gpuCountList(const ListArray *edge, const ListArray *target, long long *triNum){
@@ -63,24 +70,26 @@ __global__ void gpuCountList(const ListArray *edge, const ListArray *target, lon
     int range = edge->nodeNum;
     for(int u = blockIdx.x; u < range; u += gridDim.x){
         int uLen = target->getDeg(u);
-        const int *uList = target->neiStart(u);
+        if(uLen > 0){
+            const int *uList = target->neiStart(u);
         
-        // move node u's adj list (in target) to shared memory
-        int uDeg = edge->getDeg(u);
-        for(int i = threadIdx.x; i < uLen; i += blockDim.x){
-            uAdj[i] = uList[i];
-        }
-        __syncthreads();
+            // move node u's adj list (in target) to shared memory
+            int uDeg = edge->getDeg(u);
+            for(int i = threadIdx.x; i < uLen; i += blockDim.x){
+                uAdj[i] = uList[i];
+            }
+            __syncthreads();
 
-        // counting triangle number
-        threadTriNum[threadIdx.x] = 0;
-        const int *uNei = edge->neiStart(u);
-        for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
-            int v = uNei[i];
-            int vLen = target->getDeg(v);
-            const int *vList = target->neiStart(v);
-            // intersect u list and v list in target
-            threadTriNum[threadIdx.x] += intersectList(uLen, vLen, uAdj, vList);
+            // counting triangle number
+            threadTriNum[threadIdx.x] = 0;
+            const int *uNei = edge->neiStart(u);
+            for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
+                int v = uNei[i];
+                int vLen = target->getDeg(v);
+                const int *vList = target->neiStart(v);
+                // intersect u list and v list in target
+                threadTriNum[threadIdx.x] += intersectList(uLen, vLen, uAdj, vList);
+            }
         }
         __syncthreads();
 
