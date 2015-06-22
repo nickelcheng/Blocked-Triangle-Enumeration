@@ -14,11 +14,6 @@ int initEdgeBlock(
     vector< int* > blockEdgeNum(blockDim);
     countBlockEdgeNum(edge, blockDim, blockSize, blockEdgeNum);
 
-    for(int i = 0; i < blockDim; i++){
-        if(blockEdgeNum[i][i] > EDGE_NUM_LIMIT)
-            fprintf(stderr, "error, EDGE_NUM_LIMIT(%d) too small or blockSize(%d) too large\n", EDGE_NUM_LIMIT, blockSize);
-    }
-
     int *newID = new int[blockDim];
     rowWidth = vector< int >(blockDim);
     int newBlockDim = integrateBlock(blockEdgeNum, blockDim, newID, rowWidth);
