@@ -11,7 +11,8 @@ class ListArray{
         DECORATE int getDeg(int v) const;
         DECORATE int getNodeNum() const;
         DECORATE const int* neiStart(int v) const;
-        void integrate(const ListArray &a, ListArray &res) const;
+        void integrate(const ListArray &a, bool diagonal, ListArray &res) const;
+        void relabel(ListArray &res) const;
         DECORATE void print() const;
 //    private:
         int *nodeArr, nodeNum;
@@ -19,6 +20,8 @@ class ListArray{
 };
 
 #ifdef __NVCC__
+__global__ void removeEmptyFlag(int nodeNum, ListArray *listArr);
+__global__ void initNodeArr(int nodeNum, ListArray *listArr);
 __global__ void edge2listArr(const Edge *edge, int nodeNum, int edgeNum, ListArray *listArr);
 #endif
 
