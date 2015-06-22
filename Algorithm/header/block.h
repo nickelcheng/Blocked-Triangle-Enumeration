@@ -36,6 +36,11 @@ void initListArrBlock(
     ListArrMatrix &listArrBlock
 );
 
+void transBlock(
+    const vector< Edge > &edge, int nodeNum, int uOffset, int vOffset,
+    ListArray &listArr, ListArray *d_listArr
+);
+
 void setEmptyArray(int nodeNum, int *arr);
 
 #ifdef __NVCC__
