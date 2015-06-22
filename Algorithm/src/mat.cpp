@@ -5,43 +5,32 @@
 #include <pthread.h>
 #include <cstdio>
 
-void mat(
-    int device,
-    const vector< Edge > &edge, int edgeRange,
-    const vector< Edge > &target, int nodeNum, int entryNum,
-    int threadNum, int blockNum
-){
-/*    MatArg *matArg = new MatArg;
-
+void mat(int device, const ListArray &edge, const BitMat &target){
     extern pthread_t threads[MAX_THREAD_NUM];
     extern bool threadUsed[MAX_THREAD_NUM];
     extern int currTid;
 
-    matArg->edge.initArray(edge, edgeRange);
-    matArg->target.initMat(target, nodeNum, entryNum);
-    
-    currTid %= 10;
-    waitAndAddTriNum(currTid);
-    threadUsed[currTid] = true;
-
-    if(device == CPU || matArg->target.nodeNum > MAX_NODE_NUM_LIMIT){
-        matArg->device = CPU;
-        pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
+    MatArg *matArg = new MatArg; // delete in callMat
+    matArg->device = device;
+    matArg->edge = &edge, matArg->target = &target;
+    if(device == GPU && target.nodeNum > MAX_NODE_NUM_LIMIT){
+        delete matArg;
+        return;
     }
 
-    else{
-        matArg->threadNum = threadNum;
-        matArg->blockNum = blockNum;
-        matArg->device = GPU;
-
-        pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
-    }*/
+    currTid %= MAX_THREAD_NUM;
+    waitThread(currTid);
+    threadUsed[currTid] = true;
+    pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
+    //waitThread(currTid-1);
 }
 
-long long cpuCountMat(const MatArg &matArg){
-    const ListArray &edge = matArg.edge;
-    const BitMat &target = matArg.target;
-    long long triNum = 0;
+void cpuCountMat(const MatArg &matArg){
+    const ListArray &edge = *(matArg.edge);
+    const BitMat &target = *(matArg.target);
+
+    long long ans = 0;
+
     for(int e = 0; e < target.entryNum; e++){
     // iterator through each edge
         int range = edge.getNodeNum();
@@ -55,10 +44,14 @@ long long cpuCountMat(const MatArg &matArg){
                 UI e2 = target.getContent(v, e);
                 long long tmp = countOneBits(e1 & e2);
                 if(countOneBits(e1&e2)>0)
-                triNum += tmp;
+                ans += tmp;
             }
         }
     }
-    return triNum;
+    extern long long triNum;
+    extern pthread_mutex_t lock;
+    pthread_mutex_lock(&lock);
+    triNum += ans;
+    pthread_mutex_unlock(&lock);
 }
 

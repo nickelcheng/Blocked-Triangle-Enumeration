@@ -1,17 +1,18 @@
 #include "mat.h"
 #include "binaryTree.h"
+#include "solve.h"
 
-long long gpuCountTriangleMat(const MatArg &matArg){
-    const ListArray &edge = matArg.edge;
-    const BitMat &target = matArg.target;
-    int threadNum = matArg.threadNum;
-    int blockNum = matArg.blockNum;
+void gpuCountTriangleMat(const MatArg &matArg){
+    const ListArray &edge = *(matArg.edge);
+    const BitMat &target = *(matArg.target);
 
-    long long *d_triNum, triNum;
+    long long *d_triNum, ans;
     ListArray *d_edge;
     BitMat *d_target;
     int *d_edgeArr, *d_nodeArr, *d_mat;
 
+    int blockNum = GPU_BLOCK_NUM;
+    if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
     // copy edge to device
@@ -35,9 +36,9 @@ long long gpuCountTriangleMat(const MatArg &matArg){
     cudaMemcpy(&(d_target->mat), &d_mat, sizeof(UI*), H2D);
 
     int smSize = target.nodeNum*sizeof(UI);
-    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
+    gpuCountMat<<< blockNum, GPU_THREAD_NUM, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
-    cudaMemcpy(&triNum, d_triNum, sizeof(long long), D2H);
+    cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
 
     cudaFree(d_triNum);
     cudaFree(d_edge);
@@ -46,7 +47,11 @@ long long gpuCountTriangleMat(const MatArg &matArg){
     cudaFree(d_nodeArr);
     cudaFree(d_mat);
 
-    return triNum;
+    extern long long triNum;
+    extern pthread_mutex_t lock;
+    pthread_mutex_lock(&lock);
+    triNum += ans;
+    pthread_mutex_unlock(&lock);
 }
 
 __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long long *triNum){
