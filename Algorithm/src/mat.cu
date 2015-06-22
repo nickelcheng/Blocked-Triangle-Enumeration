@@ -35,6 +35,8 @@ void gpuCountTriangleMat(const MatArg &matArg){
     cudaMemcpy(d_mat, target.mat, sizeof(UI)*target.entryNum*target.nodeNum, H2D);
     cudaMemcpy(&(d_target->mat), &d_mat, sizeof(UI*), H2D);
 
+    delete &target;
+
     int smSize = target.nodeNum*sizeof(UI);
     gpuCountMat<<< blockNum, GPU_THREAD_NUM, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
