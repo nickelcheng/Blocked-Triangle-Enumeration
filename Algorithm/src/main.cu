@@ -1,10 +1,8 @@
 #include<cstdio>
 #include<cstdlib>
-#include<cstring>
 #include "io.h"
 #include "reorder.h"
 #include "solve.h"
-#include "tool.h"
 #include "block.h"
 #include "threadHandler.h"
 

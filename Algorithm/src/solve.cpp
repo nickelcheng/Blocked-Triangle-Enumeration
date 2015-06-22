@@ -8,7 +8,6 @@ long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth
         const ListArray &base = block[b][b];
 
         // solve block
-        fprintf(stderr, "solve block %d\n", b);
         scheduler(base, base, rowWidth[b], false);
 
         for(int i = b+1; i < blockDim; i++){
@@ -16,20 +15,17 @@ long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth
             ListArray *target;
 
             // 2-way merge-1
-            fprintf(stderr, "2-1merge %d %d\n", b, i);
             scheduler(base, ext, rowWidth[i], false);
 
             target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
             ext.integrate(block[i][i], true, *target);
             // 2-way merge-2
-            fprintf(stderr, "2-2merge %d %d\n", b, i);
             scheduler(ext, *target, rowWidth[i], true);
 
             for(int j = i+1; j < blockDim; j++){
                 target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
                 block[b][j].integrate(block[i][j], false, *target);
                 // 3-way merge
-                printf("3merge %d %d %d\n", b, i, j);
                 scheduler(ext, *target, rowWidth[j], true);
             }
         }

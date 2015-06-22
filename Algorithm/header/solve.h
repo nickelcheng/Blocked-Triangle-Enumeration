@@ -3,7 +3,6 @@
 
 #include "block.h"
 #include "listArray.h"
-#include <thrust/device_vector.h>
 #include <vector>
 
 using std::vector;

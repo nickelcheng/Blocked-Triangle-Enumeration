@@ -1,7 +1,8 @@
 GCC = g++
 FLAG = -Wall -O2 -lpthread -fopenmp
 NVCC = nvcc
-GPU_FLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_52,code=sm_52
+GPU_FLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_35,code=sm_35
+#GPU_FLAG = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_52,code=sm_52
 RDC = -rdc=true
 
 VPATH = src
@@ -27,7 +28,7 @@ cardInfo: ../Tools/gpuCardInfo.cu
 count: $(filter-out $(OBJ_DIR)procedure.o, $(obj))
 	$(NVCC) $^ -Xcompiler "$(FLAG)" -o $@
 
-proc: $(filter-out $(OBJ_DIR)main.o, $(obj))
+proc: $(filter-out $(OBJ_DIR)g_main.o, $(obj))
 	$(NVCC) $^ -Xcompiler "$(FLAG)" -o $@
 
 $(cudaObj): $(OBJ_DIR)g_%.o: %.cu

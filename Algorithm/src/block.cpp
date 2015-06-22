@@ -1,9 +1,5 @@
 #include "block.h"
-#include "io.h"
-#include "list.h"
 #include "tool.h"
-#include<algorithm>
-#include<cstdio>
 #include <omp.h>
 
 int initEdgeBlock(

@@ -3,6 +3,7 @@
 
 #include "listArray.h"
 #include "bitMat.h"
+#include <pthread.h>
 
 const int MAX_THREAD_NUM = 48;
 

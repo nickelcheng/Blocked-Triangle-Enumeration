@@ -27,10 +27,6 @@ DECORATE  int ListArray::getDeg(int v) const{
     return nodeArr[v+1] - nodeArr[v];
 }
 
-DECORATE int ListArray::getNodeNum() const{
-    return nodeNum;
-}
-
 DECORATE const int* ListArray::neiStart(int v) const{
     if(v < 0 || v >= nodeNum) return NULL;
     if(nodeArr[v] >= edgeNum) return NULL;

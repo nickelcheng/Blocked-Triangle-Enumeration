@@ -1,9 +1,5 @@
 #include "mat.h"
-#include "tool.h"
 #include "solve.h"
-#include "threadHandler.h"
-#include <pthread.h>
-#include <cstdio>
 
 void mat(int device, const ListArray &edge, const BitMat &target){
     extern pthread_t threads[MAX_THREAD_NUM];
@@ -33,7 +29,7 @@ void cpuCountMat(const MatArg &matArg){
 
     for(int e = 0; e < target.entryNum; e++){
     // iterator through each edge
-        int range = edge.getNodeNum();
+        int range = edge.nodeNum;
         for(int u = 0; u < range; u++){
 
             const int *uNei = edge.neiStart(u);

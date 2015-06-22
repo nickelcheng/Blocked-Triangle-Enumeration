@@ -1,10 +1,5 @@
 #include "list.h"
-#include "listArray.h"
-#include "reorder.h"
 #include "solve.h"
-#include <cstring>
-#include <algorithm>
-#include <pthread.h>
 
 void list(int device, const ListArray &edge, const ListArray &target, bool delTar){
     extern pthread_t threads[MAX_THREAD_NUM];
@@ -34,7 +29,7 @@ void cpuCountList(const ListArg &listArg){
     long long ans = 0;
 
     // iterator through each edge (u, v)
-    int range = edge.getNodeNum();
+    int range = edge.nodeNum;
     for(int u = 0; u < range; u++){
         int uLen = target.getDeg(u);
         if(uLen > 0){

@@ -4,11 +4,8 @@
 #include "listArray.h"
 #include "bitMat.h"
 #include "threadHandler.h"
-#include <thrust/device_vector.h>
 
 typedef unsigned int UI;
-
-using thrust::device_vector;
 
 #ifdef __NVCC__
 extern __shared__ UI tile[];
