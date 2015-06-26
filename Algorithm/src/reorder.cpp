@@ -1,6 +1,21 @@
 #include "reorder.h"
 #include "main.h"
+#include <cmath>
 #include <omp.h>
+
+void forwardReorder(int nodeNum, vector< Edge > &edge){
+    int edgeNum = (int)edge.size();
+    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
+    if(density > 0.01) return;
+
+    // split line: sqrt(nodeNum) = -24.175 * ln(density) + 142.456
+    // >: GPU, <=: CPU
+    double sqrtN = sqrt(nodeNum);
+    double lhs = (sqrtN-142.456)/-24.175;
+    double boundD = exp(lhs);
+    if(density > boundD) gForwardReorder(nodeNum, edge);
+    else cForwardReorder(nodeNum, edge);
+}
 
 void cForwardReorder(int nodeNum, vector< Edge > &edge){
     ForwardNode *node = new ForwardNode[nodeNum];

@@ -45,19 +45,14 @@ int main(int argc, char *argv[]){
     // resolve first cuda call slow timing issue
     cudaFree(0);
 
-    timerInit(1)
-    timerStart(0)
-    int edgeNum = (int)edge.size();
-    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
-
-    if(density > 0.01)
-        cForwardReorder(nodeNum, edge);
+    forwardReorder(nodeNum, edge);
 
     ListArray listArr;
-//    ListArray *d_listArr;
-//    cudaMalloc((void**)&d_listArr, sizeof(ListArray));
-//    gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
-    cTransBlock(edge, nodeNum, 0, 0, listArr);
+
+    ListArray *d_listArr;
+    cudaMalloc((void**)&d_listArr, sizeof(ListArray));
+    gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
+    cudaFree(d_listArr);
 
     pthread_mutex_init(&lock, NULL);
 
@@ -71,11 +66,7 @@ int main(int argc, char *argv[]){
 
     pthread_mutex_destroy(&lock);
 
-//    cudaFree(d_listArr);
 
-    timerEnd("time", 0)
-
-//    printf("%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);
     return 0;
 }

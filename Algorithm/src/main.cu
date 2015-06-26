@@ -42,14 +42,13 @@ int main(int argc, char *argv[]){
     int edgeNum = (int)edge.size();
     double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
 
-    if(density > 0.01)
-        gForwardReorder(nodeNum, edge);
+    forwardReorder(nodeNum, edge);
 
     EdgeMatrix edgeBlock;
     vector< int > rowWidth;
     int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
     rowWidth.resize(blockDim);
-    fprintf(stderr, "blockDim: %d\n", blockDim);
+//    fprintf(stderr, "blockDim: %d\n", blockDim);
     for(int i = 0; i < (int)rowWidth.size(); i++){
         rowWidth[i] *= blockSize;
 //        printf("%d %d\n", i, rowWidth[i]);

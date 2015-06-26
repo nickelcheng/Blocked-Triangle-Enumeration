@@ -16,7 +16,7 @@ const int EDGE_NUM_LIMIT = 100*1024*1024;
 const int GPU_BLOCK_NUM = 16000;
 const int GPU_THREAD_NUM = 256;
 
-using namespace std;
+using std::vector;
 
 typedef struct Node{
     vector< int > nei;

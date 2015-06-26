@@ -17,6 +17,7 @@ typedef struct ForwardNode{
     }
 } ForwardNode;
 
+void forwardReorder(int nodeNum, vector< Edge > &edge);
 void cForwardReorder(int nodeNum, vector< Edge > &edge);
 
 void gForwardReorder(int nodeNum, vector< Edge > &edge);
