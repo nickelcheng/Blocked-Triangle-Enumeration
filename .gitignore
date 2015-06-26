@@ -6,8 +6,10 @@ Dataset
 SampleTest
 
 # exe files
-*list
-*mat
+list
+g_list
+mat
+g_mat
 count
 bruteForce
 proc
