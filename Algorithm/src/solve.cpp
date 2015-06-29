@@ -55,7 +55,24 @@ void scheduler(
 }
 
 void getStrategy(const ListArray &edge, const ListArray &target, int &device, int &proc){
-    device = CPU, proc = LIST; // default
+    device = GPU, proc = LIST; // default
+    int nodeNum = edge.nodeNum;
+    double density = (double)target.edgeNum/(((double)(target.nodeNum)*target.nodeNum)/2);
+
+    // suppose all nodeNum <= 10240
+    // split line:
+    //     N <= 4096: density = 7.902e-8*nodeNum^2 + 7.16e-4*nodeNum + 2.025
+    //     N <= 10240: density = 5.407e-*nodeNum^2 + 1.12e-4*nodeNum + 0.857
+    // >: MAT, <=: LIST
+    double x = nodeNum, lhs;
+    if(nodeNum <= 4096)
+        lhs = 7.902e-8*x*x - 7.16e-4*x + 2.025;
+    else
+        lhs = 5.407e-9*x*x - 1.12e-4*x + 0.857;
+
+    if(density > lhs) proc = MAT;
+    else proc = LIST;
+
     extern int assignProc;
     switch(assignProc){
         case LIST: device = CPU, proc = LIST; break;
