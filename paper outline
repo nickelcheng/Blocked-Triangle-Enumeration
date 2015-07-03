@@ -1,0 +1,88 @@
+Abstract / Instruction (chinese / english)
+
+
+Preliminary
+    cpu
+        list intersection
+            vector cover
+        estimation
+    openmp
+        (...)
+    map reduce
+    gpu
+
+
+Algorithm
+    initialization
+        pre-processing
+            reorder by degree
+            larger id neighbor only
+        graph partition
+            partition into blocks
+            integrate blocks
+
+    find triangles
+        solve block
+        2-way merge
+            2-1 similar with solve block
+            2-2
+        3-way merge similar with 2-2
+
+    scheduler
+        intersection approachings
+            list intersection
+            vector intersection
+        device choice
+            not finished yet
+
+
+Implementation
+    K40 now, will use K20 and GTX 960 and Tesla M2090
+
+    reorder: no reorder, reorder by cpu or gpu
+        (give the equation, supported by experiment)
+
+    data format transformation
+        edge to list array
+        list array to bit matrix
+
+    big picture
+        In list intersection, each GPU block is responsible for whole neighbor list of a node; in vector intersection, a GPU block takes care of a single tile.
+        Each thread is responsible for an edge (which represents an intersection)
+
+    intersection: different data structure
+        list array
+        bit matrix
+
+    GPU consideration
+        shared memory usage
+            only use to store neighbor list
+        coalesces consideration
+            modify bit matrix structure    
+
+
+Experiments
+    environment
+
+    reordering analysis
+        no reorder (reorder time / total time chart), not finished yet
+        reorder by cpu or gpu (compare table, lots of numbers)
+        deduce equation
+
+    performance evaluation
+        cpu / odod's work / my work (speed up)
+
+
+Conclusion
+    summary
+        different intersection approaching for different sub-graph
+        GPU scalable solution
+        ?? speed up
+
+    future work
+        use different GPU card
+        use CPU (heterogeneous)
+
+
+Reference
+
