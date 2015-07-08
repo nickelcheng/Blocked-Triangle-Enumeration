@@ -39,9 +39,10 @@ void gForwardReorder(int nodeNum, vector< Edge > &edge){
 
     thrust::sort(d_node.begin(), d_node.end());
 
-    int newOrder[nodeNum], *d_newOrder;
+    int *d_newOrder;
     cudaMalloc((void**)&d_newOrder, sizeof(int)*nodeNum);
     setNewOrder<<< nodeBlock, nodeThread >>>(pd_node, nodeNum, d_newOrder);
+    int *newOrder = new int[nodeNum];
     cudaMemcpy(newOrder, d_newOrder, sizeof(int)*nodeNum, D2H);
     cudaFree(d_newOrder);
 
@@ -53,6 +54,7 @@ void gForwardReorder(int nodeNum, vector< Edge > &edge){
         if(newU < newV) edge[i].u=newU, edge[i].v=newV;
         else edge[i].u=newV, edge[i].v=newU;
     }
+    delete [] newOrder;
 }
 
 __global__ void initNode(int nodeNum, ForwardNode *node){
