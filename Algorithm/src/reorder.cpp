@@ -6,7 +6,7 @@
 void forwardReorder(int nodeNum, vector< Edge > &edge){
     int edgeNum = (int)edge.size();
     double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
-    if(density < 0.01) return;
+    //if(density < 0.01) return;
 
     // split line: sqrt(nodeNum) = -24.175 * ln(density) + 142.456
     // >: GPU, <=: CPU
