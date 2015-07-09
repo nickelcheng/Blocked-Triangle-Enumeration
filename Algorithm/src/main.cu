@@ -20,17 +20,13 @@ int main(int argc, char *argv[]){
     }
 
     int blockSize = atoi(argv[2]);
-    if(argc >= 4){
-        assignProc = atoi(argv[3]);
-        if(assignProc == G_LIST || assignProc == G_MAT){
-            if(argc != 6){
-                fprintf(stderr, "use default %d blocks, %d threads\n", GPU_BLOCK_NUM, GPU_THREAD_NUM);
-                blockNum = GPU_BLOCK_NUM;
-                threadNum = GPU_THREAD_NUM;
-            }
-        }
-    }
-    else assignProc = UNDEF;
+    assignProc = UNDEF;
+    blockNum = GPU_BLOCK_NUM;
+    threadNum = GPU_THREAD_NUM;
+    if(argc >= 4) assignProc = atoi(argv[3]);
+    if(argc >= 5) blockNum = atoi(argv[4]);
+    blockNum = GPU_BLOCK_NUM;
+    if(argc >= 6) threadNum = atoi(argv[5]);
 
     vector< Edge > edge;
 
