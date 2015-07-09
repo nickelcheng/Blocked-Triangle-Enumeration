@@ -25,7 +25,6 @@ int main(int argc, char *argv[]){
     threadNum = GPU_THREAD_NUM;
     if(argc >= 4) assignProc = atoi(argv[3]);
     if(argc >= 5) blockNum = atoi(argv[4]);
-    blockNum = GPU_BLOCK_NUM;
     if(argc >= 6) threadNum = atoi(argv[5]);
 
     vector< Edge > edge;
