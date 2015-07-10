@@ -49,10 +49,8 @@ void gForwardReorder(int nodeNum, vector< Edge > &edge){
     edgeNum = (int)edge.size();
     #pragma omp parallel for
     for(int i = 0; i < edgeNum; i++){
-        int newU = newOrder[edge[i].u];
-        int newV = newOrder[edge[i].v];
-        if(newU < newV) edge[i].u=newU, edge[i].v=newV;
-        else edge[i].u=newV, edge[i].v=newU;
+        edge[i].u = newOrder[edge[i].u];
+        edge[i].v = newOrder[edge[i].v];
     }
     delete [] newOrder;
 }

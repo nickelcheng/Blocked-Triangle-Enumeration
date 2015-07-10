@@ -3,18 +3,25 @@
 #include <cmath>
 #include <omp.h>
 
-void forwardReorder(int nodeNum, vector< Edge > &edge){
+void forwardReorder(int nodeNum, vector< Edge > &edge, bool reorder){
     int edgeNum = (int)edge.size();
     double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
     //if(density < 0.01) return;
 
-    // split line: sqrt(nodeNum) = -24.175 * ln(density) + 142.456
-    // >: GPU, <=: CPU
-    double sqrtN = sqrt(nodeNum);
-    double x = log(density);
-    double lhs = -24.175*x + 142.456;
-    if(sqrtN > lhs) gForwardReorder(nodeNum, edge);
-    else cForwardReorder(nodeNum, edge);
+    if(reorder){
+        // split line: sqrt(nodeNum) = -24.175 * ln(density) + 142.456
+        // >: GPU, <=: CPU
+        double sqrtN = sqrt(nodeNum);
+        double x = log(density);
+        double lhs = -24.175*x + 142.456;
+        if(sqrtN > lhs) gForwardReorder(nodeNum, edge);
+        else cForwardReorder(nodeNum, edge);
+    }
+    for(int i = 0; i < edgeNum; i++){
+        int u = edge[i].u;
+        int v = edge[i].v;
+        if(u >= v) edge[i].u = v, edge[i].v = u;
+    }
 }
 
 void cForwardReorder(int nodeNum, vector< Edge > &edge){
@@ -46,10 +53,8 @@ void cForwardReorder(int nodeNum, vector< Edge > &edge){
     int edgeNum = (int)edge.size();
     #pragma omp parallel for
     for(int i = 0; i < edgeNum; i++){
-        int newU = node[edge[i].u].order;
-        int newV = node[edge[i].v].order;
-        if(newU < newV) edge[i].u=newU, edge[i].v=newV;
-        else edge[i].u=newV, edge[i].v=newU;
+        edge[i].u = node[edge[i].u].order;
+        edge[i].v = node[edge[i].v].order;
     }
 
     delete [] node;

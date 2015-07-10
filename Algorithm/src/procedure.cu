@@ -15,13 +15,14 @@ long long triNum;
 
 
 int main(int argc, char *argv[]){
-    if(argc != 3 && argc != 5){
-        fprintf(stderr, "usage: proc <assign_proc> <input_path> <thread_per_block> <block_num>\n");
+    if(argc != 4 && argc != 6){
+        fprintf(stderr, "usage: proc <assign_proc> <input_path> <reorder_or_not> <thread_per_block> <block_num>\n");
         return 0;
     }
 
     extern int assignProc, threadNum, blockNum;
     assignProc = atoi(argv[1]);
+    bool reorder = (strcmp("true",argv[3])==0) ? true : false;
 
     if(assignProc < LIST || assignProc > G_MAT){
         fprintf(stderr, "algo choice\n0: forward\n1: g_forward\n2: mat\n3: g_mat\n");
@@ -34,8 +35,8 @@ int main(int argc, char *argv[]){
             threadNum = GPU_THREAD_NUM;
         }
         else{
-            blockNum = atoi(argv[4]);
-            threadNum = atoi(argv[3]);
+            blockNum = atoi(argv[5]);
+            threadNum = atoi(argv[4]);
         }
     }
 
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]){
     // resolve first cuda call slow timing issue
     cudaFree(0);
 
-    forwardReorder(nodeNum, edge);
+    forwardReorder(nodeNum, edge, reorder);
 
     ListArray listArr;
 
@@ -65,7 +66,6 @@ int main(int argc, char *argv[]){
     for(int i = 0; i < MAX_THREAD_NUM; i++) waitThread(i);
 
     pthread_mutex_destroy(&lock);
-
 
     printf("total triangle: %lld\n", triNum);
     return 0;
