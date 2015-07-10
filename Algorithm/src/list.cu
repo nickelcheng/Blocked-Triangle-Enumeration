@@ -1,5 +1,6 @@
 #include "list.h"
 #include "binaryTree.h"
+#include <cstdio>
 
 void gpuCountTriangle(const ListArg &listArg){
     const ListArray &edge = *(listArg.edge);
@@ -53,6 +54,7 @@ void gpuCountTriangle(const ListArg &listArg){
     cudaFree(d_target_edgeArr);
     cudaFree(d_target_nodeArr);
 
+    printf("glist %lld\n", ans);
     extern long long triNum;
     extern pthread_mutex_t lock;
     pthread_mutex_lock(&lock);
@@ -74,20 +76,24 @@ __global__ void gpuCountList(const ListArray *edge, const ListArray *target, lon
             const int *uList = target->neiStart(u);
         
             // move node u's adj list (in target) to shared memory
-            int uDeg = edge->getDeg(u);
             for(int i = threadIdx.x; i < uLen; i += blockDim.x){
                 uAdj[i] = uList[i];
             }
             __syncthreads();
 
             // counting triangle number
-            const int *uNei = edge->neiStart(u);
-            for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
-                int v = uNei[i];
-                int vLen = target->getDeg(v);
-                const int *vList = target->neiStart(v);
-                // intersect u list and v list in target
-                threadTriNum[threadIdx.x] += intersectList(uLen, vLen, uAdj, vList);
+            int uDeg = edge->getDeg(u);
+            if(uDeg > 0){
+                const int *uNei = edge->neiStart(u);
+                for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
+                    int v = uNei[i];
+                    int vLen = target->getDeg(v);
+                    if(vLen > 0){
+                        const int *vList = target->neiStart(v);
+                        // intersect u list and v list in target
+                        threadTriNum[threadIdx.x] += intersectList(uLen, vLen, uAdj, vList);
+                    }
+                }
             }
         }
         __syncthreads();
