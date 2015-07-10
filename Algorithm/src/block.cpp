@@ -93,7 +93,7 @@ void splitBlock(
 void setEmptyArray(int nodeNum, int *arr){
     #pragma omp parallel for
     for(int i = 0; i <= nodeNum; i++){
-        arr[i] = 1;
+        arr[i] = 0;
     }
 }
 
