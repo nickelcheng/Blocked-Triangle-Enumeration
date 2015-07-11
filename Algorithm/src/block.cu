@@ -23,12 +23,7 @@ void initListArrBlock(
             int vOffset = offset[j];
             if(i != j) vOffset -= rowWidth[i];
             int nodeNum = rowWidth[i];
-            int edgeNum = (int)edgeBlock[i][j].size();
-            listArrBlock[i][j].initArray(nodeNum, edgeNum);
-            if(edgeNum == 0)
-                setEmptyArray(nodeNum, listArrBlock[i][j].nodeArr);
-            else
-                gTransBlock(edgeBlock[i][j], nodeNum, offset[i], vOffset, listArrBlock[i][j], d_listArr);
+            gTransBlock(edgeBlock[i][j], nodeNum, offset[i], vOffset, listArrBlock[i][j], d_listArr);
         }
     }
 
@@ -41,6 +36,11 @@ void gTransBlock(
     ListArray &listArr, ListArray *d_listArr
 ){
     int edgeNum = (int)edge.size();
+    listArr.initArray(nodeNum, edgeNum);
+    if(edgeNum == 0){
+        setEmptyArray(nodeNum, listArr.nodeArr);
+        return;
+    }
 
     thrust::device_vector< Edge > d_edge = edge;
     thrust::sort(d_edge.begin(), d_edge.end());

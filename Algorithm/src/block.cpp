@@ -98,6 +98,12 @@ void setEmptyArray(int nodeNum, int *arr){
 }
 
 void cTransBlock(vector< Edge > &edge, int nodeNum, int uOffset, int vOffset, ListArray &listArr){
+    int edgeNum = (int)edge.size();
+    listArr.initArray(nodeNum, edgeNum);
+    if(edgeNum == 0){
+        setEmptyArray(nodeNum, listArr.nodeArr);
+        return;
+    }
     std::sort(edge.begin(), edge.end());
     cRelabelBlock(uOffset, vOffset, edge);
     cEdge2ListArr(edge, listArr);
