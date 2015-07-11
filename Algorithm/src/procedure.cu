@@ -46,11 +46,11 @@ int main(int argc, char *argv[]){
     // resolve first cuda call slow timing issue
     cudaFree(0);
 
+    timerInit(1)
+    timerStart(0)
     forwardReorder(nodeNum, edge, reorder);
 
-    ListArray listArr;
-
-    ListArray *d_listArr;
+    ListArray listArr, *d_listArr;
     cudaMalloc((void**)&d_listArr, sizeof(ListArray));
     if(assignProc == 0)
         cTransBlock(edge, nodeNum, 0, 0, listArr);
@@ -69,6 +69,7 @@ int main(int argc, char *argv[]){
     for(int i = 0; i < MAX_THREAD_NUM; i++) waitThread(i);
 
     pthread_mutex_destroy(&lock);
+    timerEnd("total", 0)
 
     printf("total triangle: %lld\n", triNum);
     return 0;

@@ -37,10 +37,15 @@ int main(int argc, char *argv[]){
     // resolve first cuda call slow timing issue
     cudaFree(0);
 
+    timerInit(2)
+    timerStart(0)
+
     int edgeNum = (int)edge.size();
 //    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
 
+    timerStart(1)
     forwardReorder(nodeNum, edge, reorder);
+    timerEnd("reorder", 1)
 
     BitMat::createMask();
     currTid = 0;
@@ -55,8 +60,10 @@ int main(int argc, char *argv[]){
         gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
         cudaFree(d_listArr);
 
+        timerStart(1)
         scheduler(listArr, listArr, nodeNum, false);
         for(int i = 0; i < MAX_THREAD_NUM; i++) waitThread(i);
+        timerEnd("count", 1)
     }
     else{
         EdgeMatrix edgeBlock;
@@ -72,10 +79,13 @@ int main(int argc, char *argv[]){
         ListArrMatrix listArrBlock(blockDim);
         initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
 
+        timerStart(1)
         findTriangle(listArrBlock, rowWidth, blockDim);
+        timerEnd("count", 1)
     }
 
     pthread_mutex_destroy(&lock);
+    timerEnd("total", 0)
 
 //    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);
