@@ -32,15 +32,16 @@ void cpuCountMat(const MatArg &matArg){
         int range = edge.nodeNum;
         for(int u = 0; u < range; u++){
 
-            const int *uNei = edge.neiStart(u);
             int uDeg = edge.getDeg(u);
-            for(int i = 0; i < uDeg; i++){
-                int v = uNei[i];
-                UI e1 = target.getContent(u, e);
-                UI e2 = target.getContent(v, e);
-                long long tmp = countOneBits(e1 & e2);
-                if(countOneBits(e1&e2)>0)
-                ans += tmp;
+            if(uDeg > 0){
+                const int *uNei = edge.neiStart(u);
+                for(int i = 0; i < uDeg; i++){
+                    int v = uNei[i];
+                    UI e1 = target.getContent(u, e);
+                    UI e2 = target.getContent(v, e);
+                    long long tmp = countOneBits(e1 & e2);
+                    ans += tmp;
+                }
             }
         }
     }

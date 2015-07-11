@@ -75,14 +75,16 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long lo
         // iterator through each edge (u, v)
         int range = edge->nodeNum;
         for(int u = 0; u < range; u++){
-            const int *uNei = edge->neiStart(u);
             int uDeg = edge->getDeg(u);
-            for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
-                int v = uNei[i];
-/*                UI e1 = target->getContent(u, e);
-                UI e2 = target->getContent(v, e);
-                threadTriNum[threadIdx.x] += countOneBits(e1 & e2);*/
-                threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v]);
+            if(uDeg > 0){
+                const int *uNei = edge->neiStart(u);
+                for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
+                    int v = uNei[i];
+/*                    UI e1 = target->getContent(u, e);
+                    UI e2 = target->getContent(v, e);
+                    threadTriNum[threadIdx.x] += countOneBits(e1 & e2);*/
+                    threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v]);
+                }
             }
         }
         __syncthreads();
