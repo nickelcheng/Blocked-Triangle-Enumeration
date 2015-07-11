@@ -41,9 +41,9 @@ void ListArray::integrate(const ListArray &a, bool diagonal, ListArray &res) con
         res.nodeArr[j] = a.nodeArr[i] + edgeNum;
     res.nodeArr[res.nodeNum] = res.edgeNum;
 
-    int offset = (diagonal) ? nodeNum : 0;
+    int offset = (diagonal) ? 0 : -a.nodeNum;
     for(int i = 0; i < edgeNum; i++)
-        res.edgeArr[i] = edgeArr[i];
+        res.edgeArr[i] = edgeArr[i] - nodeNum;
     for(int i = 0, j = edgeNum; i < a.edgeNum; i++, j++)
         res.edgeArr[j] = a.edgeArr[i] + offset;
 }
@@ -53,7 +53,7 @@ void ListArray::relabel(ListArray &res) const{
     for(int i = 0; i <= nodeNum; i++)
         res.nodeArr[i] = nodeArr[i];
     for(int i = 0; i < edgeNum; i++)
-        res.edgeArr[i] = edgeArr[i] + nodeNum;
+        res.edgeArr[i] = edgeArr[i] - nodeNum;
 }
 
 DECORATE void ListArray::print(void) const{

@@ -14,8 +14,10 @@ long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth
             const ListArray &ext = block[b][i];
             ListArray *target;
 
+            target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
+            ext.relabel(*target);
             // 2-way merge-1
-            scheduler(base, ext, rowWidth[i], false);
+            scheduler(base, *target, rowWidth[i], true);
 
             target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
             ext.integrate(block[i][i], true, *target);

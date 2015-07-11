@@ -17,7 +17,7 @@ void *callList(void *arg){
     if(((ListArg*)arg)->device == CPU){
         cpuCountList(*(ListArg*)arg);
         if(((ListArg*)arg)->delTar)
-            delete((ListArg*)arg)->target;
+            delete ((ListArg*)arg)->target;
     }
     else
         gpuCountTriangle(*(ListArg*)arg);
@@ -29,7 +29,7 @@ void *callList(void *arg){
 void *callMat(void *arg){
     if(((MatArg*)arg)->device == CPU){
         cpuCountMat(*(MatArg*)arg);
-        delete((MatArg*)arg)->target;
+        delete ((MatArg*)arg)->target;
     }
     else
         gpuCountTriangleMat(*(MatArg*)arg);
