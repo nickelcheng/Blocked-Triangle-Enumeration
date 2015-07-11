@@ -52,7 +52,10 @@ int main(int argc, char *argv[]){
 
     ListArray *d_listArr;
     cudaMalloc((void**)&d_listArr, sizeof(ListArray));
-    gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
+    if(assignProc == 0)
+        cTransBlock(edge, nodeNum, 0, 0, listArr);
+    else
+        gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
     cudaFree(d_listArr);
 
     pthread_mutex_init(&lock, NULL);

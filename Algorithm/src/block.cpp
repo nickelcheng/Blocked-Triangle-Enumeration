@@ -112,7 +112,7 @@ void cTransBlock(vector< Edge > &edge, int nodeNum, int uOffset, int vOffset, Li
 void cRelabelBlock(int uOffset, int vOffset, vector< Edge > &edge){
     if(uOffset == 0 && vOffset == 0) return;
     int edgeNum = (int)edge.size();
-    #pragma omp parallel for
+//    #pragma omp parallel for
     for(int i = 0; i < edgeNum; i++){
         edge[i].u -= uOffset;
         edge[i].v -= vOffset;
@@ -123,11 +123,11 @@ void cEdge2ListArr(const vector< Edge > &edge, ListArray &listArr){
     int nodeNum = listArr.nodeNum;
     int edgeNum = listArr.edgeNum;
 
-    #pragma omp parallel for
+//    #pragma omp parallel for
     for(int i = 0; i < nodeNum; i++)
         listArr.nodeArr[i] = -1;
 
-    #pragma omp parallel for
+//    #pragma omp parallel for
     for(int i = 0; i < edgeNum-1; i++){
         listArr.edgeArr[i] = edge[i].v;
         if(edge[i].u != edge[i+1].u){

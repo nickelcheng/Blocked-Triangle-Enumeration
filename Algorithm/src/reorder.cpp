@@ -9,12 +9,13 @@ void forwardReorder(int nodeNum, vector< Edge > &edge, bool reorder){
     //if(density < 0.01) return;
 
     if(reorder){
+        extern int assignProc;
         // split line: sqrt(nodeNum) = -24.175 * ln(density) + 142.456
         // >: GPU, <=: CPU
         double sqrtN = sqrt(nodeNum);
         double x = log(density);
         double lhs = -24.175*x + 142.456;
-        if(sqrtN > lhs) gForwardReorder(nodeNum, edge);
+        if(assignProc != 0 && sqrtN > lhs) gForwardReorder(nodeNum, edge);
         else cForwardReorder(nodeNum, edge);
     }
     for(int i = 0; i < edgeNum; i++){
