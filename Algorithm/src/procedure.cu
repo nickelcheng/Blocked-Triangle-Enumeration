@@ -15,15 +15,16 @@ long long triNum;
 
 
 int main(int argc, char *argv[]){
-    if(argc != 4 && argc != 6){
+    if(argc != 3 && argc != 4 && argc != 6){
         fprintf(stderr, "usage: proc <assign_proc> <input_path> <reorder_or_not> <thread_per_block> <block_num>\n");
         return 0;
     }
 
     extern int assignProc, threadNum, blockNum;
     assignProc = atoi(argv[1]);
-    bool reorder = (strcmp("true",argv[3])==0) ? true : false;
+    bool reorder = true;
 
+    if(argc >= 4) reorder = (strcmp("true",argv[3])==0) ? true : false;
     if(assignProc < LIST || assignProc > G_MAT){
         fprintf(stderr, "algo choice\n0: forward\n1: g_forward\n2: mat\n3: g_mat\n");
         return 0;
