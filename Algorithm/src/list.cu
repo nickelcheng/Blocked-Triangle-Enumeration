@@ -1,6 +1,5 @@
 #include "list.h"
 #include "binaryTree.h"
-#include <cstdio>
 
 void gpuCountTriangle(const ListArg &listArg){
     const ListArray &edge = *(listArg.edge);
@@ -54,7 +53,6 @@ void gpuCountTriangle(const ListArg &listArg){
     cudaFree(d_target_edgeArr);
     cudaFree(d_target_nodeArr);
 
-    printf("glist %lld\n", ans);
     extern long long triNum;
     extern pthread_mutex_t lock;
     pthread_mutex_lock(&lock);

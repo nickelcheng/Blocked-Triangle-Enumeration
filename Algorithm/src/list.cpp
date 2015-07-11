@@ -1,6 +1,5 @@
 #include "list.h"
 #include "solve.h"
-#include <cstdio>
 
 void list(int device, const ListArray &edge, const ListArray &target, bool delTar){
     extern pthread_t threads[MAX_THREAD_NUM];
@@ -15,8 +14,6 @@ void list(int device, const ListArray &edge, const ListArray &target, bool delTa
     listArg->maxDeg = target.getMaxDegree();
     if(device == GPU && listArg->maxDeg > MAX_DEG_LIMIT){
         listArg->device = CPU;
-/*        delete listArg;
-        return;*/
     }
     listArg->delTar = delTar;
     
@@ -53,7 +50,6 @@ void cpuCountList(const ListArg &listArg){
             }
         }
     }
-    printf("clist %lld\n", ans);
     extern long long triNum;
     extern pthread_mutex_t lock;
     pthread_mutex_lock(&lock);

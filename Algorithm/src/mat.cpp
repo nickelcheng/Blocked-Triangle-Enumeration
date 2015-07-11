@@ -10,15 +10,13 @@ void mat(int device, const ListArray &edge, const BitMat &target){
     matArg->device = device;
     matArg->edge = &edge, matArg->target = &target;
     if(device == GPU && target.nodeNum > MAX_NODE_NUM_LIMIT){
-        delete matArg;
-        return;
+        matArg->device = CPU;
     }
 
     currTid %= MAX_THREAD_NUM;
     waitThread(currTid);
     threadUsed[currTid] = true;
     pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
-    //waitThread(currTid-1);
 }
 
 void cpuCountMat(const MatArg &matArg){
@@ -39,8 +37,7 @@ void cpuCountMat(const MatArg &matArg){
                     int v = uNei[i];
                     UI e1 = target.getContent(u, e);
                     UI e2 = target.getContent(v, e);
-                    long long tmp = countOneBits(e1 & e2);
-                    ans += tmp;
+                    ans += countOneBits(e1 & e2);
                 }
             }
         }
