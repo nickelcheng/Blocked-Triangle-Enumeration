@@ -5,6 +5,7 @@
 #include "solve.h"
 #include "block.h"
 #include "threadHandler.h"
+#include "timer.h"
 
 int assignProc, currTid;
 int blockNum, threadNum;
@@ -37,34 +38,46 @@ int main(int argc, char *argv[]){
     cudaFree(0);
 
     int edgeNum = (int)edge.size();
-    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
+//    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
 
     forwardReorder(nodeNum, edge, reorder);
-
-    EdgeMatrix edgeBlock;
-    vector< int > rowWidth;
-    int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
-    rowWidth.resize(blockDim);
-//    fprintf(stderr, "blockDim: %d\n", blockDim);
-    for(int i = 0; i < (int)rowWidth.size(); i++){
-        rowWidth[i] *= blockSize;
-//        printf("%d %d\n", i, rowWidth[i]);
-    }
-
-    ListArrMatrix listArrBlock(blockDim);
-    initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
-
-    pthread_mutex_init(&lock, NULL);
 
     BitMat::createMask();
     currTid = 0;
     triNum = 0;
     memset(threadUsed, false, MAX_THREAD_NUM);
-    findTriangle(listArrBlock, rowWidth, blockDim);
+
+    pthread_mutex_init(&lock, NULL);
+
+    if(edgeNum <= EDGE_NUM_LIMIT){
+        ListArray listArr, *d_listArr;
+        cudaMalloc((void**)&d_listArr, sizeof(ListArray));
+        gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
+        cudaFree(d_listArr);
+
+        scheduler(listArr, listArr, nodeNum, false);
+        for(int i = 0; i < MAX_THREAD_NUM; i++) waitThread(i);
+    }
+    else{
+        EdgeMatrix edgeBlock;
+        vector< int > rowWidth;
+        int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
+        rowWidth.resize(blockDim);
+//        fprintf(stderr, "blockDim: %d\n", blockDim);
+        for(int i = 0; i < (int)rowWidth.size(); i++){
+            rowWidth[i] *= blockSize;
+//            printf("%d %d\n", i, rowWidth[i]);
+        }
+
+        ListArrMatrix listArrBlock(blockDim);
+        initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
+
+        findTriangle(listArrBlock, rowWidth, blockDim);
+    }
 
     pthread_mutex_destroy(&lock);
 
-    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
+//    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);
     return 0;
 }
