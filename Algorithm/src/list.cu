@@ -11,7 +11,10 @@ void gpuCountTriangle(const ListArg &listArg){
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;
     
     extern int blockNum, threadNum;
-    if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
+    if(blockNum > edge.nodeNum/100) blockNum = edge.nodeNum/100;
+    if(threadNum > maxDeg) threadNum = maxDeg;
+    if(blockNum == 0) blockNum = 1;
+    if(threadNum == 0) threadNum = 1;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
     // copy edge to device
