@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
         return 0;
     }
     if(assignProc == G_LIST || assignProc == G_MAT){
-        if(argc != 5){
+        if(argc != 6){
             fprintf(stderr, "use default %d blocks, %d threads\n", GPU_BLOCK_NUM, GPU_THREAD_NUM);
             blockNum = GPU_BLOCK_NUM;
             threadNum = GPU_THREAD_NUM;
