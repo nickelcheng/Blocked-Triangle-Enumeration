@@ -1,6 +1,8 @@
 #include "mat.h"
 #include "binaryTree.h"
 
+__constant__ unsigned char d_oneBitNum[BIT_NUM_TABLE_SIZE];
+
 void gpuCountTriangleMat(const MatArg &matArg){
     const ListArray &edge = *(matArg.edge);
     const BitMat &target = *(matArg.target);
@@ -83,7 +85,7 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long lo
 /*                    UI e1 = target->getContent(u, e);
                     UI e2 = target->getContent(v, e);
                     threadTriNum[threadIdx.x] += countOneBits(e1 & e2);*/
-                    threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v]);
+                    threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v], d_oneBitNum);
                 }
             }
         }
@@ -100,10 +102,24 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long lo
     }
 }
 
-DECORATE long long countOneBits(UI tar){
+void createOneBitNumTable(unsigned char *oneBitNum){
+    for(int i = 0; i < BIT_NUM_TABLE_SIZE; i++){
+        int ans = 0;
+        for(int num = i; num > 0; ans++){
+            num &= (num-1);
+        }
+        oneBitNum[i] = (unsigned char)ans;
+    }
+    cudaMemcpyToSymbol(d_oneBitNum, oneBitNum, sizeof(unsigned char)*BIT_NUM_TABLE_SIZE);
+}
+
+DECORATE long long countOneBits(UI tar, unsigned char *oneBitNum){
     long long ones = 0;
-    for(; tar; tar/=2)
-        ones += tar % 2;
+/*    for(; tar; tar/=2)
+        ones += tar % 2;*/
+    for(; tar; tar/=BIT_NUM_TABLE_SIZE){
+        ones += oneBitNum[tar%BIT_NUM_TABLE_SIZE];
+    }
     return ones;
 }
 

@@ -22,6 +22,7 @@ void mat(int device, const ListArray &edge, const BitMat &target){
 void cpuCountMat(const MatArg &matArg){
     const ListArray &edge = *(matArg.edge);
     const BitMat &target = *(matArg.target);
+    extern unsigned char oneBitNum[BIT_NUM_TABLE_SIZE];
 
     long long ans = 0;
 
@@ -37,7 +38,7 @@ void cpuCountMat(const MatArg &matArg){
                     int v = uNei[i];
                     UI e1 = target.getContent(u, e);
                     UI e2 = target.getContent(v, e);
-                    ans += countOneBits(e1 & e2);
+                    ans += countOneBits(e1 & e2, oneBitNum);
                 }
             }
         }

@@ -6,6 +6,7 @@
 #include "block.h"
 #include "threadHandler.h"
 #include "timer.h"
+#include "mat.h"
 
 int assignProc, currTid;
 int blockNum, threadNum;
@@ -13,6 +14,7 @@ pthread_t threads[MAX_THREAD_NUM];
 bool threadUsed[MAX_THREAD_NUM];
 pthread_mutex_t lock;
 long long triNum;
+unsigned char oneBitNum[BIT_NUM_TABLE_SIZE];
 
 int main(int argc, char *argv[]){
     if(argc < 3){
@@ -48,6 +50,7 @@ int main(int argc, char *argv[]){
     //timerEnd("reorder", 1)
 
     BitMat::createMask();
+    createOneBitNumTable(oneBitNum);
     currTid = 0;
     triNum = 0;
     memset(threadUsed, false, MAX_THREAD_NUM);
