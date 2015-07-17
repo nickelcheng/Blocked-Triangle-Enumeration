@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
     // resolve first cuda call slow timing issue
     cudaFree(0);
 
-    timerInit(1)
+    timerInit(2)
     timerStart(0)
 
     int edgeNum = (int)edge.size();
@@ -58,15 +58,17 @@ int main(int argc, char *argv[]){
     pthread_mutex_init(&lock, NULL);
 
     if(edgeNum <= EDGE_NUM_LIMIT){
+        timerStart(1)
         ListArray listArr, *d_listArr;
         cudaMalloc((void**)&d_listArr, sizeof(ListArray));
         gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
         cudaFree(d_listArr);
+        timerEnd("initall", 1)
 
-        //timerStart(1)
+        timerStart(1)
         scheduler(listArr, listArr, nodeNum, false);
         for(int i = 0; i < MAX_THREAD_NUM; i++) waitThread(i);
-        //timerEnd("count", 1)
+        timerEnd("count", 1)
     }
     else{
         EdgeMatrix edgeBlock;
@@ -79,12 +81,14 @@ int main(int argc, char *argv[]){
 //            printf("%d %d\n", i, rowWidth[i]);
         }
 
+        timerStart(1)
         ListArrMatrix listArrBlock(blockDim);
         initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
+        timerEnd("initpart", 1)
 
-        //timerStart(1)
+        timerStart(1)
         findTriangle(listArrBlock, rowWidth, blockDim);
-        //timerEnd("count", 1)
+        timerEnd("count", 1)
     }
 
     pthread_mutex_destroy(&lock);

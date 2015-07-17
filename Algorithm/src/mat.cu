@@ -1,5 +1,8 @@
 #include "mat.h"
 #include "binaryTree.h"
+#include "timer.h"
+
+//__constant__ unsigned char d_oneBitNum[BIT_NUM_TABLE_SIZE];
 
 void gpuCountTriangleMat(const MatArg &matArg){
     const ListArray &edge = *(matArg.edge);
@@ -11,6 +14,9 @@ void gpuCountTriangleMat(const MatArg &matArg){
     BitMat *d_target;
     int *d_edgeArr, *d_nodeArr, *d_mat;
 
+    timerInit(1)
+
+    timerStart(0)
     extern int blockNum, threadNum;
     if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
@@ -34,6 +40,7 @@ void gpuCountTriangleMat(const MatArg &matArg){
     cudaMalloc((void**)&d_mat, sizeof(UI)*target.entryNum*target.nodeNum);
     cudaMemcpy(d_mat, target.mat, sizeof(UI)*target.entryNum*target.nodeNum, H2D);
     cudaMemcpy(&(d_target->mat), &d_mat, sizeof(UI*), H2D);
+    timerEnd("copy", 0)
 
     delete &target;
 
