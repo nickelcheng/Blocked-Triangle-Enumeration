@@ -49,11 +49,13 @@ int main(int argc, char *argv[]){
     forwardReorder(nodeNum, edge, reorder);
     //timerEnd("reorder", 1)
 
+    timerStart(1)
     BitMat::createMask();
     createOneBitNumTable(oneBitNum, &d_oneBitNum);
     currTid = 0;
     triNum = 0;
     memset(threadUsed, false, MAX_THREAD_NUM);
+    timerEnd("initial", 1)
 
     pthread_mutex_init(&lock, NULL);
 
@@ -63,7 +65,7 @@ int main(int argc, char *argv[]){
         cudaMalloc((void**)&d_listArr, sizeof(ListArray));
         gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
         cudaFree(d_listArr);
-        timerEnd("initall", 1)
+        timerEnd("edge->list", 1)
 
         timerStart(1)
         scheduler(listArr, listArr, nodeNum, false);
@@ -84,7 +86,7 @@ int main(int argc, char *argv[]){
         timerStart(1)
         ListArrMatrix listArrBlock(blockDim);
         initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
-        timerEnd("initpart", 1)
+        timerEnd("edge->list", 1)
 
         timerStart(1)
         findTriangle(listArrBlock, rowWidth, blockDim);

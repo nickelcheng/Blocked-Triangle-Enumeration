@@ -17,6 +17,7 @@ void mat(int device, const ListArray &edge, const BitMat &target){
     waitThread(currTid);
     threadUsed[currTid] = true;
     pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
+    waitThread(currTid-1);
 }
 
 void cpuCountMat(const MatArg &matArg){

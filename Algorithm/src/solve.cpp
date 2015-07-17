@@ -2,6 +2,7 @@
 #include "list.h"
 #include "mat.h"
 #include "tool.h"
+#include "timer.h"
 
 long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth, int blockDim){
     for(int b = 0; b < blockDim; b++){
@@ -48,11 +49,16 @@ void scheduler(
     if(proc == LIST)
         list(device, edge, target, delTar);
     else{
+        timerInit(1)
+        timerStart(0)
         BitMat *tarMat = new BitMat; // delete in callMat or gpuCountTriangleMat
         int entry = averageCeil(width, BIT_PER_ENTRY);
         tarMat->initMat(target, entry);
         if(delTar) delete &target;
+        timerEnd("list->bit", 0)
+        timerStart(0)
         mat(device, edge, *tarMat);
+        timerEnd("mat", 0)
     }
 }
 
