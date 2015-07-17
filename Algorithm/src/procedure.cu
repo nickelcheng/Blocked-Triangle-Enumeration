@@ -5,7 +5,7 @@
 #include "solve.h"
 #include "timer.h"
 #include "threadHandler.h"
-
+#include "mat.h"
 
 int assignProc, currTid, threadNum, blockNum;
 pthread_t threads[MAX_THREAD_NUM];
