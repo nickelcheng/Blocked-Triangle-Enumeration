@@ -4,9 +4,7 @@
 
 //__constant__ unsigned char d_oneBitNum[BIT_NUM_TABLE_SIZE];
 
-void gpuCountTriangleMat(const MatArg &matArg){
-    const ListArray &edge = *(matArg.edge);
-    const BitMat &target = *(matArg.target);
+void gpuCountTriangleMat(const ListArray &edge, const BitMat &target){
     extern UC *d_oneBitNum;
 
     long long *d_triNum, ans;
@@ -42,8 +40,6 @@ void gpuCountTriangleMat(const MatArg &matArg){
     cudaMemcpy(&(d_target->mat), &d_mat, sizeof(UI*), H2D);
     timerEnd("copy", 0)
 
-    delete &target;
-
     int smSize = target.nodeNum*sizeof(UI);
     gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
@@ -57,10 +53,7 @@ void gpuCountTriangleMat(const MatArg &matArg){
     cudaFree(d_mat);
 
     extern long long triNum;
-    extern pthread_mutex_t lock;
-    pthread_mutex_lock(&lock);
     triNum += ans;
-    pthread_mutex_unlock(&lock);
 }
 
 __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *oneBitNum, long long *triNum){

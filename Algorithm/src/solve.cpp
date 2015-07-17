@@ -9,55 +9,55 @@ long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth
         const ListArray &base = block[b][b];
 
         // solve block
-        scheduler(base, base, rowWidth[b], false);
+        scheduler(base, base, rowWidth[b]);
 
         for(int i = b+1; i < blockDim; i++){
             const ListArray &ext = block[b][i];
             ListArray *target;
 
-            target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
+            target = new ListArray;
             ext.relabel(*target);
             // 2-way merge-1
-            scheduler(base, *target, rowWidth[i], true);
+            scheduler(base, *target, rowWidth[i]);
+            delete target;
 
-            target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
+            target = new ListArray;
             ext.integrate(block[i][i], true, *target);
             // 2-way merge-2
-            scheduler(ext, *target, rowWidth[i], true);
+            scheduler(ext, *target, rowWidth[i]);
+            delete target;
 
             for(int j = i+1; j < blockDim; j++){
-                target = new ListArray; // delete in callList or gpuCountTriangle or scheduler
+                target = new ListArray;
                 block[b][j].integrate(block[i][j], false, *target);
                 // 3-way merge
-                scheduler(ext, *target, rowWidth[j], true);
+                scheduler(ext, *target, rowWidth[j]);
+                delete target;
             }
         }
     }
-
-    for(int i = 0; i < MAX_THREAD_NUM; i++)
-        waitThread(i);
 
     return 0;
 }
 
 void scheduler(
-    const ListArray &edge, const ListArray &target, int width, bool delTar
+    const ListArray &edge, const ListArray &target, int width
 ){
     int device, proc;
     getStrategy(edge, target, device, proc);
 
     if(proc == LIST)
-        list(device, edge, target, delTar);
+        list(device, edge, target);
     else{
         timerInit(1)
         timerStart(0)
-        BitMat *tarMat = new BitMat; // delete in callMat or gpuCountTriangleMat
+        BitMat *tarMat = new BitMat;
         int entry = averageCeil(width, BIT_PER_ENTRY);
         tarMat->initMat(target, entry);
-        if(delTar) delete &target;
         timerEnd("list->bit", 0)
         timerStart(0)
         mat(device, edge, *tarMat);
+        delete tarMat;
         timerEnd("mat", 0)
     }
 }

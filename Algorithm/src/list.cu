@@ -1,11 +1,7 @@
 #include "list.h"
 #include "binaryTree.h"
 
-void gpuCountTriangle(const ListArg &listArg){
-    const ListArray &edge = *(listArg.edge);
-    const ListArray &target = *(listArg.target);
-    int maxDeg = listArg.maxDeg;
-
+void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg){
     long long *d_triNum, ans;
     ListArray *d_edge, *d_target;
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;
@@ -41,8 +37,6 @@ void gpuCountTriangle(const ListArg &listArg){
     cudaMemcpy(d_target_edgeArr, target.edgeArr, sizeof(int)*target.edgeNum, H2D);
     cudaMemcpy(&(d_target->edgeArr), &d_target_edgeArr, sizeof(int*), H2D);
 
-    if(listArg.delTar) delete &target;
-
     int smSize = maxDeg*sizeof(int);
     gpuCountList<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
@@ -57,10 +51,7 @@ void gpuCountTriangle(const ListArg &listArg){
     cudaFree(d_target_nodeArr);
 
     extern long long triNum;
-    extern pthread_mutex_t lock;
-    pthread_mutex_lock(&lock);
     triNum += ans;
-    pthread_mutex_unlock(&lock);
 }
 
 __global__ void gpuCountList(const ListArray *edge, const ListArray *target, long long *triNum){

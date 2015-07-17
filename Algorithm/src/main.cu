@@ -4,15 +4,10 @@
 #include "reorder.h"
 #include "solve.h"
 #include "block.h"
-#include "threadHandler.h"
 #include "timer.h"
 #include "mat.h"
 
-int assignProc, currTid;
-int blockNum, threadNum;
-pthread_t threads[MAX_THREAD_NUM];
-bool threadUsed[MAX_THREAD_NUM];
-pthread_mutex_t lock;
+int assignProc, blockNum, threadNum;
 long long triNum;
 UC oneBitNum[BIT_NUM_TABLE_SIZE], *d_oneBitNum;
 
@@ -52,12 +47,8 @@ int main(int argc, char *argv[]){
     timerStart(1)
     BitMat::createMask();
     createOneBitNumTable(oneBitNum, &d_oneBitNum);
-    currTid = 0;
     triNum = 0;
-    memset(threadUsed, false, MAX_THREAD_NUM);
     timerEnd("initial", 1)
-
-    pthread_mutex_init(&lock, NULL);
 
     if(edgeNum <= EDGE_NUM_LIMIT){
         timerStart(1)
@@ -68,8 +59,7 @@ int main(int argc, char *argv[]){
         timerEnd("edge->list", 1)
 
         timerStart(1)
-        scheduler(listArr, listArr, nodeNum, false);
-        for(int i = 0; i < MAX_THREAD_NUM; i++) waitThread(i);
+        scheduler(listArr, listArr, nodeNum);
         timerEnd("count", 1)
     }
     else{
@@ -93,7 +83,6 @@ int main(int argc, char *argv[]){
         timerEnd("count", 1)
     }
 
-    pthread_mutex_destroy(&lock);
     timerEnd("total", 0)
     cudaFree(d_oneBitNum);
 

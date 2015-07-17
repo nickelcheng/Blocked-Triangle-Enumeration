@@ -3,7 +3,6 @@
 
 #include "listArray.h"
 #include "bitMat.h"
-#include "threadHandler.h"
 
 typedef unsigned int UI;
 
@@ -15,9 +14,9 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *one
 #endif
 
 void mat(int device, const ListArray &edge, const BitMat &target);
-void cpuCountMat(const MatArg &matArg);
+void cpuCountMat(const ListArray &edge, const BitMat &target);
 
-void gpuCountTriangleMat(const MatArg &matArg);
+void gpuCountTriangleMat(const ListArray &edge, const BitMat &target);
 void createOneBitNumTable(UC *oneBitNum, UC **d_oneBitNum);
 DECORATE long long countOneBits(UI tar, unsigned char *oneBitNum);
 

@@ -1,32 +1,20 @@
 #include "list.h"
 #include "solve.h"
 
-void list(int device, const ListArray &edge, const ListArray &target, bool delTar){
-    extern pthread_t threads[MAX_THREAD_NUM];
-    extern bool threadUsed[MAX_THREAD_NUM];
-    extern int currTid;
-
+void list(int device, const ListArray &edge, const ListArray &target){
     if(edge.edgeNum <= 0 || target.edgeNum <= 0) return;
 
-    ListArg *listArg = new ListArg; // delete in callList
-    listArg->device = device;
-    listArg->edge = &edge, listArg->target = &target;
-    listArg->maxDeg = target.getMaxDegree();
-    if(device == GPU && listArg->maxDeg > MAX_DEG_LIMIT){
-        listArg->device = CPU;
-    }
-    listArg->delTar = delTar;
+    int maxDeg = target.getMaxDegree();
+    if(device == GPU && maxDeg > MAX_DEG_LIMIT)
+        device = CPU;
     
-    currTid %= MAX_THREAD_NUM;
-    waitThread(currTid);
-    threadUsed[currTid] = true;
-    pthread_create(&threads[currTid++], NULL, callList, (void*)listArg);
+    if(device == CPU)
+        cpuCountList(edge, target);
+    else
+        gpuCountTriangle(edge, target, maxDeg);
 }
 
-void cpuCountList(const ListArg &listArg){
-    const ListArray &edge = *(listArg.edge);
-    const ListArray &target = *(listArg.target);
-
+void cpuCountList(const ListArray &edge, const ListArray &target){
     long long ans = 0;
 
     // iterator through each edge (u, v)
@@ -51,9 +39,6 @@ void cpuCountList(const ListArg &listArg){
         }
     }
     extern long long triNum;
-    extern pthread_mutex_t lock;
-    pthread_mutex_lock(&lock);
     triNum += ans;
-    pthread_mutex_unlock(&lock);
 }
 

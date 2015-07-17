@@ -2,27 +2,16 @@
 #include "solve.h"
 
 void mat(int device, const ListArray &edge, const BitMat &target){
-    extern pthread_t threads[MAX_THREAD_NUM];
-    extern bool threadUsed[MAX_THREAD_NUM];
-    extern int currTid;
+    if(device == GPU && target.nodeNum > MAX_NODE_NUM_LIMIT)
+        device = CPU;
 
-    MatArg *matArg = new MatArg; // delete in callMat
-    matArg->device = device;
-    matArg->edge = &edge, matArg->target = &target;
-    if(device == GPU && target.nodeNum > MAX_NODE_NUM_LIMIT){
-        matArg->device = CPU;
-    }
-
-    currTid %= MAX_THREAD_NUM;
-    waitThread(currTid);
-    threadUsed[currTid] = true;
-    pthread_create(&threads[currTid++], NULL, callMat, (void*)matArg);
-    waitThread(currTid-1);
+    if(device == CPU)
+        cpuCountMat(edge, target);
+    else
+        gpuCountTriangleMat(edge, target);
 }
 
-void cpuCountMat(const MatArg &matArg){
-    const ListArray &edge = *(matArg.edge);
-    const BitMat &target = *(matArg.target);
+void cpuCountMat(const ListArray &edge, const BitMat &target){
     extern unsigned char oneBitNum[BIT_NUM_TABLE_SIZE];
 
     long long ans = 0;
@@ -45,9 +34,6 @@ void cpuCountMat(const MatArg &matArg){
         }
     }
     extern long long triNum;
-    extern pthread_mutex_t lock;
-    pthread_mutex_lock(&lock);
     triNum += ans;
-    pthread_mutex_unlock(&lock);
 }
 
