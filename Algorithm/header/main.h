@@ -19,6 +19,8 @@ const int BIT_NUM_TABLE_SIZE = 65536;
 
 using std::vector;
 
+typedef unsigned char UC;
+
 typedef struct Node{
     vector< int > nei;
     int degree(void) const{

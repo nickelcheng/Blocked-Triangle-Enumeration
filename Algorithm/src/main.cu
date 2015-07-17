@@ -14,7 +14,7 @@ pthread_t threads[MAX_THREAD_NUM];
 bool threadUsed[MAX_THREAD_NUM];
 pthread_mutex_t lock;
 long long triNum;
-unsigned char oneBitNum[BIT_NUM_TABLE_SIZE];
+UC oneBitNum[BIT_NUM_TABLE_SIZE], *d_oneBitNum;
 
 int main(int argc, char *argv[]){
     if(argc < 3){
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
     //timerEnd("reorder", 1)
 
     BitMat::createMask();
-    createOneBitNumTable(oneBitNum);
+    createOneBitNumTable(oneBitNum, &d_oneBitNum);
     currTid = 0;
     triNum = 0;
     memset(threadUsed, false, MAX_THREAD_NUM);
@@ -89,6 +89,7 @@ int main(int argc, char *argv[]){
 
     pthread_mutex_destroy(&lock);
     timerEnd("total", 0)
+    cudaFree(d_oneBitNum);
 
 //    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);

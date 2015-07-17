@@ -1,11 +1,10 @@
 #include "mat.h"
 #include "binaryTree.h"
 
-__constant__ unsigned char d_oneBitNum[BIT_NUM_TABLE_SIZE];
-
 void gpuCountTriangleMat(const MatArg &matArg){
     const ListArray &edge = *(matArg.edge);
     const BitMat &target = *(matArg.target);
+    extern UC *d_oneBitNum;
 
     long long *d_triNum, ans;
     ListArray *d_edge;
@@ -39,7 +38,7 @@ void gpuCountTriangleMat(const MatArg &matArg){
     delete &target;
 
     int smSize = target.nodeNum*sizeof(UI);
-    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
+    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
 
@@ -57,7 +56,7 @@ void gpuCountTriangleMat(const MatArg &matArg){
     pthread_mutex_unlock(&lock);
 }
 
-__global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long long *triNum){
+__global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *oneBitNum, long long *triNum){
     __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
 
@@ -85,7 +84,7 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long lo
 /*                    UI e1 = target->getContent(u, e);
                     UI e2 = target->getContent(v, e);
                     threadTriNum[threadIdx.x] += countOneBits(e1 & e2);*/
-                    threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v], d_oneBitNum);
+                    threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v], oneBitNum);
                 }
             }
         }
@@ -102,24 +101,24 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, long lo
     }
 }
 
-void createOneBitNumTable(unsigned char *oneBitNum){
+void createOneBitNumTable(UC *oneBitNum, UC **d_oneBitNum){
+    cudaMalloc((void**)d_oneBitNum, sizeof(UC)*BIT_NUM_TABLE_SIZE);
     for(int i = 0; i < BIT_NUM_TABLE_SIZE; i++){
         int ans = 0;
         for(int num = i; num > 0; ans++){
             num &= (num-1);
         }
-        oneBitNum[i] = (unsigned char)ans;
+        oneBitNum[i] = (UC)ans;
     }
-    cudaMemcpyToSymbol(d_oneBitNum, oneBitNum, sizeof(unsigned char)*BIT_NUM_TABLE_SIZE);
+    cudaMemcpy(*d_oneBitNum, oneBitNum, sizeof(UC)*BIT_NUM_TABLE_SIZE, H2D);
 }
 
-DECORATE long long countOneBits(UI tar, unsigned char *oneBitNum){
+DECORATE long long countOneBits(UI tar, UC *oneBitNum){
     long long ones = 0;
-/*    for(; tar; tar/=2)
-        ones += tar % 2;*/
-    for(; tar; tar/=BIT_NUM_TABLE_SIZE){
-        ones += oneBitNum[tar%BIT_NUM_TABLE_SIZE];
-    }
+    for(; tar; tar/=BIT_NUM_TABLE_SIZE)
+        ones += oneBitNum[tar % BIT_NUM_TABLE_SIZE];
+//    for(; tar; tar/=2)
+//        ones += tar % 2;
     return ones;
 }
 
