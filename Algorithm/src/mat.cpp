@@ -37,8 +37,8 @@ void cpuCountMat(const ListArray &edge, const BitMat &target){
                 const int *uNei = edge.neiStart(u);
                 for(int i = 0; i < uDeg; i++){
                     int v = uNei[i];
-                    UI e1 = target.getContent(u, e);
-                    UI e2 = target.getContent(v, e);
+                    UC e1 = target.getContent(u, e);
+                    UC e2 = target.getContent(v, e);
                     ans += countOneBits(e1 & e2, oneBitNum);
                 }
             }

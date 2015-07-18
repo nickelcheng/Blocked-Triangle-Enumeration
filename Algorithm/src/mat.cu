@@ -23,9 +23,10 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
     timerInit(1)
     timerStart(0)
     BitMat *d_tarMat;
-    UI *d_mat; 
+    UC *d_mat;
 //    cListArr2BitMat(target, &d_tarMat, &d_mat, entryNum);
     gListArr2BitMat(target, &d_tarMat, &d_mat, entryNum);
+//    pListArr2BitMat(target, &d_tarMat, &d_mat, entryNum);
     timerEnd("gpu list->bitmat", 0)
 
     extern int blockNum, threadNum;
@@ -33,7 +34,7 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
     timerStart(0)
-    int smSize = target.nodeNum*sizeof(UI);
+    int smSize = target.nodeNum*sizeof(UC);
     gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
@@ -76,8 +77,8 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *one
                 const int *uNei = edge->neiStart(u);
                 for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
                     int v = uNei[i];
-/*                    UI e1 = target->getContent(u, e);
-                    UI e2 = target->getContent(v, e);
+/*                    UC e1 = target->getContent(u, e);
+                    UC e2 = target->getContent(v, e);
                     threadTriNum[threadIdx.x] += countOneBits(e1 & e2);*/
                     threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v], oneBitNum);
                 }
@@ -108,7 +109,7 @@ void createOneBitNumTable(UC *oneBitNum, UC **d_oneBitNum){
     cudaMemcpy(*d_oneBitNum, oneBitNum, sizeof(UC)*BIT_NUM_TABLE_SIZE, H2D);
 }
 
-DECORATE long long countOneBits(UI tar, UC *oneBitNum){
+DECORATE long long countOneBits(UC tar, UC *oneBitNum){
     long long ones = 0;
     for(; tar; tar/=BIT_NUM_TABLE_SIZE)
         ones += oneBitNum[tar % BIT_NUM_TABLE_SIZE];
