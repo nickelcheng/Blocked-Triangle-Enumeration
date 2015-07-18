@@ -1,7 +1,6 @@
 #include "mat.h"
 #include "solve.h"
 #include "tool.h"
-#include "timer.h"
 
 void mat(int device, const ListArray &edge, const ListArray &target, int width){
     int entry = averageCeil(width, BIT_PER_ENTRY);
@@ -9,15 +8,10 @@ void mat(int device, const ListArray &edge, const ListArray &target, int width){
         device = CPU;
 
     if(device == CPU){
-        timerInit(1)
-        timerStart(0)
         BitMat *tarMat = new BitMat;
         tarMat->initMat(target, entry);
-        timerEnd("cpu list->bitmat", 0)
-        timerStart(0)
         cpuCountMat(edge, *tarMat);
         delete tarMat;
-        timerEnd("mat count", 0)
     }
     else
         gpuCountTriangleMat(edge, target, entry);

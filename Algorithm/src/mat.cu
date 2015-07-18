@@ -20,25 +20,25 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
     cudaMemcpy(d_edgeArr, edge.edgeArr, sizeof(int)*edge.edgeNum, H2D);
     cudaMemcpy(&(d_edge->edgeArr), &d_edgeArr, sizeof(int*), H2D);
 
-    timerInit(1)
-    timerStart(0)
+//    timerInit(1)
+//    timerStart(0)
     BitMat *d_tarMat;
     UC *d_mat;
 //    cListArr2BitMat(target, &d_tarMat, &d_mat, entryNum);
     gListArr2BitMat(target, &d_tarMat, &d_mat, entryNum);
 //    pListArr2BitMat(target, &d_tarMat, &d_mat, entryNum);
-    timerEnd("gpu list->bitmat", 0)
+//    timerEnd("gpu list->bitmat", 0)
 
     extern int blockNum, threadNum;
     if(blockNum > entryNum) blockNum = entryNum;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
-    timerStart(0)
+//    timerStart(0)
     int smSize = target.nodeNum*sizeof(UC);
     gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
-    timerEnd("mat count", 0)
+//    timerEnd("mat count", 0)
 
     cudaFree(d_edge);
     cudaFree(d_edgeArr);

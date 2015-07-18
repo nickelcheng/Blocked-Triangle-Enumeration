@@ -45,10 +45,10 @@ int main(int argc, char *argv[]){
     cudaFree(0);
 
     timerInit(2)
-    timerStart(0)
+//    timerStart(0)
     forwardReorder(nodeNum, edge, reorder);
 
-    timerStart(1)
+//    timerStart(1)
     ListArray listArr, *d_listArr;
     cudaMalloc((void**)&d_listArr, sizeof(ListArray));
     if(assignProc == 0)
@@ -56,18 +56,18 @@ int main(int argc, char *argv[]){
     else
         gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
     cudaFree(d_listArr);
-    timerEnd("init", 1)
+//    timerEnd("init", 1)
 
-    timerStart(1)
+//    timerStart(1)
     createMask(mask, &d_mask);
     createOneBitNumTable(oneBitNum, &d_oneBitNum);
     triNum = 0;
-    timerEnd("init", 1)
+//    timerEnd("init", 1)
     timerStart(1)
     scheduler(listArr, listArr, nodeNum);
 
     timerEnd("count", 1)
-    timerEnd("total", 0)
+//    timerEnd("total", 0)
 
     printf("total triangle: %lld\n", triNum);
     return 0;
