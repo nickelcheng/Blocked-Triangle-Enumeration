@@ -27,4 +27,6 @@ __global__ void initMat(UI *mat, int nodeNum, int entryNum);
 __global__ void listArr2BitMat(const ListArray *src, const UI *mask, BitMat *tar, UI *mat, int entryNum);
 #endif
 
+void cListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum);
+
 #endif

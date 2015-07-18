@@ -7,6 +7,15 @@ void createMask(UI *mask, UI **d_mask){
     cudaMemcpy(*d_mask, mask, sizeof(UI)*BIT_PER_ENTRY, H2D);
 }
 
+void cListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum){
+    BitMat *tarMat = new BitMat;
+    tarMat->initMat(src, entryNum);
+    cudaMalloc((void**)tar, sizeof(BitMat));
+    cudaMemcpy(*tar, tarMat, sizeof(BitMat), H2D);
+    cudaMalloc((void**)mat, sizeof(UI)*src.nodeNum*entryNum);
+    cudaMemcpy(*mat, tarMat->mat, sizeof(UI)*src.nodeNum*entryNum, H2D);
+    cudaMemcpy(&((*tar)->mat), mat, sizeof(UI*), H2D);
+}
 void gListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum){
     ListArray *d_src;
     int *d_edgeArr, *d_nodeArr;
