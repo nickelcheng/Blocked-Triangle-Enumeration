@@ -20,4 +20,11 @@ class BitMat{
         int nodeNum, entryNum; // width and height
 };
 
+#ifdef __NVCC__
+void gListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum);
+void createMask(UI *mask, UI **d_mask);
+__global__ void initMat(UI *mat, int nodeNum, int entryNum);
+__global__ void listArr2BitMat(const ListArray *src, const UI *mask, BitMat *tar, UI *mat, int entryNum);
+#endif
+
 #endif

@@ -9,6 +9,7 @@
 
 int assignProc, blockNum, threadNum;
 long long triNum;
+UI mask[BIT_PER_ENTRY], *d_mask;
 UC oneBitNum[BIT_NUM_TABLE_SIZE], *d_oneBitNum;
 
 int main(int argc, char *argv[]){
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]){
     //timerEnd("reorder", 1)
 
     timerStart(1)
-    BitMat::createMask();
+    createMask(mask, &d_mask);
     createOneBitNumTable(oneBitNum, &d_oneBitNum);
     triNum = 0;
     timerEnd("initial", 1)
@@ -85,6 +86,7 @@ int main(int argc, char *argv[]){
 
     timerEnd("total", 0)
     cudaFree(d_oneBitNum);
+    cudaFree(d_mask);
 
 //    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);

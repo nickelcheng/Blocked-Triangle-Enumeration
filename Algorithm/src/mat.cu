@@ -2,22 +2,11 @@
 #include "binaryTree.h"
 #include "timer.h"
 
-//__constant__ unsigned char d_oneBitNum[BIT_NUM_TABLE_SIZE];
-
-void gpuCountTriangleMat(const ListArray &edge, const BitMat &target){
+void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int entryNum){
     extern UC *d_oneBitNum;
-
     long long *d_triNum, ans;
     ListArray *d_edge;
-    BitMat *d_target;
-    int *d_edgeArr, *d_nodeArr, *d_mat;
-
-    timerInit(1)
-
-    timerStart(0)
-    extern int blockNum, threadNum;
-    if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
-    cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
+    int *d_edgeArr, *d_nodeArr;
 
     // copy edge to device
     cudaMalloc((void**)&d_edge, sizeof(ListArray));
@@ -31,25 +20,24 @@ void gpuCountTriangleMat(const ListArray &edge, const BitMat &target){
     cudaMemcpy(d_edgeArr, edge.edgeArr, sizeof(int)*edge.edgeNum, H2D);
     cudaMemcpy(&(d_edge->edgeArr), &d_edgeArr, sizeof(int*), H2D);
 
-    // copy target to device
-    cudaMalloc((void**)&d_target, sizeof(BitMat));
-    cudaMemcpy(d_target, &target, sizeof(BitMat), H2D);
-    // target.mat
-    cudaMalloc((void**)&d_mat, sizeof(UI)*target.entryNum*target.nodeNum);
-    cudaMemcpy(d_mat, target.mat, sizeof(UI)*target.entryNum*target.nodeNum, H2D);
-    cudaMemcpy(&(d_target->mat), &d_mat, sizeof(UI*), H2D);
-    timerEnd("copy", 0)
+    BitMat *d_tarMat;
+    UI *d_mat; 
+    gListArr2BitMat(target, &d_tarMat, &d_mat, entryNum);
+
+    extern int blockNum, threadNum;
+    if(blockNum > entryNum) blockNum = entryNum;
+    cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
     int smSize = target.nodeNum*sizeof(UI);
-    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_oneBitNum, d_triNum);
+    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
 
-    cudaFree(d_triNum);
     cudaFree(d_edge);
-    cudaFree(d_target);
     cudaFree(d_edgeArr);
     cudaFree(d_nodeArr);
+    cudaFree(d_triNum);
+    cudaFree(d_tarMat);
     cudaFree(d_mat);
 
     extern long long triNum;
@@ -57,6 +45,7 @@ void gpuCountTriangleMat(const ListArray &edge, const BitMat &target){
 }
 
 __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *oneBitNum, long long *triNum){
+
     __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
 

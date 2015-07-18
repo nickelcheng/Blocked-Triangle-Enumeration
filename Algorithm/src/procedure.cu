@@ -8,6 +8,7 @@
 
 int assignProc, threadNum, blockNum;
 long long triNum;
+UI mask[BIT_PER_ENTRY], *d_mask;
 UC oneBitNum[BIT_NUM_TABLE_SIZE], *d_oneBitNum;
 
 int main(int argc, char *argv[]){
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]){
     timerEnd("init", 1)
 
     timerStart(1)
-    BitMat::createMask();
+    createMask(mask, &d_mask);
     createOneBitNumTable(oneBitNum, &d_oneBitNum);
     triNum = 0;
     timerEnd("init", 1)

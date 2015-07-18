@@ -48,18 +48,8 @@ void scheduler(
 
     if(proc == LIST)
         list(device, edge, target);
-    else{
-        timerInit(1)
-        timerStart(0)
-        BitMat *tarMat = new BitMat;
-        int entry = averageCeil(width, BIT_PER_ENTRY);
-        tarMat->initMat(target, entry);
-        timerEnd("list->bit", 0)
-        timerStart(0)
-        mat(device, edge, *tarMat);
-        delete tarMat;
-        timerEnd("mat", 0)
-    }
+    else
+        mat(device, edge, target, width);
 }
 
 void getStrategy(const ListArray &edge, const ListArray &target, int &device, int &proc){

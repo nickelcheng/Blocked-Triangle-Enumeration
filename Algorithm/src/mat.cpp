@@ -1,19 +1,24 @@
 #include "mat.h"
 #include "solve.h"
+#include "tool.h"
 
-void mat(int device, const ListArray &edge, const BitMat &target){
+void mat(int device, const ListArray &edge, const ListArray &target, int width){
+    int entry = averageCeil(width, BIT_PER_ENTRY);
     if(device == GPU && target.nodeNum > MAX_NODE_NUM_LIMIT)
         device = CPU;
 
-    if(device == CPU)
-        cpuCountMat(edge, target);
+    if(device == CPU){
+        BitMat *tarMat = new BitMat;
+        tarMat->initMat(target, entry);
+        cpuCountMat(edge, *tarMat);
+        delete tarMat;
+    }
     else
-        gpuCountTriangleMat(edge, target);
+        gpuCountTriangleMat(edge, target, entry);
 }
 
 void cpuCountMat(const ListArray &edge, const BitMat &target){
     extern unsigned char oneBitNum[BIT_NUM_TABLE_SIZE];
-
     long long ans = 0;
 
     for(int e = 0; e < target.entryNum; e++){
