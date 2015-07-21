@@ -1,29 +1,29 @@
 #include "bitMat.h"
 #include <omp.h>
 
-void createMask(UC *mask, UC **d_mask){
-    cudaMalloc((void**)d_mask, sizeof(UC)*BIT_PER_ENTRY);
+void createMask(UI *mask, UI **d_mask){
+    cudaMalloc((void**)d_mask, sizeof(UI)*BIT_PER_ENTRY);
     for(int i = 0; i < (int)BIT_PER_ENTRY; i++)
-        mask[i] = (UC)1 << i;
-    cudaMemcpy(*d_mask, mask, sizeof(UC)*BIT_PER_ENTRY, H2D);
+        mask[i] = (UI)1 << i;
+    cudaMemcpy(*d_mask, mask, sizeof(UI)*BIT_PER_ENTRY, H2D);
 }
 
-void cListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum){
+void cListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum){
     BitMat *tarMat = new BitMat;
     tarMat->initMat(src, entryNum);
     cudaMalloc((void**)tar, sizeof(BitMat));
     cudaMemcpy(*tar, tarMat, sizeof(BitMat), H2D);
-    cudaMalloc((void**)mat, sizeof(UC)*src.nodeNum*entryNum);
-    cudaMemcpy(*mat, tarMat->mat, sizeof(UC)*src.nodeNum*entryNum, H2D);
-    cudaMemcpy(&((*tar)->mat), mat, sizeof(UC*), H2D);
+    cudaMalloc((void**)mat, sizeof(UI)*src.nodeNum*entryNum);
+    cudaMemcpy(*mat, tarMat->mat, sizeof(UI)*src.nodeNum*entryNum, H2D);
+    cudaMemcpy(&((*tar)->mat), mat, sizeof(UI*), H2D);
     delete tarMat;
 }
 
-void pListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum){
+void pListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum){
     BitMat *tarMat = new BitMat;
     tarMat->nodeNum = src.nodeNum;
     tarMat->entryNum = entryNum;
-    tarMat->mat = new UC[sizeof(UC)*entryNum*src.nodeNum];
+    tarMat->mat = new UI[sizeof(UI)*entryNum*src.nodeNum];
     #pragma omp parallel for collapse(2)
     for(int i = 0; i < src.nodeNum; i++){
         for(int j = 0; j < entryNum; j++){
@@ -31,7 +31,7 @@ void pListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum)
         }
     }
 
-    extern UC mask[BIT_PER_ENTRY];
+    extern UI mask[BIT_PER_ENTRY];
     #pragma omp parallel for
     for(int i = 0; i < src.nodeNum; i++){
         for(int j = src.nodeArr[i]; j < src.nodeArr[i+1]; j++){
@@ -44,13 +44,13 @@ void pListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum)
 
     cudaMalloc((void**)tar, sizeof(BitMat));
     cudaMemcpy(*tar, tarMat, sizeof(BitMat), H2D);
-    cudaMalloc((void**)mat, sizeof(UC)*entryNum*src.nodeNum);
-    cudaMemcpy(*mat, tarMat->mat, sizeof(UC)*entryNum*src.nodeNum, H2D);
-    cudaMemcpy(&((*tar)->mat), mat, sizeof(UC*), H2D);
+    cudaMalloc((void**)mat, sizeof(UI)*entryNum*src.nodeNum);
+    cudaMemcpy(*mat, tarMat->mat, sizeof(UI)*entryNum*src.nodeNum, H2D);
+    cudaMemcpy(&((*tar)->mat), mat, sizeof(UI*), H2D);
     delete tarMat;
 }
 
-void gListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum){
+void gListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum){
     ListArray *d_src;
     int *d_edgeArr, *d_nodeArr;
 
@@ -68,13 +68,13 @@ void gListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum)
 
     // create mat on device
     cudaMalloc((void**)tar, sizeof(BitMat));
-    cudaMalloc((void**)mat, sizeof(UC)*src.nodeNum*entryNum);
-    cudaMemcpy(&((*tar)->mat), mat, sizeof(UC*), H2D);
+    cudaMalloc((void**)mat, sizeof(UI)*src.nodeNum*entryNum);
+    cudaMemcpy(&((*tar)->mat), mat, sizeof(UI*), H2D);
 
     int threadNum = (entryNum<1024) ? entryNum : 1024;
     initMat<<< src.nodeNum, threadNum >>>(src.nodeNum, entryNum, *tar, *mat);
 
-    extern UC *d_mask;
+    extern UI *d_mask;
     listArr2BitMat<<< src.nodeNum/32+1, 32 >>>(d_src, d_mask, *mat);
 
     cudaFree(d_src);
@@ -82,7 +82,7 @@ void gListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum)
     cudaFree(d_nodeArr);
 }
 
-__global__ void initMat(int nodeNum, int entryNum, BitMat *tar, UC *mat){
+__global__ void initMat(int nodeNum, int entryNum, BitMat *tar, UI *mat){
     tar->nodeNum = nodeNum;
     tar->entryNum = entryNum;
     for(int i = blockIdx.x; i < nodeNum; i+=gridDim.x){
@@ -92,7 +92,7 @@ __global__ void initMat(int nodeNum, int entryNum, BitMat *tar, UC *mat){
     }
 }
 
-__global__ void listArr2BitMat(const ListArray *src, const UC *mask, UC *mat){
+__global__ void listArr2BitMat(const ListArray *src, const UI *mask, UI *mat){
     int u = threadIdx.x + blockIdx.x*blockDim.x;
     int nodeNum = src->nodeNum;
     if(u < nodeNum){

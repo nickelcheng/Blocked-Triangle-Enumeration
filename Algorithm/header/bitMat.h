@@ -3,28 +3,28 @@
 
 #include "listArray.h"
 
-#define BIT_PER_ENTRY (sizeof(UC)*8)
+#define BIT_PER_ENTRY (sizeof(UI)*8)
 
 class BitMat{
     public:
         ~BitMat();
         static void createMask(void);
         void initMat(const ListArray &edge, int entry);
-        UC getContent(int x, int y) const;
+        UI getContent(int x, int y) const;
         void setEdge(int u, int v);
 //    protected:
-        UC *mat;
+        UI *mat;
         int nodeNum, entryNum; // width and height
 };
 
 #ifdef __NVCC__
-void gListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum);
-void createMask(UC *mask, UC **d_mask);
-__global__ void initMat(int nodeNum, int entryNum, BitMat *tar, UC *mat);
-__global__ void listArr2BitMat(const ListArray *src, const UC *mask, UC *mat);
+void gListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum);
+void createMask(UI *mask, UI **d_mask);
+__global__ void initMat(int nodeNum, int entryNum, BitMat *tar, UI *mat);
+__global__ void listArr2BitMat(const ListArray *src, const UI *mask, UI *mat);
 #endif
 
-void cListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum);
-void pListArr2BitMat(const ListArray &src, BitMat **tar, UC **mat, int entryNum);
+void cListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum);
+void pListArr2BitMat(const ListArray &src, BitMat **tar, UI **mat, int entryNum);
 
 #endif

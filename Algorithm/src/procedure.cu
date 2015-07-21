@@ -8,7 +8,7 @@
 
 int assignProc, threadNum, blockNum;
 long long triNum;
-UC mask[BIT_PER_ENTRY], *d_mask;
+UI mask[BIT_PER_ENTRY], *d_mask;
 UC oneBitNum[BIT_NUM_TABLE_SIZE], *d_oneBitNum;
 
 int main(int argc, char *argv[]){
