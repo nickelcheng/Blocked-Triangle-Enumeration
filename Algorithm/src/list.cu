@@ -1,5 +1,6 @@
 #include "list.h"
 #include "binaryTree.h"
+#include <cstdio>
 
 void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg){
     long long *d_triNum, ans;
@@ -7,10 +8,6 @@ void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;
     
     extern int blockNum, threadNum;
-    if(blockNum > edge.nodeNum/100) blockNum = edge.nodeNum/100;
-    if(threadNum > maxDeg) threadNum = maxDeg;
-    if(blockNum == 0) blockNum = 1;
-    if(threadNum == 0) threadNum = 1;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
     // copy edge to device
@@ -37,7 +34,13 @@ void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg
     cudaMemcpy(d_target_edgeArr, target.edgeArr, sizeof(int)*target.edgeNum, H2D);
     cudaMemcpy(&(d_target->edgeArr), &d_target_edgeArr, sizeof(int*), H2D);
 
+    if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
+    int avgDeg = edge.edgeNum / edge.nodeNum;
+    while(threadNum > avgDeg/3) threadNum -= 32;
+    if(threadNum < 32) threadNum = 32;
     int smSize = maxDeg*sizeof(int);
+    printf("avgDeg = %d\n", avgDeg);
+    printf("%d block, %d thread, %d sm\n", blockNum, threadNum, smSize+8192);
     gpuCountList<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
