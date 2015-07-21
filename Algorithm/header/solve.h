@@ -11,7 +11,7 @@ enum{LIST = 0, G_LIST, MAT, G_MAT, UNDEF};
 enum{CPU = 0, GPU};
 
 long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth, int blockDim);
-void scheduler(const ListArray &edge, const ListArray &target, int entry);
-void getStrategy(const ListArray &edge, const ListArray &target, int &device, int &proc);
+void scheduler(const ListArray &edge, const ListArray &target, int width);
+void getStrategy(const ListArray &edge, const ListArray &target, int width, int &device, int &proc);
 
 #endif

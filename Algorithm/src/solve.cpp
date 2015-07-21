@@ -43,8 +43,12 @@ long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth
 void scheduler(
     const ListArray &edge, const ListArray &target, int width
 ){
+    if(edge.nodeNum == 0 || target.nodeNum == 0){
+        printf("\033[1;31medge or target empty, end the procedure\n\033[m");
+        return;
+    }
     int device, proc;
-    getStrategy(edge, target, device, proc);
+    getStrategy(edge, target, width, device, proc);
 
     if(proc == LIST)
         list(device, edge, target);
@@ -52,30 +56,25 @@ void scheduler(
         mat(device, edge, target, width);
 }
 
-void getStrategy(const ListArray &edge, const ListArray &target, int &device, int &proc){
+void getStrategy(const ListArray &edge, const ListArray &target, int width, int &device, int &proc){
     device = GPU, proc = LIST; // default
-    int nodeNum = edge.nodeNum;
-    double density = (double)target.edgeNum/(((double)(target.nodeNum)*target.nodeNum)/2);
+    double possibleEdge = (double)target.nodeNum * width;
+    double density = (double)target.edgeNum/possibleEdge;
+    printf("list area: %d nodes * %d width\n", target.nodeNum, width);
+    printf("list area: %d edges (possible %.0lf)\n", edge.edgeNum, possibleEdge);
+    printf("density = %lf%%\n", density*100.0);
+    if(target.nodeNum >= MAX_NODE_NUM_LIMIT)
+        printf("\033[1;31mCAN NOT USE VECTOR INTERSECTION\n\033[m");
 
-    // suppose all nodeNum <= 10240
-    // split line:
-    //     N <= 4096: density = 7.902e-8*nodeNum^2 + 7.16e-4*nodeNum + 2.025
-    //     N <= 10240: density = 5.407e-*nodeNum^2 + 1.12e-4*nodeNum + 0.857
-    // >: MAT, <=: LIST
-    double x = nodeNum, lhs;
-    if(nodeNum <= 4096)
-        lhs = 7.902e-8*x*x - 7.16e-4*x + 2.025;
-    else
-        lhs = 5.407e-9*x*x - 1.12e-4*x + 0.857;
-
-    if(density > lhs) proc = MAT;
+    if(density > 0.06 && edge.nodeNum < MAX_NODE_NUM_LIMIT) proc = MAT;
     else proc = LIST;
 
     extern int assignProc;
     switch(assignProc){
-        case LIST: device = CPU, proc = LIST; break;
+//        case LIST: device = CPU, proc = LIST; break;
         case G_LIST: device = GPU, proc = LIST; break;
-        case MAT: device = CPU, proc = MAT; break;
+//        case MAT: device = CPU, proc = MAT; break;
         case G_MAT: device = GPU, proc = MAT; break;
     }
+    if(edge.nodeNum >= MAX_NODE_NUM_LIMIT) proc = LIST;
 }
