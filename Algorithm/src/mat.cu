@@ -37,10 +37,11 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
 //    int smSize = target.nodeNum*sizeof(UI);
 //    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
     int avgDeg = edge.edgeNum / edge.nodeNum;
-    while(threadNum > avgDeg/8) threadNum -= 32;
+    while(threadNum > avgDeg/3) threadNum -= 32;
     if(threadNum < 32) threadNum = 32;
     if(blockNum > entryNum) blockNum = entryNum;
     int smSize = threadNum*sizeof(long long);
+    printf("avgDeg = %d\n", avgDeg);
     printf("block %d, thread %d, sm %d\n", blockNum, threadNum, smSize);
     gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
@@ -92,12 +93,12 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *one
         }
         __syncthreads();
 
-/*        binaryTreeSum(threadTriNum, blockDim.x, bound);
+        binaryTreeSum(threadTriNum, blockDim.x, bound);
         if(threadIdx.x==0)
-            triNum[blockIdx.x] += threadTriNum[0];*/
+            triNum[blockIdx.x] += threadTriNum[0];
 
-        if(threadIdx.x==0)
-            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);
+//        if(threadIdx.x==0)
+//            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);
 
         __syncthreads();
     }
