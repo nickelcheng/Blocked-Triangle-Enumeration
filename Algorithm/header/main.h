@@ -16,6 +16,7 @@ const int EDGE_NUM_LIMIT = 100*1024*1024;
 const int GPU_BLOCK_NUM = 16000;
 const int GPU_THREAD_NUM = 256;
 const int BIT_NUM_TABLE_SIZE = 65536;
+const int BIT_SHIFT_AMT = 16;
 
 using std::vector;
 

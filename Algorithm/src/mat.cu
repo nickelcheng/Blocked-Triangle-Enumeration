@@ -117,8 +117,8 @@ void createOneBitNumTable(UC *oneBitNum, UC **d_oneBitNum){
 
 DECORATE long long countOneBits(UI tar, UC *oneBitNum){
     long long ones = 0;
-    for(; tar; tar/=BIT_NUM_TABLE_SIZE)
-        ones += oneBitNum[tar % BIT_NUM_TABLE_SIZE];
+    for(; tar; tar >>= BIT_SHIFT_AMT)
+        ones += oneBitNum[tar&(BIT_NUM_TABLE_SIZE-1)];
 //    for(; tar; tar/=2)
 //        ones += tar % 2;
     return ones;

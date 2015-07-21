@@ -102,7 +102,7 @@ __global__ void listArr2BitMat(const ListArray *src, const UI *mask, UI *mat){
             for(int i = 0; i < deg; i++){
                 int v = nei[i];
                 int row = v / BIT_PER_ENTRY, col = u;
-                int bit = v % BIT_PER_ENTRY;
+                int bit = v & (BIT_PER_ENTRY-1);
                 mat[row*nodeNum+col] |= mask[bit];
             }
         }
