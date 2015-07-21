@@ -1,6 +1,7 @@
 #include "mat.h"
 #include "binaryTree.h"
 #include "timer.h"
+#include <cstdio>
 
 void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int entryNum){
     extern UC *d_oneBitNum;
@@ -30,11 +31,17 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
 //    timerEnd("gpu list->bitmat", 0)
 
     extern int blockNum, threadNum;
-    if(blockNum > entryNum) blockNum = entryNum;
     cudaMalloc((void**)&d_triNum, sizeof(long long)*blockNum);
 
 //    timerStart(0)
-    int smSize = target.nodeNum*sizeof(UC);
+//    int smSize = target.nodeNum*sizeof(UC);
+//    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
+    int avgDeg = edge.edgeNum / edge.nodeNum;
+    while(threadNum > avgDeg/8) threadNum -= 32;
+    if(threadNum < 32) threadNum = 32;
+    if(blockNum > entryNum) blockNum = entryNum;
+    int smSize = threadNum*sizeof(long long);
+    printf("block %d, thread %d, sm %d\n", blockNum, threadNum, smSize);
     gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
@@ -53,7 +60,6 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
 
 __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *oneBitNum, long long *triNum){
 
-    __shared__ long long threadTriNum[1024];
     int bound = nearestLessPowOf2(blockDim.x);
 
     triNum[blockIdx.x] = 0;
@@ -62,10 +68,10 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *one
 
         // move tile area to shared memory
         int offset = e * target->nodeNum;
-        for(int i = threadIdx.x; i < target->nodeNum; i++){
+/*        for(int i = threadIdx.x; i < target->nodeNum; i++){
             tile[i] = target->mat[offset+i];
         }
-        __syncthreads();
+        __syncthreads();*/
 
         // count triangle number
         threadTriNum[threadIdx.x] = 0;
@@ -77,21 +83,21 @@ __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *one
                 const int *uNei = edge->neiStart(u);
                 for(int i = threadIdx.x; i < uDeg; i += blockDim.x){
                     int v = uNei[i];
-/*                    UC e1 = target->getContent(u, e);
-                    UC e2 = target->getContent(v, e);
-                    threadTriNum[threadIdx.x] += countOneBits(e1 & e2);*/
-                    threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v], oneBitNum);
+                    UC e1 = target->mat[offset+u];
+                    UC e2 = target->mat[offset+v];
+                    threadTriNum[threadIdx.x] += countOneBits(e1 & e2, oneBitNum);
+//                    threadTriNum[threadIdx.x] += countOneBits(tile[u]&tile[v], oneBitNum);
                 }
             }
         }
         __syncthreads();
 
-        binaryTreeSum(threadTriNum, blockDim.x, bound);
+/*        binaryTreeSum(threadTriNum, blockDim.x, bound);
         if(threadIdx.x==0)
-            triNum[blockIdx.x] += threadTriNum[0];
+            triNum[blockIdx.x] += threadTriNum[0];*/
 
-//        if(threadIdx.x==0)
-//            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);
+        if(threadIdx.x==0)
+            triNum[blockIdx.x] += linearSum(threadTriNum, blockDim.x);
 
         __syncthreads();
     }

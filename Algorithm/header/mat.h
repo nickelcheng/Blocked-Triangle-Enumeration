@@ -7,7 +7,8 @@
 const int MAX_NODE_NUM_LIMIT = 40*1024;
 
 #ifdef __NVCC__
-extern __shared__ UC tile[];
+//extern __shared__ UC tile[];
+extern __shared__ long long threadTriNum[];
 __global__ void gpuCountMat(const ListArray *edge, const BitMat *target, UC *oneBitNum, long long *triNum);
 #endif
 
