@@ -12,6 +12,6 @@ gettimeofday(&st[n], NULL);
 
 #define timerEnd(tar, n)\
 gettimeofday(&ed[n], NULL);\
-fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
-//fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st[n],ed[n]));
+fprintf(stderr, "%s: %.3lf ms\n", tar, cntTime(st[n],ed[n]));
+//fprintf(stderr, " %.3lf", cntTime(st[n],ed[n]));
 

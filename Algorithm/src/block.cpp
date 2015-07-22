@@ -8,7 +8,6 @@ int initEdgeBlock(
     const vector< Edge > &edge, int nodeNum, int blockSize, int remain,
     EdgeMatrix &block, vector< int > &rowWidth
 ){
-    printf("remain = %d\n", remain);
     int blockDim = averageCeil(nodeNum, blockSize);
     vector< int* > blockEdgeNum(blockDim);
     countBlockEdgeNum(edge, blockDim, blockSize, remain, blockEdgeNum);

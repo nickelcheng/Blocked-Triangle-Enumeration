@@ -6,6 +6,7 @@
 #include "block.h"
 #include "timer.h"
 #include "mat.h"
+#include "degeneracy.h"
 
 int assignProc, blockNum, threadNum;
 double densityBoundary;
@@ -54,11 +55,12 @@ int main(int argc, char *argv[]){
     timerStart(0)
 
     int edgeNum = (int)edge.size();
-//    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
+    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
 
-    //timerStart(1)
-    forwardReorder(nodeNum, edge, reorder);
-    //timerEnd("reorder", 1)
+    timerStart(1)
+    //forwardReorder(nodeNum, edge, reorder);
+    reorderByDegeneracy(nodeNum, edge);
+    timerEnd("reorder", 1)
 
     timerStart(1)
     createMask(mask, &d_mask);
@@ -66,7 +68,7 @@ int main(int argc, char *argv[]){
     triNum = 0;
     timerEnd("initial", 1)
 
-    if(edgeNum <= EDGE_NUM_LIMIT){
+/*    if(edgeNum <= EDGE_NUM_LIMIT){
         timerStart(1)
         ListArray listArr, *d_listArr;
         cudaMalloc((void**)&d_listArr, sizeof(ListArray));
@@ -75,20 +77,19 @@ int main(int argc, char *argv[]){
         timerEnd("edge->list", 1)
 
         timerStart(1)
-        scheduler(listArr, listArr, nodeNum);
+        scheduler(listArr, listArr, nodeNum, true);
         timerEnd("count", 1)
     }
-    else{
+    else{*/
         EdgeMatrix edgeBlock;
         vector< int > rowWidth;
         int remain = nodeNum % blockSize;
         if(remain == 0) remain = blockSize;
         int blockDim = initEdgeBlock(edge, nodeNum, blockSize, remain, edgeBlock, rowWidth);
         rowWidth.resize(blockDim);
-//        fprintf(stderr, "blockDim: %d\n", blockDim);
+        printf("divide into %d subgraph(s):", blockDim);
         for(int i = 0; i < (int)rowWidth.size(); i++){
-            rowWidth[i] *= blockSize;
-//            printf("%d %d\n", i, rowWidth[i]);
+            printf(" %d", rowWidth[i]);
         }
 
         timerStart(1)
@@ -99,13 +100,13 @@ int main(int argc, char *argv[]){
         timerStart(1)
         findTriangle(listArrBlock, rowWidth, blockDim);
         timerEnd("count", 1)
-    }
+//    }
 
     timerEnd("total", 0)
     cudaFree(d_oneBitNum);
     cudaFree(d_mask);
 
-//    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
+    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);
     return 0;
 }
