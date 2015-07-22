@@ -3,6 +3,7 @@
 #include <omp.h>
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 
 int initEdgeBlock(
     const vector< Edge > &edge, int nodeNum, int blockSize, int remain,
@@ -90,51 +91,45 @@ int integrateBlock(
     return blockDim-currBlockID;
 }
 
-int integrateBlock2(
-    const vector< int* > &blockEdgeNum, int blockDim,
-    int *newID, vector< int > &rowWidth
-){
-    extern int edgeNumLimit;
-    int currEdgeNum = blockEdgeNum[0][0];
-    int currBlockID = 0;
-    int startBlock = 0;
-    newID[0] = 0;
-    rowWidth[0] = 1;
-    for(int b = 1; b < blockDim; b++){
-        int addEdgeNum = 0;
-        for(int i = startBlock; i <= b; i++)
-            addEdgeNum += blockEdgeNum[i][b];
-        if(currEdgeNum + addEdgeNum > edgeNumLimit){
-            currEdgeNum = blockEdgeNum[b][b];
-            newID[b] = ++currBlockID;
-            rowWidth[currBlockID] = 1;
-            startBlock = b;
-        }
-        else{
-            currEdgeNum += addEdgeNum;
-            newID[b] = currBlockID;
-            rowWidth[currBlockID]++;
-        }
-    }
-    return currBlockID+1;
-}
-
 void splitBlock(
     const vector<Edge> &edge, const int *newID, int blockSize, int blockDim, int remain,
     EdgeMatrix &block
 ){
     block = EdgeMatrix(blockDim);
+    #pragma omp parallel for
     for(int i = 0; i < blockDim; i++){
         block[i] = EdgeRow(blockDim);
     }
 
     int edgeNum = (int)edge.size();
+    int *edgePos = new int[edgeNum];
+    int blockEdgeNum[blockDim][blockDim];
+    memset(blockEdgeNum, 0, sizeof(int)*blockDim*blockDim);
+
     for(int i = 0; i < edgeNum; i++){
         int u = edge[i].u, v = edge[i].v;
         int ublock = newID[(u-remain)/blockSize+1];
         int vblock = newID[(v-remain)/blockSize+1];
-        block[ublock][vblock].push_back((Edge){u, v});
+        edgePos[i] = blockEdgeNum[ublock][vblock]++;
     }
+
+    #pragma omp parallel for
+    for(int i = 0; i < blockDim; i++){
+        for(int j = i; j < blockDim; j++){
+            block[i][j] = vector< Edge >(blockEdgeNum[i][j]);
+        }
+    }
+
+    #pragma omp parallel for
+    for(int i = 0; i < edgeNum; i++){
+        int u = edge[i].u, v = edge[i].v;
+        int ublock = newID[(u-remain)/blockSize+1];
+        int vblock = newID[(v-remain)/blockSize+1];
+        block[ublock][vblock][edgePos[i]].u = u;
+        block[ublock][vblock][edgePos[i]].v = v;
+    }
+
+    delete [] edgePos;
 }
 
 void setEmptyArray(int nodeNum, int *arr){
