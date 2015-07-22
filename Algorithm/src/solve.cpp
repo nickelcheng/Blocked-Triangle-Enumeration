@@ -9,29 +9,43 @@ long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth
         const ListArray &base = block[b][b];
 
         // solve block
-        scheduler(base, base, rowWidth[b]);
+        timerInit(1)
+        printf("\nsolve subgraph %d\n", b);
+        timerStart(0)
+        scheduler(base, base, rowWidth[b], true);
+        timerEnd("time", 0)
 
         for(int i = b+1; i < blockDim; i++){
             const ListArray &ext = block[b][i];
+            if(ext.edgeNum == 0) continue;
             ListArray *target;
 
             target = new ListArray;
             ext.relabel(*target);
             // 2-way merge-1
-            scheduler(base, *target, rowWidth[i]);
+            printf("\n2-merge-1 %d and %d\n", b, i);
+            timerStart(0)
+            scheduler(base, *target, rowWidth[i], false);
+            timerEnd("time", 0)
             delete target;
 
             target = new ListArray;
             ext.integrate(block[i][i], true, *target);
             // 2-way merge-2
-            scheduler(ext, *target, rowWidth[i]);
+            printf("\n2-merge-2 %d and %d\n", b, i);
+            timerStart(0)
+            scheduler(ext, *target, rowWidth[i], false);
+            timerEnd("time", 0)
             delete target;
 
             for(int j = i+1; j < blockDim; j++){
                 target = new ListArray;
                 block[b][j].integrate(block[i][j], false, *target);
                 // 3-way merge
-                scheduler(ext, *target, rowWidth[j]);
+                printf("\n3-merge %d, %d, and %d\n", b, i, j);
+                timerStart(0)
+                scheduler(ext, *target, rowWidth[j], false);
+                timerEnd("time", 0)
                 delete target;
             }
         }
@@ -41,14 +55,14 @@ long long findTriangle(const ListArrMatrix &block, const vector< int > &rowWidth
 }
 
 void scheduler(
-    const ListArray &edge, const ListArray &target, int width
+    const ListArray &edge, const ListArray &target, int width, bool isDiagonal
 ){
-    if(edge.nodeNum == 0 || target.nodeNum == 0){
-        printf("\033[1;31medge or target empty, end the procedure\n\033[m");
+    if(edge.edgeNum == 0 || target.edgeNum == 0){
+        printf("\033[1;31medge or target empty, end the procedure\033[m\n");
         return;
     }
     int device, proc;
-    getStrategy(edge, target, width, device, proc);
+    getStrategy(edge, target, width, isDiagonal, device, proc);
 
     if(proc == LIST)
         list(device, edge, target);
@@ -56,17 +70,20 @@ void scheduler(
         mat(device, edge, target, width);
 }
 
-void getStrategy(const ListArray &edge, const ListArray &target, int width, int &device, int &proc){
+void getStrategy(const ListArray &edge, const ListArray &target, int width, bool isDiagonal, int &device, int &proc){
     device = GPU, proc = LIST; // default
-    double possibleEdge = (double)target.nodeNum * width;
+    double possibleEdge;
+    if(isDiagonal) possibleEdge = (double)target.nodeNum*(target.nodeNum-1)/2.0;
+    else possibleEdge = (double)target.nodeNum * width;
     double density = (double)target.edgeNum/possibleEdge;
     printf("list area: %d nodes * %d width\n", target.nodeNum, width);
-    printf("list area: %d edges (possible %.0lf)\n", edge.edgeNum, possibleEdge);
+    printf("list area: %d edges (possible %.0lf)\n", target.edgeNum, possibleEdge);
     printf("density = %lf%%\n", density*100.0);
     if(target.nodeNum >= MAX_NODE_NUM_LIMIT)
-        printf("\033[1;31mCAN NOT USE VECTOR INTERSECTION\n\033[m");
+        printf("\033[1;31mCAN NOT USE VECTOR INTERSECTION\033[m\n");
 
-    if(density > 0.06 && edge.nodeNum < MAX_NODE_NUM_LIMIT) proc = MAT;
+    extern double densityBoundary;
+    if(density > densityBoundary && edge.nodeNum < MAX_NODE_NUM_LIMIT) proc = MAT;
     else proc = LIST;
 
     extern int assignProc;
