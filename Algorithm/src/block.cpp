@@ -5,19 +5,20 @@
 #include <cstdio>
 
 int initEdgeBlock(
-    const vector< Edge > &edge, int nodeNum, int blockSize,
+    const vector< Edge > &edge, int nodeNum, int blockSize, int remain,
     EdgeMatrix &block, vector< int > &rowWidth
 ){
+    printf("remain = %d\n", remain);
     int blockDim = averageCeil(nodeNum, blockSize);
     vector< int* > blockEdgeNum(blockDim);
-    countBlockEdgeNum(edge, blockDim, blockSize, blockEdgeNum);
+    countBlockEdgeNum(edge, blockDim, blockSize, remain, blockEdgeNum);
 
     int *newID = new int[blockDim];
     rowWidth = vector< int >(blockDim, 0);
     //int newBlockDim = integrateBlock2(blockEdgeNum, blockDim, newID, rowWidth);
-    int newBlockDim = integrateBlock(blockEdgeNum, blockDim, blockSize, newID, rowWidth);
+    int newBlockDim = integrateBlock(blockEdgeNum, blockDim, blockSize, remain, newID, rowWidth);
     rowWidth.resize(newBlockDim);
-    splitBlock(edge, newID, blockSize, newBlockDim, block);
+    splitBlock(edge, newID, blockSize, newBlockDim, remain, block);
 
     for(int i = 0; i < blockDim; i++)
         delete [] blockEdgeNum[i];
@@ -27,7 +28,7 @@ int initEdgeBlock(
 }
 
 void countBlockEdgeNum(
-    const vector< Edge > &edge, int blockDim, int blockSize,
+    const vector< Edge > &edge, int blockDim, int blockSize, int remain,
     vector< int* > &blockEdgeNum
 ){
     for(int i = 0; i < blockDim; i++){
@@ -40,23 +41,27 @@ void countBlockEdgeNum(
     int edgeNum = (int)edge.size();
     for(int i = 0; i < edgeNum; i++){
         int u = edge[i].u, v = edge[i].v;
-        int ublock = u / blockSize;
-        int vblock = v / blockSize;
+        int ublock = (u-remain) / blockSize + 1;
+        int vblock = (v-remain) / blockSize + 1;
+        if(u < remain) ublock = 0;
+        if(v < remain) vblock = 0;
         blockEdgeNum[ublock][vblock]++;
     }
 }
 
 int integrateBlock(
-    const vector< int* > &blockEdgeNum, int blockDim, int blockSize,
+    const vector< int* > &blockEdgeNum, int blockDim, int blockSize, int remain,
     int *newID, vector< int > &rowWidth
 ){
+    extern int edgeNumLimit;
+    extern double densityBoundary;
     int currEdgeNum = blockEdgeNum[blockDim-1][blockDim-1];
     int currNodeNum = blockSize;
     int currBlockID = blockDim-1;
     int startBlock = blockDim-1;
     newID[blockDim-1] = currBlockID;
-    double density = (double)currEdgeNum/((double)blockSize*blockSize/2);
-    for(int b = blockDim-2; b >= 0; b--){
+    double density = (double)currEdgeNum/((double)blockSize*(blockSize-1)/2.0);
+    for(int b = blockDim-2; b > 0; b--){
         int addEdgeNum = 0;
         for(int i = startBlock; i >= b; i--){
             addEdgeNum += blockEdgeNum[b][i];
@@ -64,8 +69,7 @@ int integrateBlock(
         int nodeNum = currNodeNum + blockSize;
         int edgeNum = currEdgeNum + addEdgeNum;
         double newDensity = (double)edgeNum/((double)nodeNum*nodeNum/2);
-        if((density > 0.03 && newDensity < 0.03) || edgeNum > EDGE_NUM_LIMIT){
-            printf("%d node, %d edge density=%lf, ori=%lf\n", nodeNum, edgeNum, newDensity, density);
+        if((density > densityBoundary && newDensity < densityBoundary) || edgeNum > edgeNumLimit){
             currEdgeNum = blockEdgeNum[b][b];
             currNodeNum = blockSize;
             newID[b] = --currBlockID;
@@ -79,9 +83,11 @@ int integrateBlock(
             density = newDensity;
         }
     }
-    for(int i = 0; i < blockDim; i++){
+    newID[0] = 0;
+    rowWidth[0] = remain;
+    for(int i = 1; i < blockDim; i++){
         newID[i] -= currBlockID;
-        rowWidth[newID[i]]++;
+        rowWidth[newID[i]] += blockSize;
     }
     return blockDim-currBlockID;
 }
@@ -90,6 +96,7 @@ int integrateBlock2(
     const vector< int* > &blockEdgeNum, int blockDim,
     int *newID, vector< int > &rowWidth
 ){
+    extern int edgeNumLimit;
     int currEdgeNum = blockEdgeNum[0][0];
     int currBlockID = 0;
     int startBlock = 0;
@@ -99,7 +106,7 @@ int integrateBlock2(
         int addEdgeNum = 0;
         for(int i = startBlock; i <= b; i++)
             addEdgeNum += blockEdgeNum[i][b];
-        if(currEdgeNum + addEdgeNum > EDGE_NUM_LIMIT){
+        if(currEdgeNum + addEdgeNum > edgeNumLimit){
             currEdgeNum = blockEdgeNum[b][b];
             newID[b] = ++currBlockID;
             rowWidth[currBlockID] = 1;
@@ -115,7 +122,7 @@ int integrateBlock2(
 }
 
 void splitBlock(
-    const vector<Edge> &edge, const int *newID, int blockSize, int blockDim,
+    const vector<Edge> &edge, const int *newID, int blockSize, int blockDim, int remain,
     EdgeMatrix &block
 ){
     block = EdgeMatrix(blockDim);
@@ -126,8 +133,8 @@ void splitBlock(
     int edgeNum = (int)edge.size();
     for(int i = 0; i < edgeNum; i++){
         int u = edge[i].u, v = edge[i].v;
-        int ublock = newID[u/blockSize];
-        int vblock = newID[v/blockSize];
+        int ublock = newID[(u-remain)/blockSize+1];
+        int vblock = newID[(v-remain)/blockSize+1];
         block[ublock][vblock].push_back((Edge){u, v});
     }
 }

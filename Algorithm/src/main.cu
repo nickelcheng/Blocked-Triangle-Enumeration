@@ -8,25 +8,40 @@
 #include "mat.h"
 
 int assignProc, blockNum, threadNum;
+double densityBoundary;
+int edgeNumLimit;
 long long triNum;
 UI mask[BIT_PER_ENTRY], *d_mask;
 UC oneBitNum[BIT_NUM_TABLE_SIZE], *d_oneBitNum;
 
 int main(int argc, char *argv[]){
-    if(argc < 3){
-        fprintf(stderr, "usage: count <input_path> <block_size> (<reorder_or_not> <assign_proc> <block_num> <thread_num>)\n");
+    if(argc < 2){
+        fprintf(stderr, "arguments:\n");
+        fprintf(stderr, "  input_path\t\t\t(required)\n");
+        fprintf(stderr, "  density_boundary\t\t(default=0.06)\n");
+        fprintf(stderr, "  block_size\t\t\t(default=3072)\n");
+        fprintf(stderr, "  edge_num_limit\t\t(default=20M)\n");
+        fprintf(stderr, "  reorder_or_not\t\t(default=true)\n");
+        fprintf(stderr, "  assign_proc\t\t\t(default:auto)\n");
+        fprintf(stderr, "  max_allowed_gpu_block_num\t(default=16000)\n");
+        fprintf(stderr, "  max_allowed_thread_per_block\t(default=1024\n");
         return 0;
     }
 
-    int blockSize = atoi(argv[2]);
+    densityBoundary = DENSITY_BOUNDARY;
+    int blockSize = DEFAULT_BLOCK_SIZE;
+    edgeNumLimit = EDGE_NUM_LIMIT;
     bool reorder = true;
     assignProc = UNDEF;
     blockNum = GPU_BLOCK_NUM;
     threadNum = GPU_THREAD_NUM;
-    if(argc >= 4) reorder = (strcmp("true",argv[3])==0) ? true : false;
-    if(argc >= 5) assignProc = atoi(argv[4]);
-    if(argc >= 6) blockNum = atoi(argv[5]);
-    if(argc >= 7) threadNum = atoi(argv[6]);
+    if(argc >= 3) densityBoundary = atof(argv[2]);
+    if(argc >= 4) blockSize = atoi(argv[3]);
+    if(argc >= 5) edgeNumLimit = atoi(argv[4]);
+    if(argc >= 6) reorder = (strcmp("true",argv[5])==0) ? true : false;
+    if(argc >= 7) assignProc = atoi(argv[6]);
+    if(argc >= 8) blockNum = atoi(argv[7]);
+    if(argc >= 9) threadNum = atoi(argv[8]);
 
     vector< Edge > edge;
 
@@ -66,7 +81,9 @@ int main(int argc, char *argv[]){
     else{
         EdgeMatrix edgeBlock;
         vector< int > rowWidth;
-        int blockDim = initEdgeBlock(edge, nodeNum, blockSize, edgeBlock, rowWidth);
+        int remain = nodeNum % blockSize;
+        if(remain == 0) remain = blockSize;
+        int blockDim = initEdgeBlock(edge, nodeNum, blockSize, remain, edgeBlock, rowWidth);
         rowWidth.resize(blockDim);
 //        fprintf(stderr, "blockDim: %d\n", blockDim);
         for(int i = 0; i < (int)rowWidth.size(); i++){

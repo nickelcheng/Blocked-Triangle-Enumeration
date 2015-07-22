@@ -12,12 +12,13 @@
 #define H2D cudaMemcpyHostToDevice
 #define D2H cudaMemcpyDeviceToHost
 
+#define DENSITY_BOUNDARY 0.06
+#define DEFAULT_BLOCK_SIZE 3072
+#define EDGE_NUM_LIMIT 20*1024*1024
 #define GPU_BLOCK_NUM 16000
 #define GPU_THREAD_NUM 1024
 #define BIT_NUM_TABLE_SIZE 65536
 #define BIT_SHIFT_AMT 16
-
-const int EDGE_NUM_LIMIT = 100*1024*1024;
 
 using std::vector;
 

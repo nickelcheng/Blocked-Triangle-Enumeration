@@ -12,17 +12,17 @@ typedef vector< ListArray > ListArrRow;
 typedef vector< ListArrRow > ListArrMatrix;
 
 int initEdgeBlock(
-    const vector< Edge > &edge, int nodeNum, int blockSize,
+    const vector< Edge > &edge, int nodeNum, int blockSize, int remain,
     EdgeMatrix &block, vector< int > &rowWidth
 );
 
 void countBlockEdgeNum(
-    const vector< Edge > &edge, int blockDim, int blockSize,
+    const vector< Edge > &edge, int blockDim, int blockSize, int remain,
     vector< int* > &blockEdgeNum
 );
 
 int integrateBlock(
-    const vector< int* > &blockEdgeNum, int blockDim, int blockSize,
+    const vector< int* > &blockEdgeNum, int blockDim, int blockSize, int remain,
     int *newID, vector< int > &rowWidth
 );
 
@@ -31,7 +31,7 @@ int integrateBlock2(
     int *newID, vector< int > &rowWidth
 );
 void splitBlock(
-    const vector< Edge > &edge, const int* newID, int blockSize, int blockDim,
+    const vector< Edge > &edge, const int* newID, int blockSize, int blockDim, int remain,
     EdgeMatrix &block
 );
 
