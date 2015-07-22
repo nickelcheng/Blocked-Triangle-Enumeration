@@ -22,10 +22,14 @@ void countBlockEdgeNum(
 );
 
 int integrateBlock(
-    const vector< int* > &blockEdgeNum, int blockDim,
+    const vector< int* > &blockEdgeNum, int blockDim, int blockSize,
     int *newID, vector< int > &rowWidth
 );
 
+int integrateBlock2(
+    const vector< int* > &blockEdgeNum, int blockDim,
+    int *newID, vector< int > &rowWidth
+);
 void splitBlock(
     const vector< Edge > &edge, const int* newID, int blockSize, int blockDim,
     EdgeMatrix &block

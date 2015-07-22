@@ -2,6 +2,7 @@
 #include "tool.h"
 #include <omp.h>
 #include <algorithm>
+#include <cstdio>
 
 int initEdgeBlock(
     const vector< Edge > &edge, int nodeNum, int blockSize,
@@ -12,8 +13,9 @@ int initEdgeBlock(
     countBlockEdgeNum(edge, blockDim, blockSize, blockEdgeNum);
 
     int *newID = new int[blockDim];
-    rowWidth = vector< int >(blockDim);
-    int newBlockDim = integrateBlock(blockEdgeNum, blockDim, newID, rowWidth);
+    rowWidth = vector< int >(blockDim, 0);
+    //int newBlockDim = integrateBlock2(blockEdgeNum, blockDim, newID, rowWidth);
+    int newBlockDim = integrateBlock(blockEdgeNum, blockDim, blockSize, newID, rowWidth);
     rowWidth.resize(newBlockDim);
     splitBlock(edge, newID, blockSize, newBlockDim, block);
 
@@ -45,6 +47,46 @@ void countBlockEdgeNum(
 }
 
 int integrateBlock(
+    const vector< int* > &blockEdgeNum, int blockDim, int blockSize,
+    int *newID, vector< int > &rowWidth
+){
+    int currEdgeNum = blockEdgeNum[blockDim-1][blockDim-1];
+    int currNodeNum = blockSize;
+    int currBlockID = blockDim-1;
+    int startBlock = blockDim-1;
+    newID[blockDim-1] = currBlockID;
+    double density = (double)currEdgeNum/((double)blockSize*blockSize/2);
+    for(int b = blockDim-2; b >= 0; b--){
+        int addEdgeNum = 0;
+        for(int i = startBlock; i >= b; i--){
+            addEdgeNum += blockEdgeNum[b][i];
+        }
+        int nodeNum = currNodeNum + blockSize;
+        int edgeNum = currEdgeNum + addEdgeNum;
+        double newDensity = (double)edgeNum/((double)nodeNum*nodeNum/2);
+        if((density > 0.03 && newDensity < 0.03) || edgeNum > EDGE_NUM_LIMIT){
+            printf("%d node, %d edge density=%lf, ori=%lf\n", nodeNum, edgeNum, newDensity, density);
+            currEdgeNum = blockEdgeNum[b][b];
+            currNodeNum = blockSize;
+            newID[b] = --currBlockID;
+            startBlock = b;
+            density = (double)currEdgeNum/((double)blockSize*blockSize/2);
+        }
+        else{
+            currEdgeNum = edgeNum;
+            currNodeNum += blockSize;
+            newID[b] = currBlockID;
+            density = newDensity;
+        }
+    }
+    for(int i = 0; i < blockDim; i++){
+        newID[i] -= currBlockID;
+        rowWidth[newID[i]]++;
+    }
+    return blockDim-currBlockID;
+}
+
+int integrateBlock2(
     const vector< int* > &blockEdgeNum, int blockDim,
     int *newID, vector< int > &rowWidth
 ){
