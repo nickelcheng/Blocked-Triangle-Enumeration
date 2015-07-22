@@ -6,8 +6,8 @@ void list(int device, const ListArray &edge, const ListArray &target){
     if(edge.edgeNum <= 0 || target.edgeNum <= 0) return;
 
     int maxDeg = target.getMaxDegree();
-    printf("edge region max degree = %d (shared memory size)\n", maxDeg);
-    printf("edge region avg degree = %d (work load)\n", edge.edgeNum/edge.nodeNum);
+//    printf("edge region max degree = %d (shared memory size)\n", maxDeg);
+//    printf("edge region avg degree = %d (work load)\n", edge.edgeNum/edge.nodeNum);
     if(device == GPU && maxDeg > MAX_DEG_LIMIT)
         device = CPU;
     
@@ -18,7 +18,7 @@ void list(int device, const ListArray &edge, const ListArray &target){
 }
 
 void cpuCountList(const ListArray &edge, const ListArray &target){
-    printf("\033[1;33mcpu list intersection!!!\n\033[m");
+    printf("\033[1;33mcpu list intersection!!!\033[m\n");
     long long ans = 0;
 
     // iterator through each edge (u, v)

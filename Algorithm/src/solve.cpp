@@ -79,8 +79,8 @@ void getStrategy(const ListArray &edge, const ListArray &target, int width, bool
     printf("list area: %d nodes * %d width\n", target.nodeNum, width);
     printf("list area: %d edges (possible %.0lf)\n", target.edgeNum, possibleEdge);
     printf("density = %lf%%\n", density*100.0);
-    if(target.nodeNum >= MAX_NODE_NUM_LIMIT)
-        printf("\033[1;31mCAN NOT USE VECTOR INTERSECTION\033[m\n");
+/*    if(target.nodeNum >= MAX_NODE_NUM_LIMIT)
+        printf("\033[1;31mCAN NOT USE VECTOR INTERSECTION\033[m\n");*/
 
     extern double densityBoundary;
     if(density > densityBoundary && edge.nodeNum < MAX_NODE_NUM_LIMIT) proc = MAT;

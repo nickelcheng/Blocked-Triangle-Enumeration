@@ -5,7 +5,7 @@
 
 void mat(int device, const ListArray &edge, const ListArray &target, int width){
     int entry = averageCeil(width, BIT_PER_ENTRY);
-    printf("edge region avg degree = %d (work load)\n", edge.edgeNum/edge.nodeNum);
+//    printf("edge region avg degree = %d (work load)\n", edge.edgeNum/edge.nodeNum);
     if(device == GPU && target.nodeNum > MAX_NODE_NUM_LIMIT)
         device = CPU;
 

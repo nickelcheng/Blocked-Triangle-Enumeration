@@ -3,7 +3,7 @@
 #include <cstdio>
 
 void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg){
-    printf("\033[1;33mcgu list intersection!!!\n\033[m");
+    printf("\033[1;33mgpu list intersection!!!\033[m\n");
     long long *d_triNum, ans;
     ListArray *d_edge, *d_target;
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;
@@ -40,8 +40,7 @@ void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg
     while(threadNum > avgDeg/3) threadNum -= 32;
     if(threadNum < 32) threadNum = 32;
     int smSize = maxDeg*sizeof(int);
-    printf("avgDeg = %d\n", avgDeg);
-    printf("%d block, %d thread, %d sm\n", blockNum, threadNum, smSize+8192);
+//    printf("%d block, %d thread, %d sm\n", blockNum, threadNum, smSize+8192);
     gpuCountList<<< blockNum, threadNum, smSize >>>(d_edge, d_target, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);

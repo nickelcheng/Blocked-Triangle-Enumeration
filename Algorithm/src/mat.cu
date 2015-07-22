@@ -4,7 +4,7 @@
 #include <cstdio>
 
 void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int entryNum){
-    printf("\033[1;33mgpu vector intersection!!!\n\033[m");
+    printf("\033[1;35mgpu vector intersection!!!\033[m\n");
     extern UC *d_oneBitNum;
     long long *d_triNum, ans;
 
@@ -42,8 +42,8 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
     if(threadNum < 32) threadNum = 32;
     if(blockNum > entryNum) blockNum = entryNum;
     int smSize = threadNum*sizeof(long long);
-    printf("%d blocks, %d thread/block\n", blockNum, threadNum);
-    printf("%d bytes shared memory\n", smSize);
+//    printf("%d blocks, %d thread/block\n", blockNum, threadNum);
+//    printf("%d bytes shared memory\n", smSize);
     gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
     sumTriangle<<< 1, 1 >>>(d_triNum, blockNum);
     cudaMemcpy(&ans, d_triNum, sizeof(long long), D2H);
