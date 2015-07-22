@@ -14,7 +14,6 @@ int initEdgeBlock(
 
     int *newID = new int[blockDim];
     rowWidth = vector< int >(blockDim, 0);
-    //int newBlockDim = integrateBlock2(blockEdgeNum, blockDim, newID, rowWidth);
     int newBlockDim = integrateBlock(blockEdgeNum, blockDim, blockSize, remain, newID, rowWidth);
     rowWidth.resize(newBlockDim);
     splitBlock(edge, newID, blockSize, newBlockDim, remain, block);

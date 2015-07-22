@@ -26,10 +26,6 @@ int integrateBlock(
     int *newID, vector< int > &rowWidth
 );
 
-int integrateBlock2(
-    const vector< int* > &blockEdgeNum, int blockDim,
-    int *newID, vector< int > &rowWidth
-);
 void splitBlock(
     const vector< Edge > &edge, const int* newID, int blockSize, int blockDim, int remain,
     EdgeMatrix &block
