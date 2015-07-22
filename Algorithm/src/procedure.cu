@@ -7,36 +7,35 @@
 #include "mat.h"
 
 int assignProc, threadNum, blockNum;
+int edgeNumLimit;
+double densityBoundary = 0;
 long long triNum;
 UI mask[BIT_PER_ENTRY], *d_mask;
 UC oneBitNum[BIT_NUM_TABLE_SIZE], *d_oneBitNum;
 
 int main(int argc, char *argv[]){
-    if(argc != 3 && argc != 4 && argc != 6){
-        fprintf(stderr, "usage: proc <assign_proc> <input_path> <reorder_or_not> <thread_per_block> <block_num>\n");
+    if(argc < 3){
+        fprintf(stderr, "arguments:\n");
+        fprintf(stderr, "  assign_proc\t\t\t(required, 1(list) or 3(vector))\n");
+        fprintf(stderr, "  input_path\t\t\t(required)\n");
+        fprintf(stderr, "  reorder_or_not\t\t(default=true)\n");
+        fprintf(stderr, "  max_allowed_gpu_block_num\t(default:16000)\n");
+        fprintf(stderr, "  max_allowed_thread_per_block\t(default:1024)\n");
         return 0;
     }
 
-    extern int assignProc, threadNum, blockNum;
     assignProc = atoi(argv[1]);
-    bool reorder = true;
-
-    if(argc >= 4) reorder = (strcmp("true",argv[3])==0) ? true : false;
     if(assignProc < LIST || assignProc > G_MAT){
         fprintf(stderr, "algo choice\n0: forward\n1: g_forward\n2: mat\n3: g_mat\n");
         return 0;
     }
-    if(assignProc == G_LIST || assignProc == G_MAT){
-        if(argc != 6){
-            fprintf(stderr, "use default %d blocks, %d threads\n", GPU_BLOCK_NUM, GPU_THREAD_NUM);
-            blockNum = GPU_BLOCK_NUM;
-            threadNum = GPU_THREAD_NUM;
-        }
-        else{
-            blockNum = atoi(argv[5]);
-            threadNum = atoi(argv[4]);
-        }
-    }
+
+    bool reorder = true;
+    blockNum = GPU_BLOCK_NUM;
+    threadNum = GPU_THREAD_NUM;
+    if(argc >= 4) reorder = (strcmp("true",argv[3])==0) ? true : false;
+    if(argc >= 5) blockNum = atoi(argv[4]);
+    if(argc >= 6) threadNum = atoi(argv[5]);
 
     vector< Edge > edge;
     int nodeNum = inputEdge(argv[2], edge);
@@ -64,7 +63,7 @@ int main(int argc, char *argv[]){
     triNum = 0;
 //    timerEnd("init", 1)
     timerStart(1)
-    scheduler(listArr, listArr, nodeNum);
+    scheduler(listArr, listArr, nodeNum, true);
 
     timerEnd("count", 1)
 //    timerEnd("total", 0)
