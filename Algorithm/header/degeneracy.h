@@ -26,7 +26,7 @@ struct DegList{
 };
 typedef struct DegList DegList;
 
-void reorderByDegeneracy(int nodeNum, vector< Edge > &edge);
+void reorderByDegeneracy(int nodeNum, vector< Edge > &edge, bool reorder);
 void buildDegList(vector< DegeneracyNode > &node, vector< DegList > &degList);
 void reordering(vector< DegeneracyNode > &node, vector< DegList > &degList);
 int findMinDegNode(int &currPos, vector< DegList > &degList);

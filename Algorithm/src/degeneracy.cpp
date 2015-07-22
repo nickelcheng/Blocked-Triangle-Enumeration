@@ -1,30 +1,30 @@
 #include "degeneracy.h"
 #include <cstdio>
 
-void reorderByDegeneracy(int nodeNum, vector< Edge > &edge){
+void reorderByDegeneracy(int nodeNum, vector< Edge > &edge, bool reorder){
     int edgeNum = (int)edge.size();
-    vector< DegeneracyNode > node(nodeNum);
-    vector< DegList > degList;
+    if(reorder){
+        vector< DegeneracyNode > node(nodeNum);
+        vector< DegList > degList;
 
-    // build adj list for each node
-    for(int i = 0; i < edgeNum; i++){
-        node[edge[i].u].addNei(edge[i].v);
-        node[edge[i].v].addNei(edge[i].u);
+        // build adj list for each node
+        for(int i = 0; i < edgeNum; i++){
+            node[edge[i].u].addNei(edge[i].v);
+            node[edge[i].v].addNei(edge[i].u);
+        }
+        // reordering
+        degList.resize(nodeNum);
+        buildDegList(node, degList);
+        reordering(node, degList);
+        for(int i = 0; i < edgeNum; i++){
+            int u = edge[i].u, v = edge[i].v;
+            edge[i].u = node[u].newOrder;
+            edge[i].v = node[v].newOrder;
+        }
     }
-    // reordering
-    degList.resize(nodeNum);
-    buildDegList(node, degList);
-    reordering(node, degList);
-/*    for(int i = 0; i < nodeNum; i++)
-        printf("%d -> %d\n", i, node[i].newOrder);*/
     for(int i = 0; i < edgeNum; i++){
         int u = edge[i].u, v = edge[i].v;
-//        printf("(%d,%d)->", u, v);
-        u = node[u].newOrder;
-        v = node[v].newOrder;
         if(u > v) edge[i].u = v, edge[i].v = u;
-        else edge[i].u = u, edge[i].v = v;
-//        printf("(%d,%d)\n", edge[i].u, edge[i].v);
     }
 }
 
