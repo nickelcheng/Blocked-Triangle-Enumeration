@@ -67,8 +67,21 @@ int main(int argc, char *argv[]){
     triNum = 0;
     timerEnd("initial", 1)
 
-/*    if(edgeNum <= edgeNumLimit){
-        printf("\033[1;32msolve whole graph\033[m\n");
+    timerStart(1)
+    EdgeMatrix edgeBlock;
+    vector< int > rowWidth;
+    int remain = nodeNum % blockSize;
+    if(remain == 0) remain = blockSize;
+    int blockDim = initEdgeBlock(edge, nodeNum, blockSize, remain, edgeBlock, rowWidth);
+    rowWidth.resize(blockDim);
+    timerEnd("split block", 1)
+    printf("\033[1;32mdivide into %d subgraph(s)\033[m\n", blockDim);
+    printf("subgraph size:");
+    for(int i = 0; i < (int)rowWidth.size(); i++)
+        printf(" %d", rowWidth[i]);
+    printf("\n");
+
+    if(blockDim == 1){
         timerStart(1)
         ListArray listArr, *d_listArr;
         cudaMalloc((void**)&d_listArr, sizeof(ListArray));
@@ -80,21 +93,8 @@ int main(int argc, char *argv[]){
         scheduler(listArr, listArr, nodeNum, true);
         timerEnd("count", 1)
     }
-    else{*/
-        timerStart(1)
-        EdgeMatrix edgeBlock;
-        vector< int > rowWidth;
-        int remain = nodeNum % blockSize;
-        if(remain == 0) remain = blockSize;
-        int blockDim = initEdgeBlock(edge, nodeNum, blockSize, remain, edgeBlock, rowWidth);
-        rowWidth.resize(blockDim);
-        timerEnd("split block", 1)
-        printf("\033[1;32mdivide into %d subgraph(s)\033[m\n", blockDim);
-        printf("subgraph size:");
-        for(int i = 0; i < (int)rowWidth.size(); i++)
-            printf(" %d", rowWidth[i]);
-        printf("\n");
 
+    else{
         timerStart(1)
         ListArrMatrix listArrBlock(blockDim);
         initListArrBlock(edgeBlock, rowWidth, blockDim, blockSize, listArrBlock);
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]){
         timerStart(1)
         findTriangle(listArrBlock, rowWidth, blockDim);
         timerEnd("count", 1)
-//    }
+    }
 
     cudaFree(d_oneBitNum);
     cudaFree(d_mask);
