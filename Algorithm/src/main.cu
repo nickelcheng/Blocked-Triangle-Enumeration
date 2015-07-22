@@ -55,10 +55,10 @@ int main(int argc, char *argv[]){
 
     int edgeNum = (int)edge.size();
 
-    timerStart(1)
+//    timerStart(1)
 //    forwardReorder(nodeNum, edge, reorder);
-    reorderByDegeneracy(nodeNum, edge);
-    timerEnd("reorder", 1)
+    reorderByDegeneracy(nodeNum, edge, reorder);
+//    timerEnd("reorder", 1)
 
     timerStart(0)
     timerStart(1)
