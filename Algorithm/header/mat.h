@@ -4,7 +4,7 @@
 #include "listArray.h"
 #include "bitMat.h"
 
-const int MAX_NODE_NUM_LIMIT = 40*1024;
+const int MAX_NODE_NUM_LIMIT = 200*1024;
 
 #ifdef __NVCC__
 //extern __shared__ UI tile[];
