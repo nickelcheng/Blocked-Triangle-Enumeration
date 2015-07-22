@@ -19,28 +19,28 @@ int main(int argc, char *argv[]){
     if(argc < 2){
         fprintf(stderr, "arguments:\n");
         fprintf(stderr, "  input_path\t\t\t(required)\n");
-        fprintf(stderr, "  density_boundary\t\t(default=0.06)\n");
-        fprintf(stderr, "  block_size\t\t\t(default=3072)\n");
-        fprintf(stderr, "  edge_num_limit\t\t(default=20M)\n");
-        fprintf(stderr, "  reorder_or_not\t\t(default=true)\n");
         fprintf(stderr, "  assign_proc\t\t\t(default:auto)\n");
-        fprintf(stderr, "  max_allowed_gpu_block_num\t(default=16000)\n");
-        fprintf(stderr, "  max_allowed_thread_per_block\t(default=1024\n");
+        fprintf(stderr, "  density_boundary\t\t(default=%lf)\n", DENSITY_BOUNDARY);
+        fprintf(stderr, "  block_size\t\t\t(default=%d)\n", DEFAULT_BLOCK_SIZE);
+        fprintf(stderr, "  edge_num_limit\t\t(default=%d)\n", EDGE_NUM_LIMIT);
+        fprintf(stderr, "  reorder_or_not\t\t(default=true)\n");
+        fprintf(stderr, "  max_allowed_gpu_block_num\t(default=%d)\n", GPU_BLOCK_NUM);
+        fprintf(stderr, "  max_allowed_thread_per_block\t(default=%d\n", GPU_THREAD_NUM);
         return 0;
     }
 
+    assignProc = UNDEF;
     densityBoundary = DENSITY_BOUNDARY;
     int blockSize = DEFAULT_BLOCK_SIZE;
     edgeNumLimit = EDGE_NUM_LIMIT;
     bool reorder = true;
-    assignProc = UNDEF;
     blockNum = GPU_BLOCK_NUM;
     threadNum = GPU_THREAD_NUM;
-    if(argc >= 3) densityBoundary = atof(argv[2]);
-    if(argc >= 4) blockSize = atoi(argv[3]);
-    if(argc >= 5) edgeNumLimit = atoi(argv[4]);
-    if(argc >= 6) reorder = (strcmp("true",argv[5])==0) ? true : false;
-    if(argc >= 7) assignProc = atoi(argv[6]);
+    if(argc >= 3) assignProc = atoi(argv[2]);
+    if(argc >= 4) densityBoundary = atof(argv[3]);
+    if(argc >= 5) blockSize = atoi(argv[4]);
+    if(argc >= 6) edgeNumLimit = atoi(argv[5]);
+    if(argc >= 7) reorder = (strcmp("true",argv[6])==0) ? true : false;
     if(argc >= 8) blockNum = atoi(argv[7]);
     if(argc >= 9) threadNum = atoi(argv[8]);
 
