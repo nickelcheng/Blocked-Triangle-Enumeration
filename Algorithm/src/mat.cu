@@ -4,7 +4,7 @@
 #include <cstdio>
 
 void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int entryNum){
-    printf("\033[1;35mgpu vector intersection!!!\033[m\n");
+//    printf("\033[1;35mgpu vector intersection!!!\033[m\n");
     extern UC *d_oneBitNum;
     long long *d_triNum, ans;
 

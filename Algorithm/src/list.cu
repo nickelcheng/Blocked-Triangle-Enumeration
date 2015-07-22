@@ -3,7 +3,7 @@
 #include <cstdio>
 
 void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg){
-    printf("\033[1;33mgpu list intersection!!!\033[m\n");
+//    printf("\033[1;33mgpu list intersection!!!\033[m\n");
     long long *d_triNum, ans;
     ListArray *d_edge, *d_target;
     int *d_edge_edgeArr, *d_edge_nodeArr, *d_target_edgeArr, *d_target_nodeArr;

@@ -18,7 +18,7 @@ void list(int device, const ListArray &edge, const ListArray &target){
 }
 
 void cpuCountList(const ListArray &edge, const ListArray &target){
-    printf("\033[1;33mcpu list intersection!!!\033[m\n");
+//    printf("\033[1;33mcpu list intersection!!!\033[m\n");
     long long ans = 0;
 
     // iterator through each edge (u, v)

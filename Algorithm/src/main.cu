@@ -75,11 +75,11 @@ int main(int argc, char *argv[]){
     int blockDim = initEdgeBlock(edge, nodeNum, blockSize, remain, edgeBlock, rowWidth);
     rowWidth.resize(blockDim);
     timerEnd("split block", 1)
-    printf("\033[1;32mdivide into %d subgraph(s)\033[m\n", blockDim);
+/*    printf("\033[1;32mdivide into %d subgraph(s)\033[m\n", blockDim);
     printf("subgraph size:");
     for(int i = 0; i < (int)rowWidth.size(); i++)
         printf(" %d", rowWidth[i]);
-    printf("\n");
+    printf("\n");*/
 
     if(blockDim == 1){
         timerStart(1)

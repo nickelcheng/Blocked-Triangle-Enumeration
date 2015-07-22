@@ -20,7 +20,7 @@ void mat(int device, const ListArray &edge, const ListArray &target, int width){
 }
 
 void cpuCountMat(const ListArray &edge, const BitMat &target){
-    printf("\033[1;33mcpu vector intersection!!!\n\033[m");
+//    printf("\033[1;33mcpu vector intersection!!!\n\033[m");
     extern unsigned char oneBitNum[BIT_NUM_TABLE_SIZE];
     long long ans = 0;
 
