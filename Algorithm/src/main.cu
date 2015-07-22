@@ -52,23 +52,23 @@ int main(int argc, char *argv[]){
     cudaFree(0);
 
     timerInit(2)
-    timerStart(0)
 
     int edgeNum = (int)edge.size();
-    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
 
     timerStart(1)
-    //forwardReorder(nodeNum, edge, reorder);
+//    forwardReorder(nodeNum, edge, reorder);
     reorderByDegeneracy(nodeNum, edge);
     timerEnd("reorder", 1)
 
+    timerStart(0)
     timerStart(1)
     createMask(mask, &d_mask);
     createOneBitNumTable(oneBitNum, &d_oneBitNum);
     triNum = 0;
     timerEnd("initial", 1)
 
-/*    if(edgeNum <= EDGE_NUM_LIMIT){
+/*    if(edgeNum <= edgeNumLimit){
+        printf("\033[1;32msolve whole graph\033[m\n");
         timerStart(1)
         ListArray listArr, *d_listArr;
         cudaMalloc((void**)&d_listArr, sizeof(ListArray));
@@ -81,16 +81,19 @@ int main(int argc, char *argv[]){
         timerEnd("count", 1)
     }
     else{*/
+        timerStart(1)
         EdgeMatrix edgeBlock;
         vector< int > rowWidth;
         int remain = nodeNum % blockSize;
         if(remain == 0) remain = blockSize;
         int blockDim = initEdgeBlock(edge, nodeNum, blockSize, remain, edgeBlock, rowWidth);
         rowWidth.resize(blockDim);
-        printf("divide into %d subgraph(s):", blockDim);
-        for(int i = 0; i < (int)rowWidth.size(); i++){
+        timerEnd("split block", 1)
+        printf("\033[1;32mdivide into %d subgraph(s)\033[m\n", blockDim);
+        printf("subgraph size:");
+        for(int i = 0; i < (int)rowWidth.size(); i++)
             printf(" %d", rowWidth[i]);
-        }
+        printf("\n");
 
         timerStart(1)
         ListArrMatrix listArrBlock(blockDim);
@@ -102,11 +105,14 @@ int main(int argc, char *argv[]){
         timerEnd("count", 1)
 //    }
 
-    timerEnd("total", 0)
     cudaFree(d_oneBitNum);
     cudaFree(d_mask);
 
-    fprintf(stderr, "%d node, %d edge, density = %lf%%\n", nodeNum, edgeNum, density);
+    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
+    printf("\n\033[1;44m=== Graph Information ===\033[m\n");
+    timerEnd("total time", 0)
+    printf("%d node, %d edge\ndensity = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);
+    printf("\033[1;44m=== End of the Program ===\033[m\n\n");
     return 0;
 }

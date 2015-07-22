@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
     cudaFree(0);
 
     timerInit(2)
-//    timerStart(0)
+    timerStart(0)
     forwardReorder(nodeNum, edge, reorder);
 
 //    timerStart(1)
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
     scheduler(listArr, listArr, nodeNum, true);
 
     timerEnd("count", 1)
-//    timerEnd("total", 0)
+    timerEnd("total", 0)
 
     printf("total triangle: %lld\n", triNum);
     return 0;

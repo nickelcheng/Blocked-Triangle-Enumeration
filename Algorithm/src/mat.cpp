@@ -1,9 +1,11 @@
 #include "mat.h"
 #include "solve.h"
 #include "tool.h"
+#include <cstdio>
 
 void mat(int device, const ListArray &edge, const ListArray &target, int width){
     int entry = averageCeil(width, BIT_PER_ENTRY);
+    printf("edge region avg degree = %d (work load)\n", edge.edgeNum/edge.nodeNum);
     if(device == GPU && target.nodeNum > MAX_NODE_NUM_LIMIT)
         device = CPU;
 
@@ -18,6 +20,7 @@ void mat(int device, const ListArray &edge, const ListArray &target, int width){
 }
 
 void cpuCountMat(const ListArray &edge, const BitMat &target){
+    printf("\033[1;33mcpu vector intersection!!!\n\033[m");
     extern unsigned char oneBitNum[BIT_NUM_TABLE_SIZE];
     long long ans = 0;
 
