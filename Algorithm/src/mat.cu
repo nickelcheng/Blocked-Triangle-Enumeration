@@ -37,8 +37,9 @@ void gpuCountTriangleMat(const ListArray &edge, const ListArray &target, int ent
 //    timerStart(0)
 //    int smSize = target.nodeNum*sizeof(UI);
 //    gpuCountMat<<< blockNum, threadNum, smSize >>>(d_edge, d_tarMat, d_oneBitNum, d_triNum);
-    int avgDeg = edge.edgeNum / edge.nodeNum;
-    while(threadNum > avgDeg/3) threadNum -= 32;
+//    int avgDeg = edge.edgeNum / edge.nodeNum;
+    int maxDeg = edge.getMaxDegree();
+    while(threadNum > maxDeg+32) threadNum -= 32;
     if(threadNum < 32) threadNum = 32;
     if(blockNum > entryNum) blockNum = entryNum;
     int smSize = threadNum*sizeof(long long);

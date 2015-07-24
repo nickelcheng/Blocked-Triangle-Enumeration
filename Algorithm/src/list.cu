@@ -36,8 +36,9 @@ void gpuCountTriangle(const ListArray &edge, const ListArray &target, int maxDeg
     cudaMemcpy(&(d_target->edgeArr), &d_target_edgeArr, sizeof(int*), H2D);
 
     if(blockNum > edge.nodeNum) blockNum = edge.nodeNum;
-    int avgDeg = edge.edgeNum / edge.nodeNum;
-    while(threadNum > avgDeg/3) threadNum -= 32;
+//    int avgDeg = edge.edgeNum / edge.nodeNum;
+    int eMaxDeg = edge.getMaxDegree();
+    while(threadNum > eMaxDeg+32) threadNum -= 32;
     if(threadNum < 32) threadNum = 32;
     int smSize = maxDeg*sizeof(int);
 //    printf("%d block, %d thread, %d sm\n", blockNum, threadNum, smSize+8192);

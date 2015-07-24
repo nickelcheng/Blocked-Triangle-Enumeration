@@ -96,7 +96,6 @@ void splitBlock(
     EdgeMatrix &block
 ){
     block = EdgeMatrix(blockDim);
-    #pragma omp parallel for
     for(int i = 0; i < blockDim; i++){
         block[i] = EdgeRow(blockDim);
     }

@@ -5,6 +5,7 @@
 #include "solve.h"
 #include "timer.h"
 #include "mat.h"
+#include "degeneracy.h"
 
 int assignProc, threadNum, blockNum;
 int edgeNumLimit;
@@ -44,10 +45,11 @@ int main(int argc, char *argv[]){
     cudaFree(0);
 
     timerInit(2)
-    timerStart(0)
-    forwardReorder(nodeNum, edge, reorder);
+//    forwardReorder(nodeNum, edge, reorder);
+    reorderByDegeneracy(nodeNum, edge, reorder);
 
-//    timerStart(1)
+    timerStart(0)
+    timerStart(1)
     ListArray listArr, *d_listArr;
     cudaMalloc((void**)&d_listArr, sizeof(ListArray));
     if(assignProc == 0)
@@ -55,7 +57,7 @@ int main(int argc, char *argv[]){
     else
         gTransBlock(edge, nodeNum, 0, 0, listArr, d_listArr);
     cudaFree(d_listArr);
-//    timerEnd("init", 1)
+    timerEnd("edge->list", 1)
 
 //    timerStart(1)
     createMask(mask, &d_mask);
@@ -64,10 +66,17 @@ int main(int argc, char *argv[]){
 //    timerEnd("init", 1)
     timerStart(1)
     scheduler(listArr, listArr, nodeNum, true);
-
     timerEnd("count", 1)
-    timerEnd("total", 0)
+    
+    cudaFree(d_oneBitNum);
+    cudaFree(d_mask);
 
+    int edgeNum = (int)edge.size();
+    double density = (double)edgeNum/((double)nodeNum*nodeNum/2.0) * 100.0;
+    printf("\n\033[1;44m=== Graph Information ===\033[m\n");
+    timerEnd("total", 0)
+    printf("%d node, %d edge\ndensity = %lf%%\n", nodeNum, edgeNum, density);
     printf("total triangle: %lld\n", triNum);
+    printf("\033[1;44m=== End of the Program ===\033[m\n\n");
     return 0;
 }
