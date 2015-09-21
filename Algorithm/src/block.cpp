@@ -107,8 +107,8 @@ void splitBlock(
 
     for(int i = 0; i < edgeNum; i++){
         int u = edge[i].u, v = edge[i].v;
-        int ublock = newID[(u-remain)/blockSize+1];
-        int vblock = newID[(v-remain)/blockSize+1];
+        int ublock = newID[(int)floor((double)(u-remain)/blockSize)+1];
+        int vblock = newID[(int)floor((double)(v-remain)/blockSize)+1];
         edgePos[i] = blockEdgeNum[ublock][vblock]++;
     }
 
@@ -122,8 +122,8 @@ void splitBlock(
     #pragma omp parallel for
     for(int i = 0; i < edgeNum; i++){
         int u = edge[i].u, v = edge[i].v;
-        int ublock = newID[(u-remain)/blockSize+1];
-        int vblock = newID[(v-remain)/blockSize+1];
+        int ublock = newID[(int)floor((double)(u-remain)/blockSize)+1];
+        int vblock = newID[(int)floor((double)(v-remain)/blockSize)+1];
         block[ublock][vblock][edgePos[i]].u = u;
         block[ublock][vblock][edgePos[i]].v = v;
     }
